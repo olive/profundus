@@ -1,0 +1,3 @@
+[submodule "gleany"]
+	path = gleany
+	url = https://github.com/deweyvm/gleany.git
