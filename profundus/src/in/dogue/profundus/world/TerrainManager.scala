@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.profundus.entities.Player
+import in.dogue.profundus.entities.{Falling, Grounded, Player}
 import in.dogue.antiqua.Implicits
 import Implicits._
 import in.dogue.antiqua.data.Direction
@@ -22,9 +22,13 @@ class TerrainManager {
   private def updateClimb(w:World, pl:Player):Player = {
     import Direction._
     if (pl.isClimbing && Vector(Left, Right).contains(pl.face)) {
-      if (pl.face == Left && w.isSolid(pl.pos --> Left) && !w.isSolid(pl.pos --> Left --> Up)) {
+      if (       pl.face == Left
+              && w.isSolid(pl.pos --> Left)
+              && !w.isSolid(pl.pos --> Left --> Up)) {
         pl.move(pl.pos --> Left --> Up)
-      } else if (pl.face == Right && w.isSolid(pl.pos --> Right) && !w.isSolid(pl.pos --> Right --> Up)) {
+      } else if (pl.face == Right
+              && w.isSolid(pl.pos --> Right)
+              && !w.isSolid(pl.pos --> Right --> Up)) {
         pl.move(pl.pos --> Right --> Up)
       } else {
         pl
@@ -35,10 +39,15 @@ class TerrainManager {
   }
 
   private def processFall(w:World, p:Player) = {
-    if (!w.isGrounded(p.pos)) {
-      p.move(p.pos --> Direction.Down).copy(fallFrames=p.fallFrames+1)
-    } else {
-      p.land
+    val grounded = w.isGrounded(p.pos)
+    p.fall match {
+      case f@Falling(t, tiles) if !grounded =>
+        val newT = (t + 1) % f.fallTime
+        val newTiles = tiles + (newT == 0).select(0, 1)
+        val newPos = (newT==0).select(p.pos, p.pos --> Direction.Down)
+        p.move(newPos).copy(fall = Falling(newT, newTiles))
+      case _ if !grounded => p.copy(fall = Falling(0,0))
+      case _ => p.land
     }
 
   }

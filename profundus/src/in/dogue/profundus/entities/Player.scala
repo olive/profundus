@@ -9,15 +9,24 @@ import in.dogue.antiqua.Implicits
 import Implicits._
 
 
-sealed trait PlayerState
-case object Alive extends PlayerState
-case object Dead extends PlayerState
+sealed trait LivingState
+case object Alive extends LivingState
+case object Dead extends LivingState
 
+
+sealed trait FallState {
+  val tiles:Int
+}
+case class Falling(t:Int, override val tiles:Int) extends FallState {
+  val fallTime = 6
+}
+case object Grounded extends FallState {
+  override val tiles = 0
+}
 
 object Player {
   def create(i:Int, j:Int) = {
     val shovel = Shovel.create
-    val f = TileFactory(Color.Black, Color.White)
     def getTile(d:Direction) = {
       val code = d match {
         case Direction.Up => CP437.▀
@@ -25,16 +34,16 @@ object Player {
         case Direction.Left => CP437.▌
         case Direction.Right => CP437.▐
       }
-      f(code)
+      code.mkTile(Color.Black, Color.White)
     }
-    Player(i, j - 1, i, j, Down, shovel, getTile, false, false, 0, Alive)
+    Player(i, j - 1, i, j, Down, shovel, getTile, false, false, Grounded, Alive)
   }
 }
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
                            face:Direction, shovel:Shovel, t:Direction => Tile,
-                           isShovelling:Boolean, isClimbing:Boolean, fallFrames:Int,
-                           state:PlayerState) {
+                           isShovelling:Boolean, isClimbing:Boolean, fall:FallState,
+                           state:LivingState) {
   def shovelPos = isShovelling.select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:(Int,Int)) = {
@@ -42,13 +51,13 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
   }
 
   def land = {
-    val newState = if(fallFrames > 7) {
+    val newState = if (fall.tiles > 17) {
       Dead
     } else {
       state
     }
 
-    copy(fallFrames=0, state=newState)
+    copy(fall = Grounded, state=newState)
   }
 
   def setFacing(d:Direction) = copy(face=d)

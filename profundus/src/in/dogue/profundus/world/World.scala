@@ -22,7 +22,8 @@ case class World(cols:Int, rows:Int, tMap:Map[Int, Terrain], max:Int, min:Int, m
   }
 
   def isGrounded(ij:(Int,Int)):Boolean = {
-    get(ij).isSolid(convert(ij --> Direction.Down))
+    val down = ij --> Direction.Down
+    get(down).isSolid(convert(down))
   }
 
   private def convert(ij:(Int,Int)):(Int,Int) = {
@@ -32,7 +33,9 @@ case class World(cols:Int, rows:Int, tMap:Map[Int, Terrain], max:Int, min:Int, m
 
   def break(ij:(Int,Int)):World = {
     val index = getIndex(ij)
-    copy(tMap=tMap.updated(index, tMap(index).break(convert(ij))))
+    val broke = tMap(index).break(convert(ij))
+    val updated = tMap.updated(index, broke)
+    copy(tMap=updated)
   }
 
   private def getIndex(ij:(Int,Int)) = {
@@ -73,24 +76,18 @@ case class World(cols:Int, rows:Int, tMap:Map[Int, Terrain], max:Int, min:Int, m
   }
 
   def draw(ij:(Int,Int))(t:TileRenderer):TileRenderer = {
-    val fixAmt = -rows
-    val tr = t.move(0, fixAmt)
-    //draw to a new TileRenderer then merge it with tr
     val y1 = ij.y %% rows
     val plOffset = rows/2 + 5
-    val ntr = if (y1 >= rows/2 - 5) {
-      val terrain1 = tMap(getIndex(ij))
-      val terrain2 = tMap(getIndex(ij)+1)
-      val move0 = -y1-plOffset + rows
-      val move1 = rows
-      tr.move(0, move0).<+<(terrain1.draw).move(0, move1).<+<(terrain2.draw).move(0, -move0 - move1)
-    } else {
-      val terrain1 = tMap(getIndex(ij)-1)
-      val terrain2 = tMap(getIndex(ij))
-      val move0 = -y1-plOffset
-      val move1 = rows
-      tr.move(0, move0).<+<(terrain1.draw).move(0, move1).<+<(terrain2.draw).move(0, -move0 - move1)
+    val m = -y1-plOffset
+    //optimization: only draw the two on screen
+    val things = Vector(
+      (tMap(getIndex(ij)-1), m - rows),
+      (tMap(getIndex(ij)), m),
+      (tMap(getIndex(ij)+1), m + rows)
+    )
+
+    things.foldLeft(t) { case (tr, (ter,mv)) =>
+      tr.withMove(0, mv) { _ <+< ter.draw }
     }
-    ntr.move(0, -fixAmt)
   }
 }

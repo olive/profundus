@@ -1,7 +1,7 @@
 package in.dogue.profundus.world
 
-import in.dogue.antiqua.graphics.{Tile, TileRenderer}
-import in.dogue.antiqua.data.{Direction, CP437, Array2d}
+import in.dogue.antiqua.graphics.{TileRenderer}
+import in.dogue.antiqua.data.{CP437, Array2d}
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Implicits
@@ -15,7 +15,7 @@ object Terrain {
       val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
       val solid = CP437.█.mkTile(bg, fg)
       val empty = bgCode.mkTile(bg, fg)
-      val state = (r.nextDouble > 0.3).select(Filled, Empty)
+      val state = (r.nextDouble > 0.6).select(Filled, Empty)
       WorldTile(solid, empty, state)
     }
     Terrain(tiles)
