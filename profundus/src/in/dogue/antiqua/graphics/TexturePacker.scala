@@ -1,10 +1,8 @@
 package in.dogue.antiqua.graphics
 
 import com.deweyvm.gleany.graphics.{Screenshot, Color, Fbo}
-import com.badlogic.gdx.graphics.g2d.{TextureRegion, Sprite, SpriteBatch}
+import com.badlogic.gdx.graphics.g2d.{TextureRegion, SpriteBatch}
 import com.badlogic.gdx.graphics.{OrthographicCamera, Pixmap, Texture}
-import java.io.FileOutputStream
-
 
 object TexturePacker {
   private def makeBlank = {

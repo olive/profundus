@@ -3,7 +3,7 @@ package in.dogue.antiqua.data
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.graphics.Tile
+import in.dogue.antiqua.graphics.{BorderCodePage, Tile}
 import in.dogue.antiqua.Implicits
 import Implicits._
 
@@ -288,6 +288,10 @@ object CP437 {
   def intToCode(i:Int):CP437 = {
     All.find(_.index == i) getOrElse CP437.?
   }
+
+  val doubleBorder = new BorderCodePage(
+    CP437.║, CP437.═, CP437.╔, CP437.╗, CP437.╚, CP437.╝
+  )
 }
 
 case class CP437(index:Int, char:Char='?', unicode:Char) {
@@ -298,7 +302,6 @@ case class CP437(index:Int, char:Char='?', unicode:Char) {
 
   def rawString = index.toChar.toString
 
-  def mkTile(bg:Color, fg:Color) =  {
-    Tile(this.toCode, bg, fg)
-  }
 }
+
+

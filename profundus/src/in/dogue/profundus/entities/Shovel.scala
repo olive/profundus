@@ -3,16 +3,19 @@ package in.dogue.profundus.entities
 import in.dogue.antiqua.graphics.{TileRenderer, TileFactory, Tile}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.{Direction, CP437}
-
+import in.dogue.antiqua.Implicits
+import Implicits._
 object Shovel {
   def create = {
     import Direction._
-    val f = TileFactory(Color.Black, Color.White)
-    def tiles(d:Direction) = d match {
-      case Up => f(CP437.^)
-      case Down => f(CP437.v)
-      case Left => f(CP437.<)
-      case Right => f(CP437.>)
+    def tiles(d:Direction) = {
+      val code = d match {
+        case Up => CP437.^
+        case Down => CP437.v
+        case Left => CP437.<
+        case Right => CP437.>
+      }
+      code.mkTile(Color.Black, Color.White)
     }
     Shovel(tiles)
   }

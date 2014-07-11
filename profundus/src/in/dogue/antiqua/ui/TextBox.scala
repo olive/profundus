@@ -2,19 +2,19 @@ package in.dogue.antiqua.ui
 
 import in.dogue.antiqua.graphics._
 import in.dogue.antiqua.graphics.Text
-import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.Implicits
 import Implicits._
+import in.dogue.antiqua.data.{Code, CP437}
 
 object Line {
-  def create(v:Text, sound:() => Unit) = Line(v, sound, 0, 0)
+  def create(v:Text, sound:() => Unit, isBlank:Code=>Boolean) = Line(v, sound, isBlank, 0, 0)
 }
-case class Line(v:Text, sound: () => Unit, ptr:Int, t:Int) {
+case class Line(v:Text, sound: () => Unit, isBlank:Code=>Boolean, ptr:Int, t:Int) {
   val speed = 2
   def isFinished = ptr >= v.length
   def update = {
     val (newT, newPtr) = if (t > speed) {
-      if (ptr < v.length && v.tiles(ptr).code != CP437.` `.toCode) {
+      if (ptr < v.length && isBlank(v.tiles(ptr).code)) {
         sound()
       }
       (0, ptr+1)

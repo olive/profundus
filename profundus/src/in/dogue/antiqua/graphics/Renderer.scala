@@ -8,7 +8,7 @@ import com.badlogic.gdx.Gdx
 import scala.collection.mutable.ArrayBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
-import in.dogue.antiqua.data.{Code, CP437}
+import in.dogue.antiqua.data.Code
 
 case class OglSprite(t:TextureRegion, color:Color) {
   def draw(batch:SpriteBatch, x:Int, y:Int) {

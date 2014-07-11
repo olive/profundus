@@ -5,11 +5,13 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.graphics.Text
 import in.dogue.antiqua.graphics.Tile
+import in.dogue.antiqua.Implicits
+import Implicits._
 
 object Hud {
   def create(cols:Int, rows:Int):Hud = {
     val rect = Rect.createPlain(cols, rows, CP437.` `.mkTile(Color.Black, Color.White))
-    val tf = TextFactory(Color.Black, Color.White)
+    val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
     Hud(cols, rect, tf.create("This is a test"), tf.create("Depth:"), tf.create("0"), tf)
   }
 }
