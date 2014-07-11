@@ -1,12 +1,11 @@
 package in.dogue.antiqua.graphics
 
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.data.{Code, CP437}
 import in.dogue.antiqua.Implicits._
 
 object Border {
   def standard(bcp:BorderCodePage, bg:Color, fg:Color) =
-    Border(CP437.doubleBorder)(bg, fg) _
+    Border(bcp)(bg, fg) _
 }
 
 
