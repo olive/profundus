@@ -2,13 +2,13 @@ package in.dogue.profundus.ui
 
 import in.dogue.antiqua.graphics._
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.data.Code
+import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.graphics.Text
 import in.dogue.antiqua.graphics.Tile
 
 object Hud {
   def create(cols:Int, rows:Int):Hud = {
-    val rect = Rect.createPlain(cols, rows, Tile(Code.` `, Color.Black, Color.White))
+    val rect = Rect.createPlain(cols, rows, CP437.` `.mkTile(Color.Black, Color.White))
     val tf = TextFactory(Color.Black, Color.White)
     Hud(cols, rect, tf.create("This is a test"), tf.create("Depth:"), tf.create("0"), tf)
   }

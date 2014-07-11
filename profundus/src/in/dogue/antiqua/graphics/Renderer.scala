@@ -8,7 +8,7 @@ import com.badlogic.gdx.Gdx
 import scala.collection.mutable.ArrayBuffer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType
-import in.dogue.antiqua.data.Code
+import in.dogue.antiqua.data.{Code, CP437}
 
 case class OglSprite(t:TextureRegion, color:Color) {
   def draw(batch:SpriteBatch, x:Int, y:Int) {
@@ -23,16 +23,20 @@ class OglTile(tileset:Tileset) {
   val height = tileset.tileHeight
   val texture = tileset.t
 
-  private def makeSprite(index:Int, color:Color, texture:Texture) = {
+  private def getRegion(index:Int) = {
     val x = index % rows
     val y = index / rows
-    val region = tileset.getRegion(x, y)
+    tileset.getRegion(x, y)
+  }
+
+  private def makeSprite(index:Int, color:Color, texture:Texture) = {
+    val region = getRegion(index)
     OglSprite(region, color)
   }
 
   def getSprites(code:Code, fgColor:Color, bgColor:Color) = {
     val fg = makeSprite(code.index, fgColor, texture)
-    val bg = makeSprite(Code.█.index, bgColor, texture)
+    val bg = OglSprite(tileset.blank, bgColor)
     (fg, bg)
   }
 }

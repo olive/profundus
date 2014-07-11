@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.graphics.{TileFactory, TileRenderer, Tile}
-import in.dogue.antiqua.data.{Direction, Code}
+import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.input.Controls
 import Direction.Down
@@ -20,10 +20,10 @@ object Player {
     val f = TileFactory(Color.Black, Color.White)
     def getTile(d:Direction) = {
       val code = d match {
-        case Direction.Up => Code.▀
-        case Direction.Down => Code.▄
-        case Direction.Left => Code.▌
-        case Direction.Right => Code.▐
+        case Direction.Up => CP437.▀
+        case Direction.Down => CP437.▄
+        case Direction.Left => CP437.▌
+        case Direction.Right => CP437.▐
       }
       f(code)
     }

@@ -1,21 +1,21 @@
 package in.dogue.antiqua.graphics
 
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.data.Code
+import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.Implicits._
 
 object Border {
-  def standard(bg:Color, fg:Color) = Border(Code.║, Code.═, Code.╔, Code.╗, Code.╚, Code.╝)(bg, fg) _
+  def standard(bg:Color, fg:Color) = Border(CP437.║, CP437.═, CP437.╔, CP437.╗, CP437.╚, CP437.╝)(bg, fg) _
 }
 
 
 case class Border(
-    v:Code, h:Code, ul:Code, ur:Code, ll:Code, lr:Code
+    v:CP437, h:CP437, ul:CP437, ur:CP437, ll:CP437, lr:CP437
   )(
     bgColor:Color, fgColor:Color
   )(
     val cols:Int, val rows:Int) {
-  private def mkTile(c:Code) = Tile(c, bgColor, fgColor)
+  private def mkTile(c:CP437) = c.mkTile(bgColor, fgColor)
   val edges:Seq[(Int,Int,Tile)] = {
     val vert = mkTile(v)
     val horiz = mkTile(h)

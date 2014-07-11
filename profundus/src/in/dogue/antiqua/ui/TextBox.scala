@@ -2,7 +2,9 @@ package in.dogue.antiqua.ui
 
 import in.dogue.antiqua.graphics._
 import in.dogue.antiqua.graphics.Text
-import in.dogue.antiqua.data.Code
+import in.dogue.antiqua.data.CP437
+import in.dogue.antiqua.Implicits
+import Implicits._
 
 object Line {
   def create(v:Text, sound:() => Unit) = Line(v, sound, 0, 0)
@@ -12,7 +14,7 @@ case class Line(v:Text, sound: () => Unit, ptr:Int, t:Int) {
   def isFinished = ptr >= v.length
   def update = {
     val (newT, newPtr) = if (t > speed) {
-      if (ptr < v.length && v.tiles(ptr).code != Code.` `) {
+      if (ptr < v.length && v.tiles(ptr).code != CP437.` `.toCode) {
         sound()
       }
       (0, ptr+1)

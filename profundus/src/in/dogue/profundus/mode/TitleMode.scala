@@ -11,7 +11,7 @@ object TitleMode {
 
 case class TitleMode private (cols:Int, rows:Int) {
 
-  def update = this
+  def update:Mode[_] = toMode
 
   def draw(tr:TileRenderer):TileRenderer = tr
 

@@ -12,6 +12,7 @@ object Implicits {
   implicit def seq2AugPosSeq[A](seq:Seq[(Int,Int,A)]) = new AugPosSeq(seq)
   implicit def intTup2Aug[A](tup:(Int,Int)) = new AugIntPair(tup)
   implicit def int2Aug(i:Int) = new AugInt(i)
+  implicit def cp437_2Code(cp:CP437) = new Code(cp.index)
   def id[T](t:T) = t
 
   def impossible = throw new Exception("Impossible")
