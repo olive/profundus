@@ -9,3 +9,4 @@ graph.py
 logs/
 DbSettings.scala
 test.png
+crash_*
