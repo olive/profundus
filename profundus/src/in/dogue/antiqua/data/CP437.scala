@@ -270,9 +270,6 @@ object CP437 {
   val `²`        = CP437(253, '²', '\u00B2')
   val ■          = CP437(254, '■', '\u25A0')
 
-  //def random = All(Random.nextInt(All.length))
-  //def randomInt(i:Int) = All(Random.nextInt(i))
-
   def codeToUnicode(code:Char):Char = {
     if (code < 1 || code > 253) {
       '?'
@@ -283,10 +280,6 @@ object CP437 {
 
   def unicodeToCode(s:Char):CP437 = {
     All.find(_.unicode == s) getOrElse CP437.?
-  }
-
-  def intToCode(i:Int):CP437 = {
-    All.find(_.index == i) getOrElse CP437.?
   }
 
   val doubleBorder = new BorderCodePage(
