@@ -2,9 +2,7 @@ package in.dogue.antiqua.ui
 
 import in.dogue.antiqua.graphics._
 import in.dogue.antiqua.graphics.Text
-import in.dogue.antiqua.Implicits
-import Implicits._
-import in.dogue.antiqua.data.{Code, CP437}
+import in.dogue.antiqua.data.Code
 
 object Line {
   def create(v:Text, sound:() => Unit, isBlank:Code=>Boolean) = Line(v, sound, isBlank, 0, 0)
