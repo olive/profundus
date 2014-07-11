@@ -104,6 +104,13 @@ class Array2d[T](private val elements:Vector[T],
     }
   }
 
+  def foldLeft[R](r:R)(f:(R, (Int,Int,T)) => R): R = {
+    elements.zipWithIndex.foldLeft(r) { case (acc, (e, k)) =>
+      val (i, j) = indexToCoords(k, cols)
+      f(acc,(i, j, e))
+    }
+  }
+
   def get(i:Int, j:Int):T = {
     val k = coordsToIndex(i, j, cols)
     elements(k)

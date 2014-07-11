@@ -1,18 +1,23 @@
 package in.dogue.antiqua.graphics
 
 import com.deweyvm.gleany.data.Recti
-
+import in.dogue.antiqua.data.Array2d
+import in.dogue.antiqua.Implicits
+import Implicits._
 
 object TileRenderer {
   def create = TileRenderer(Map(), 0, 0)
 }
 
 case class TileRenderer(draws:Map[(Int,Int), Tile], originX:Int, originY:Int) {
-  def at(i:Int, j:Int) = copy(originX = i, originY = j)
-  def att(ij:(Int,Int)) = at(ij._1, ij._2)
   def move(i:Int, j:Int) = copy(originX = originX + i, originY = originY + j)
   def movet(ij:(Int,Int)) = move(ij._1, ij._2)
   def project(rect:Recti) = Recti(originX, originY, 0, 0) + rect
+
+
+  def withMove(i:Int, j:Int)(f:TileRenderer => TileRenderer) = {
+    move(i, j).<+<(f).move(-i, -j)
+  }
 
   /**
    * Draws only the foreground of the given tile
@@ -69,19 +74,27 @@ case class TileRenderer(draws:Map[(Int,Int), Tile], originX:Int, originY:Int) {
     t.map {this <+~ _}.getOrElse(this)
   }
   def <++(draws:Seq[(Int,Int,Tile)]): TileRenderer = {
-    draws.foldLeft(this) { _ <+~ _}
+    draws.foldLeft(this) { _ <+~ _ }
   }
+  def <+++(draws:Array2d[Tile]):TileRenderer = {
+    draws.foldLeft(this){ _ <+~ _ }
+  }
+
+  def <+++<[T](draws:Array2d[T], f:T => Tile):TileRenderer = {
+    <+++(draws.map { case (i, j, t) => f(t)})
+  }
+
 
   def <+<(f:TileRenderer => TileRenderer): TileRenderer = {
     f(this)
   }
 
   def <+?<(f:Option[TileRenderer => TileRenderer]): TileRenderer = {
-    f.foldLeft(this) { _ <+< _}
+    f.foldLeft(this) { _ <+< _ }
   }
 
   def <++<(draws:Seq[TileRenderer => TileRenderer]): TileRenderer = {
-    draws.foldLeft(this) { _ <+< _}
+    draws.foldLeft(this) { _ <+< _ }
   }
 
   def <#(i:Int, j:Int, a:Animation): (TileRenderer) => TileRenderer = {

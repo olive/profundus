@@ -2,18 +2,20 @@ package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Tileset, TileRenderer, Renderer}
 import com.deweyvm.gleany.AssetLoader
+import in.dogue.profundus.mode.GameMode
 
 class Engine {
-  var exampleMode = ExampleMode.create(16,16)
+  var mode = GameMode.create(32, 32, 16,16).toMode
   val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("Md_curses_16x16"))
   val r = new Renderer(512, 512, 1, ts)
 
   def update() = {
-    exampleMode = exampleMode.update
+    mode = mode.update
   }
+
   def draw() = {
     val tr = TileRenderer.create
-    r.render(tr <+< exampleMode.draw)
+    r.render(tr <+< mode.draw)
     ()
   }
 

@@ -7,6 +7,7 @@ import com.deweyvm.gleany.files.PathResolver
 import com.deweyvm.gleany.logging.Logger
 import in.dogue.antiqua.Implicits
 import Implicits._
+
 object Main {
   def main(args: Array[String]) {
 

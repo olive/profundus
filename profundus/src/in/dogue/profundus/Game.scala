@@ -3,8 +3,6 @@ package in.dogue.profundus
 import com.deweyvm.gleany.{Glean, GleanyGame, GleanyInitializer}
 import java.util.concurrent.{Executors, Callable, TimeUnit}
 import in.dogue.profundus.input.Controls
-import java.util
-
 
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {
   private lazy val engine = new Engine()
