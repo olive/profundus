@@ -28,13 +28,14 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
 
   def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
     val (updates, particles, newEs) = es.update
+    val gravEs = newEs.doGravity(this)
     if (updates.length > 0) {
       println("got one")
     }
 
     val newCache = cache.checkPositions(ppos)
     val newWorld = copy(cache=newCache,
-                        es=newEs,
+                        es=gravEs,
                         ds=ds++updates)
     (World.doDeformations(newWorld), particles)
   }

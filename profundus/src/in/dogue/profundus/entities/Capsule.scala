@@ -10,7 +10,8 @@ import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
 
 object Capsule {
-  def create = {
+  val stick = CP437.║.mkTile(Color.Black, Color.Red.dim(2))
+  def create(i:Int, j:Int) = {
     val fuse = Animation.create(Vector(
       (1, CP437.*.mkTile(Color.Black, Color.Yellow)),
       (1, CP437.Θ.mkTile(Color.Black, Color.Red)),
@@ -18,16 +19,23 @@ object Capsule {
 
     ))
     val stick = Animation.singleton(
-      CP437.║.mkTile(Color.Black, Color.Red.dim(2))
+      Capsule.stick
     )
-    Capsule(Seq(
+
+    val anims = Seq(
       (0, 0, stick),
       (0, -1, fuse)
-    ), 0)
+    )
+
+    Capsule(i, j, anims, Grounded, 0)
   }
 }
 
-case class Capsule private (a:Seq[(Int,Int,Animation)], t:Int){
+case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallState, t:Int){
+
+  def pos = (i, j)
+  def move(p:(Int,Int)) = copy(i=p.x, j=p.y)
+  def setState(f:FallState) = copy(fall=f)
   def update = {
     copy(a=a.smap {_.update}, t=t+1)
   }
@@ -36,34 +44,37 @@ case class Capsule private (a:Seq[(Int,Int,Animation)], t:Int){
 
   def getDim = 1 + scala.math.sin(t/2.0)/4.0
 
-  private def drawAura(p:Int, q:Int)(tr:TileRenderer):TileRenderer = {
+  private def drawAura(tr:TileRenderer):TileRenderer = {
     val bound = (getDim*4).toInt
     val dist = (bound*bound).sqrt
-    val draws = for (i <- (p - bound) to (p + bound); j <- (q - bound) to (q + bound)) yield {
+    val draws = for (p <- (i - bound) to (i + bound);
+                     q <- (j - bound) to (j + bound)) yield {
       def f(t:Tile) = t.setFg(t.fgColor.dim(1/getDim))
-      if (scala.math.hypot(p - i, q - j) < dist) {
-        (i, j, f _)
+      if (scala.math.hypot(i - p, j - q) < dist) {
+        (p, q, f _)
       } else {
-        (i, j, id[Tile] _)
+        (p, q, id[Tile] _)
       }
     }
     tr `$$>` draws
   }
 
-  def makeDeformation(i:Int, j:Int) = {
+  private def makeDeformation = {
     ExplosionDeformation.create(i, j, 8, 3).toDeformation
   }
 
-  def makeParticle(i:Int, j:Int) = {
+  private def makeParticle = {
     ExplosionParticle.create(i, j, 0, 8, 3).toParticle
   }
 
 
-  def getExplode(i:Int, j:Int):(Deformation[_], Seq[Particle[A] forSome {type A}]) = {
-    (makeDeformation(i, j), Seq(makeParticle(i, j)))
+  def getExplode:(Deformation[_], Seq[Particle[_]]) = {
+    (makeDeformation, Seq(makeParticle))
   }
 
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    tr <## (a |+| (i, j)) <+< drawAura(i, j)
+  def draw(tr:TileRenderer):TileRenderer = {
+    tr <## (a |+| (i, j)) <+< drawAura
   }
+
+  def toMassive:Massive[Capsule] = Massive(this, _.pos, _.move, _.setState, fall)
 }

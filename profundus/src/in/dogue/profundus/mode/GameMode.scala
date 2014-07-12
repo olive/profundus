@@ -15,7 +15,7 @@ object GameMode {
     val hudHeight = 4
     val w = World.create(cols, rows-hudHeight, r)
     val pl = Player.create(10,10)
-    val hud = Hud.create(cols, hudHeight)
+    val hud = Hud.create(cols, hudHeight, pl.inv)
     GameMode(cols, rows, pl, w, new TerrainManager(), ParticleManager.create, hud, r)
   }
 }
@@ -23,10 +23,10 @@ object GameMode {
 case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainManager, pm:ParticleManager, hud:Hud, r:Random) {
 
   def update = {
-    val inserted = updateItemUse(w, pl)
-    val (newW, newPl) = mgr.update(inserted, pl)
+    val (inserted, bombed) = updateItemUse(w, pl)
+    val (newW, newPl) = mgr.update(inserted, bombed)
     val (explored, ps) = newW.update(newPl.pos)
-    val newHud = hud.atDepth(pl.pos.y)
+    val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
     val newPm = pm.update
     newPl.state match {
       case Dead => TitleMode.create(cols, rows).toMode
@@ -35,11 +35,11 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     }
   }
 
-  private def updateItemUse(w:World, p:Player) = {
-    if (p.isBombing) {
-      w.insertBomb(p.pos --> p.face)
+  private def updateItemUse(w:World, p:Player):(World, Player) = {
+    if (p.isBombing && p.inv.hasBomb) {
+      (w.insertBomb(p.pos --> p.face), p.spendBomb)
     } else {
-      w
+      (w, p)
     }
 
   }

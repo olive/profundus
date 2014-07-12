@@ -36,19 +36,26 @@ object Player {
       }
       code.mkTile(Color.Black, Color.White)
     }
-    Player(i, j - 1, i, j, Down, shovel, getTile, false, false, false, Grounded, Alive)
+    Player(i, j - 1, i, j, Down,
+           shovel, getTile,
+           false, false, false,
+           Inventory.create,
+           Grounded, Alive)
   }
 }
 
-case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
-                           face:Direction, shovel:Shovel, t:Direction => Tile,
+case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
+                           shovel:Shovel, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean,
+                           inv:Inventory,
                            fall:FallState, state:LivingState) {
   def shovelPos = isShovelling.select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:(Int,Int)) = {
     copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
   }
+
+  def spendBomb = copy(inv = inv.spendBomb)
 
   def land = {
     val newState = if (fall.tiles > 17) {
@@ -92,6 +99,10 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
          isBombing=Controls.Capsule.justPressed)
   }
 
+  private def setFallState(s:FallState) = {
+    copy(fall=s)
+  }
+
   private def drawShovel(tr:TileRenderer):TileRenderer = {
     isShovelling.select(
       tr,
@@ -102,4 +113,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+ (x, y, t(face)) <+< drawShovel
   }
+
+  def toMassive:Massive[Player] = Massive(this, _.pos, _.move, _.setFallState, fall)
 }

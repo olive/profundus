@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.profundus.entities.{Falling, Grounded, Player}
+import in.dogue.profundus.entities.{Massive, Falling, Player}
 import in.dogue.antiqua.Implicits
 import Implicits._
 import in.dogue.antiqua.data.Direction
@@ -36,8 +36,13 @@ class TerrainManager {
     }
   }
 
+  private def processFall2[T](w:World, p:Massive[T]) = {
+    p.update(w)
+  }
+
   private def processFall(w:World, p:Player) = {
-    val grounded = w.isGrounded(p.pos)
+    processFall2(w, p.toMassive)
+    /*val grounded = w.isGrounded(p.pos)
     p.fall match {
       case f@Falling(t, tiles) if !grounded =>
         val newT = (t + 1) % f.fallTime
@@ -46,7 +51,7 @@ class TerrainManager {
         p.move(newPos).copy(fall = Falling(newT, newTiles))
       case _ if !grounded => p.copy(fall = Falling(0,0))
       case _ => p.land
-    }
+    }*/
 
   }
 
