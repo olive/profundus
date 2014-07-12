@@ -9,6 +9,7 @@ object ParticleManager {
 
 case class ParticleManager private (ps:Seq[Particle[_]]) {
   def update = copy(ps = ps.map{_.update}.flatten)
+  def ++(s:Seq[Particle[_]]) = copy(ps = ps ++ s)
   def draw(tr:TileRenderer):TileRenderer = {
     tr <++< ps.map { _.draw _ }
   }

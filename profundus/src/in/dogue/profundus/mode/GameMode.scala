@@ -25,13 +25,13 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
   def update = {
     val inserted = updateItemUse(w, pl)
     val (newW, newPl) = mgr.update(inserted, pl)
-    val explored = newW.update(newPl.pos)
+    val (explored, ps) = newW.update(newPl.pos)
     val newHud = hud.atDepth(pl.pos.y)
     val newPm = pm.update
     newPl.state match {
       case Dead => TitleMode.create(cols, rows).toMode
       case Alive =>
-        copy(pl=newPl, w=explored, hud=newHud, pm=newPm).toMode
+        copy(pl=newPl, w=explored, hud=newHud, pm=newPm ++ ps).toMode
     }
   }
 

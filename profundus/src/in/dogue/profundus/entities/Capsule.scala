@@ -6,6 +6,8 @@ import in.dogue.antiqua.graphics.{Tile, TileRenderer, Animation}
 import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.world.World
+import in.dogue.profundus.particles.{ExplosionParticle, Particle}
+import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
 
 object Capsule {
   def create = {
@@ -26,7 +28,9 @@ object Capsule {
 }
 
 case class Capsule private (a:Seq[(Int,Int,Animation)], t:Int){
-  def update = copy(a=a.smap {_.update}, t=t+1)
+  def update = {
+    copy(a=a.smap {_.update}, t=t+1)
+  }
 
   def isDone = t > 120
 
@@ -46,7 +50,18 @@ case class Capsule private (a:Seq[(Int,Int,Animation)], t:Int){
     tr `$$>` draws
   }
 
-  def getExplode(i:Int, j:Int):World=>World = id[World] _
+  def makeDeformation(i:Int, j:Int) = {
+    ExplosionDeformation.create(i, j, 8, 3).toDeformation
+  }
+
+  def makeParticle(i:Int, j:Int) = {
+    ExplosionParticle.create(i, j, 0, 8, 3).toParticle
+  }
+
+
+  def getExplode(i:Int, j:Int):(Deformation[_], Seq[Particle[A] forSome {type A}]) = {
+    (makeDeformation(i, j), Seq(makeParticle(i, j)))
+  }
 
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     tr <## (a |+| (i, j)) <+< drawAura(i, j)
