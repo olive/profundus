@@ -23,8 +23,9 @@ object GameMode {
 case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainManager, pm:ParticleManager, hud:Hud, r:Random) {
 
   def update = {
-    val (inserted, bombed) = updateItemUse(w, pl)
-    val (newW, newPl) = mgr.update(inserted, bombed)
+    val (insertedW, bombedPl) = updateItemUse(w, pl)
+    val (strippedW, collectedPl) = insertedW.collectGems(bombedPl)
+    val (newW, newPl) = mgr.update(strippedW, collectedPl)
     val (explored, ps) = newW.update(newPl.pos)
     val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
     val newPm = pm.update

@@ -2,7 +2,7 @@ package in.dogue.profundus.world
 
 import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.profundus.entities.EntityManager
+import in.dogue.profundus.entities.{Player, EntityManager}
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 
@@ -38,6 +38,11 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
                         es=gravEs,
                         ds=ds++updates)
     (World.doDeformations(newWorld), particles)
+  }
+
+  def collectGems(p:Player):(World, Player) = {
+    val (newP, newEs) = es.collectGems(p)
+    (copy(es=newEs), newP)
   }
 
 

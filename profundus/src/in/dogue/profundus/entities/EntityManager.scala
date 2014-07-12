@@ -12,7 +12,7 @@ object EntityManager {
   def create = EntityManager(Seq(), Seq())
 }
 
-case class EntityManager private (caps:Seq[Capsule], gems:Seq[GemDrop]) {
+case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop]) {
   def update:(Seq[Deformation[_]], Seq[Particle[_]], EntityManager) = {
     val updated = caps.map{_.update}
     val (done, notDone) = updated.partition{ _.isDone}
@@ -20,7 +20,7 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[GemDrop]) {
     (explosions, particles.flatten, copy(caps=notDone, gems=gems.map{_.update}))
   }
 
-  def addDrops(gs:Seq[GemDrop]) = {
+  def addDrops(gs:Seq[MineralDrop]) = {
     copy(gems=gems ++ gs)
   }
 
@@ -29,8 +29,15 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[GemDrop]) {
     copy(caps=caps :+ c)
   }
 
-  def doCollide(p:Collidable[_], w:World) {
-
+  def collectGems(p:Player):(Player, EntityManager) = {
+    val (newPl, newGems) = gems.foldLeft((p, List[MineralDrop]())) { case ((pl, list), g) =>
+      if (g.pos == p.pos) {
+        (p.collect(g), list)
+      } else {
+        (p, g :: list)
+      }
+    }
+    (newPl, copy(gems=newGems))
   }
 
   def doGravity(w:World) = {

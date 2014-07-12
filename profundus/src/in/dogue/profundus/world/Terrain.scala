@@ -6,7 +6,7 @@ import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Implicits
 import Implicits._
-import in.dogue.profundus.entities.GemDrop
+import in.dogue.profundus.entities.MineralDrop
 
 object Terrain {
   def create(y:Int, cols:Int, rows:Int, r:Random) = {
@@ -21,7 +21,7 @@ object Terrain {
       val state = Vector(
         (50, Filled),
         (50, Empty),
-        (1, Gem.create(gemColor))
+        (1, Mineral.create(gemColor))
       ).expand.randomR(r)
       WorldTile(solid, empty, gem, state)
     }
@@ -36,12 +36,12 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile]) {
     !t.exists{_.state == Empty}
   }
 
-  def break(ij:(Int,Int)):(Terrain, Seq[GemDrop]) = {
+  def break(ij:(Int,Int)):(Terrain, Seq[MineralDrop]) = {
     val t = tiles.get(ij.x, ij.y)
     val (newState: TileState, drops) = t.state match {
       case Filled => (Empty, Seq())
       case Empty => (Empty, Seq())
-      case g@Gem(_,_) => g.hit(ij.x, ij.y + y)
+      case g@Mineral(_,_) => g.hit(ij.x, ij.y + y)
     }
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
     (newT, drops)

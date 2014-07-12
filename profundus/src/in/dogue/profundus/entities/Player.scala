@@ -49,6 +49,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean,
                            inv:Inventory,
                            fall:FallState, state:LivingState) {
+
+  def collect(g:MineralDrop) = copy(inv=inv.collect(g))
   def shovelPos = isShovelling.select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:(Int,Int)) = {
@@ -113,6 +115,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+ (x, y, t(face)) <+< drawShovel
   }
+
 
   def toMassive:Massive[Player] = Massive(_.pos, _.move, _.setFallState, fall, this)
 }
