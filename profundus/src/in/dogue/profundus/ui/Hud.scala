@@ -12,7 +12,7 @@ object Hud {
   def create(cols:Int, rows:Int):Hud = {
     val rect = Rect.createPlain(cols, rows, CP437.` `.mkTile(Color.Black, Color.White))
     val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
-    Hud(cols, rect, tf.create("This is a test"), tf.create("Depth:"), tf.create("0"), tf)
+    Hud(cols, rect, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), tf)
   }
 }
 

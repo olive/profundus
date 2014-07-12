@@ -2,7 +2,7 @@ package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Tileset, TileRenderer, Renderer}
 import com.deweyvm.gleany.AssetLoader
-import in.dogue.profundus.mode.{Mode,  GameMode}
+import in.dogue.profundus.mode.{Mode, GameMode}
 
 class Engine {
   var mode:Mode[_] = GameMode.create(32, 32, 16,16).toMode

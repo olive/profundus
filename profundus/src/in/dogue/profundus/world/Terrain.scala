@@ -8,7 +8,7 @@ import in.dogue.antiqua.Implicits
 import Implicits._
 
 object Terrain {
-  def create(cols:Int, rows:Int, r:Random) = {
+  def create(y:Int, cols:Int, rows:Int, r:Random) = {
     val tiles = Array2d.tabulate(cols, rows) { case (i, j) =>
       val bg = Color.Brown.dim(3 + r.nextDouble)
       val fg = Color.Tan.dim(1 + r.nextDouble)
@@ -18,12 +18,12 @@ object Terrain {
       val state = (r.nextDouble > 0.6).select(Filled, Empty)
       WorldTile(solid, empty, state)
     }
-    Terrain(tiles)
+    Terrain(y, tiles)
   }
+
 }
 
-case class Terrain private (tiles:Array2d[WorldTile]) {
-
+case class Terrain private (y:Int, tiles:Array2d[WorldTile]) {
   def isSolid(s:(Int,Int)):Boolean = {
     val t = (tiles.getOption _).tupled(s)
     !t.exists{_.state == Empty}
@@ -34,6 +34,7 @@ case class Terrain private (tiles:Array2d[WorldTile]) {
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr.<+++<(tiles, (w:WorldTile) => w.getTile)
+    //tr.<+++<(tiles, (w:WorldTile) => w.getTile)
+    tr <++ tiles.flatten.map { case (i, j, w)  => (i, j+y, w.getTile)}
   }
 }

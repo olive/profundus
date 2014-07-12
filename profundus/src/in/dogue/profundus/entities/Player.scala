@@ -36,14 +36,14 @@ object Player {
       }
       code.mkTile(Color.Black, Color.White)
     }
-    Player(i, j - 1, i, j, Down, shovel, getTile, false, false, Grounded, Alive)
+    Player(i, j - 1, i, j, Down, shovel, getTile, false, false, false, Grounded, Alive)
   }
 }
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
                            face:Direction, shovel:Shovel, t:Direction => Tile,
-                           isShovelling:Boolean, isClimbing:Boolean, fall:FallState,
-                           state:LivingState) {
+                           isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean,
+                           fall:FallState, state:LivingState) {
   def shovelPos = isShovelling.select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:(Int,Int)) = {
@@ -88,17 +88,18 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int,
 
   def update = {
     copy(isShovelling=Controls.Space.isPressed,
-         isClimbing=Controls.Action.justPressed)
+         isClimbing=Controls.Action.justPressed,
+         isBombing=Controls.Capsule.justPressed)
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
     isShovelling.select(
       tr,
-      tr <+< shovel.draw(face)(x, 14-28 - 5)
+      tr <+< shovel.draw(face)(x, y)
     )
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+ (x, 14-28 - 5, t(face)) <+< drawShovel
+    tr <+ (x, y, t(face)) <+< drawShovel
   }
 }

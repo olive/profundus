@@ -6,8 +6,6 @@ import Implicits._
 import in.dogue.antiqua.data.Direction
 
 class TerrainManager {
-
-
   private def updateShovel(w:World, pl:Player):(World, Player) = {
     val world = pl.shovelPos.map { p =>
       w.break(p)

@@ -1,12 +1,12 @@
 package in.dogue.profundus.mode
 
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.antiqua.Implicits
-import Implicits._
 
 
 object TitleMode {
-  def create(cols:Int, rows:Int) = TitleMode(cols, rows)
+  def create(cols:Int, rows:Int) = {
+    TitleMode(cols, rows)
+  }
 }
 
 case class TitleMode private (cols:Int, rows:Int) {
