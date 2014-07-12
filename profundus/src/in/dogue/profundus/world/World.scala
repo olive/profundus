@@ -54,7 +54,8 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
   }
 
   def break(ij:(Int,Int)):World = {
-    copy(cache=cache.break(ij))
+    val (newCache, dropped) = cache.break(ij)
+    copy(cache=newCache, es=es.addDrops(dropped))
   }
 
   def draw(pl:(Int,Int))(tr:TileRenderer):TileRenderer = {

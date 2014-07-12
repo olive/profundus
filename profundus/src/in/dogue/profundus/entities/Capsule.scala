@@ -76,5 +76,5 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
     tr <## (a |+| (i, j)) <+< drawAura
   }
 
-  def toMassive:Massive[Capsule] = Massive(this, _.pos, _.move, _.setState, fall)
+  def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, fall, this)
 }

@@ -94,7 +94,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def update = {
-    copy(isShovelling=Controls.Space.isPressed,
+    copy(isShovelling=Controls.Space.justPressed,
          isClimbing=Controls.Action.justPressed,
          isBombing=Controls.Capsule.justPressed)
   }
@@ -114,5 +114,5 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     tr <+ (x, y, t(face)) <+< drawShovel
   }
 
-  def toMassive:Massive[Player] = Massive(this, _.pos, _.move, _.setFallState, fall)
+  def toMassive:Massive[Player] = Massive(_.pos, _.move, _.setFallState, fall, this)
 }

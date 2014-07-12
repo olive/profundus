@@ -5,11 +5,11 @@ import in.dogue.profundus.world.World
 import in.dogue.antiqua.Implicits
 import Implicits._
 
-case class Massive[T](self:T,
-                      pos: T => (Int,Int),
+case class Massive[T](pos: T => (Int,Int),
                       move: T => ((Int,Int)) => T,
                       setState: T => FallState => T,
-                      state:FallState) {
+                      state:FallState,
+                      self:T) {
   def update(w:World) = {
     val epos = pos(self)
     val grounded = w.isGrounded(epos)

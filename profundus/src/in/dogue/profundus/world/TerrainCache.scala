@@ -5,6 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Implicits
 import Implicits._
 import in.dogue.antiqua.data.Direction
+import in.dogue.profundus.entities.GemDrop
 
 
 object TerrainCache {
@@ -34,11 +35,11 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def break(ij:(Int,Int)):TerrainCache = {
+  def break(ij:(Int,Int)):(TerrainCache, Seq[GemDrop]) = {
     val index = getIndex(ij)
-    val broke = tMap(index).break(convert(ij))
+    val (broke, dropped) = tMap(index).break(convert(ij))
     val updated = tMap.updated(index, broke)
-    copy(tMap=updated)
+    (copy(tMap=updated), dropped)
   }
 
   private def getIndex(ij:(Int,Int)) = {
