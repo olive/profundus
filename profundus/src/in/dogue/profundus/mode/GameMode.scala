@@ -62,8 +62,9 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
   }
   //world tiles are all on 0,0 so they must be adjusted by the players position, whereas the players position is absolute
   def draw(tr:TileRenderer):TileRenderer = {
+    val offset = 0//5
     tr.withMove(0, hud.height){ t =>
-      t.withMove(0, -pl.y - 5 - 16) { worldPos =>
+      t.withMove(0, -pl.y - offset - 16) { worldPos =>
         worldPos <+< w.draw(pl.pos)  <+< pl.draw <+< pm.draw
       }
     }.<+<(hud.draw)

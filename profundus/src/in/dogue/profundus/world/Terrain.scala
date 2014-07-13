@@ -11,6 +11,24 @@ import in.dogue.antiqua.procgen.PerlinNoise
 
 
 object Terrain {
+  def createSky(y:Int, cols:Int, rows:Int, r:Random) = {
+    val tiles = Array2d.tabulate(cols, rows) { case (i, j) =>
+      val bgCode = Vector(CP437.`.`, CP437.`'`, CP437.` `, CP437.` `, CP437.` `).randomR(r)
+      val dim = (j+y)/cols.toDouble
+      val night = bgCode.mkTile(Color.DarkBlue.dim(1/dim), Color.White)
+      val grassFg = Color.DarkGreen.mix(Color.Brown, j/(rows*2).toDouble).dim(1 + r.nextDouble)
+      val grassBg = Color.DarkGreen.mix(Color.Brown, j/rows.toDouble).dim(1 + r.nextDouble)
+      val grass = CP437.█.mkTile(grassBg, grassFg)
+      val behind = CP437.` `.mkTile(grassBg, grassBg)
+      val state = if (j + y > 16) {
+        Dirt.create(grass, behind)
+      } else {
+        Empty(night)
+      }
+      WorldTile(state)
+    }
+    Terrain(y, tiles)
+  }
   def create(y:Int, cols:Int, rows:Int, r:Random) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val tiles = noise.map { case (i, j, d) =>
@@ -31,17 +49,17 @@ object Terrain {
       ).expand.randomR(r)*/
       val state = if (d < -0.4) {
         if (r.nextDouble > 0.99) {
-          Mineral.create(mineralColor)
+          Mineral.create(mineral, empty, mineralColor)
         } else {
-          Rock.create
+          Rock.create(rock, empty)
 
         }
       } else if (d < 0.0) {
-        Dirt.create
+        Dirt.create(dirt, empty)
       } else {
-        Empty
+        Empty(empty)
       }
-      WorldTile(rock, dirt, empty, mineral, state)
+      WorldTile(state)
     }
     Terrain(y, tiles)
   }
@@ -51,22 +69,22 @@ object Terrain {
 case class Terrain private (y:Int, tiles:Array2d[WorldTile]) {
   def isSolid(s:(Int,Int)):Boolean = {
     val t = (tiles.getOption _).tupled(s)
-    !t.exists{_.state == Empty}
+    !t.exists{_.state.isWalkable}
   }
 
   def hit(ij:(Int,Int)):(Terrain, Seq[MineralDrop]) = {
     val t = tiles.get(ij.x, ij.y)
-    val (newState: TileState, drops) = t.state match {
-      case r@Rock(_) => r.hit
-      case d@Dirt(_) => d.hit
-      case Empty => (Empty, Seq())
-      case g@Mineral(_,_) => g.hit(ij.x, ij.y + y)
+    val (newState, drops) = t.state match {
+      case r@Rock(_,_,_) => r.hit
+      case d@Dirt(_,_,_) => d.hit
+      case e@Empty(_) => (e, Seq())
+      case g@Mineral(_,_,_,_) => g.hit(ij.x, ij.y + y)
     }
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
     (newT, drops)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++ tiles.flatten.map { case (i, j, w)  => (i, j+y, w.getTile)}
+    tr <++ tiles.flatten.map { case (i, j, w)  => (i, j+y, w.tile)}
   }
 }

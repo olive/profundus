@@ -11,15 +11,20 @@ import in.dogue.profundus.entities.MineralDrop
 object TerrainCache {
   def create(cols:Int, rows:Int, r:Random) = {
     val copy = new Random(r.nextInt())
-    def gen(i:Int, r:Random, prev:Terrain) = {
-      Terrain.create(i*rows, cols, rows, copy)
+    def gen(i:Int, r:Random, prev:Option[Terrain]) = {
+      val gen = if (i <= 0) {
+        Terrain.createSky _
+      } else {
+        Terrain.create _
+      }
+      gen(i*rows, cols, rows, copy)
     }
-    TerrainCache(cols, rows, Map(0->Terrain.create(0, cols, rows, r)), 0, 0, gen, r)
+    TerrainCache(cols, rows, Map(0->gen(0, r, None)), 0, 0, gen, r)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,
                                  tMap:Map[Int, Terrain], max:Int, min:Int,
-                                 mkNext:(Int, Random, Terrain) => Terrain,
+                                 mkNext:(Int, Random, Option[Terrain]) => Terrain,
                                  r:Random) {
   def isSolid(ij:(Int,Int)):Boolean = {
     get(ij).isSolid(convert(ij))
@@ -57,14 +62,14 @@ case class TerrainCache private (cols:Int, rows:Int,
     val (newMap, newMin, newMax) = if (i > max) {
       val mm = ((max+1) to i).foldLeft(tMap) { case (map, k) =>
         val prev = map(k-1)
-        val next = mkNext(k, r, prev)
+        val next = mkNext(k, r, prev.some)
         map.updated(k, next)
       }
       (mm, min, i)
     } else if (i < min) {
       val mm = ((min - 1) to (i, -1)).foldLeft(tMap) { case (map, k) =>
         val prev = map(k+1)
-        val next = mkNext(k, r, prev)
+        val next = mkNext(k, r, prev.some)
         map.updated(k, next)
       }
       (mm, i, max)
