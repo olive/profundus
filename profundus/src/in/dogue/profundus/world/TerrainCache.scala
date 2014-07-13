@@ -35,9 +35,9 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def break(ij:(Int,Int)):(TerrainCache, Seq[MineralDrop]) = {
+  def hit(ij:(Int,Int)):(TerrainCache, Seq[MineralDrop]) = {
     val index = getIndex(ij)
-    val (broke, dropped) = tMap(index).break(convert(ij))
+    val (broke, dropped) = tMap(index).hit(convert(ij))
     val updated = tMap.updated(index, broke)
     (copy(tMap=updated), dropped)
   }

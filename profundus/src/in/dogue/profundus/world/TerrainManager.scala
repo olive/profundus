@@ -7,10 +7,11 @@ import in.dogue.antiqua.data.Direction
 
 class TerrainManager {
   private def updateShovel(w:World, pl:Player):(World, Player) = {
-    val world = pl.shovelPos.map { p =>
-      w.break(p)
-    }.getOrElse(w)
-    (world, pl)
+    pl.shovelPos match {
+      case None => (w, pl)
+      case Some(p) =>
+        (w.hit(p), pl.copy(inv=pl.inv.useShovel(1)))
+    }
   }
 
   private def updateFacing(dir:Option[Direction], pl:Player):Player = {

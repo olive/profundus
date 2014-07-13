@@ -12,7 +12,6 @@ case class Deformation[T](up:T => T,
 
   def update:Option[Deformation[A] forSome {type A}] = {
     if (done(self)) {
-      println("done")
       None
     } else {
       copy(self=up(self)).some

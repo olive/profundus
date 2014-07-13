@@ -29,10 +29,6 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
   def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
     val (updates, particles, newEs) = es.update
     val gravEs = newEs.doGravity(this)
-    if (updates.length > 0) {
-      println("got one")
-    }
-
     val newCache = cache.checkPositions(ppos)
     val newWorld = copy(cache=newCache,
                         es=gravEs,
@@ -58,8 +54,8 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
     cache.isGrounded(ij)
   }
 
-  def break(ij:(Int,Int)):World = {
-    val (newCache, dropped) = cache.break(ij)
+  def hit(ij:(Int,Int)):World = {
+    val (newCache, dropped) = cache.hit(ij)
     copy(cache=newCache, es=es.addDrops(dropped))
   }
 

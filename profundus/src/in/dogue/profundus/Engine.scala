@@ -6,7 +6,7 @@ import in.dogue.profundus.mode.{Mode, GameMode}
 
 class Engine {
   var mode:Mode[_] = GameMode.create(32, 32, 16,16).toMode
-  val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("Md_curses_16x16"))
+  val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("16x16"))
   val r = new Renderer(512, 512, 1, ts)
 
   def update() = {

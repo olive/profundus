@@ -8,7 +8,22 @@ import in.dogue.profundus.entities.MineralDrop
 
 sealed trait TileState
 case object Empty extends TileState
-case object Filled extends TileState
+object Rock {
+  def create = Rock(5)
+}
+case class Rock(hp:Int) extends TileState {
+  def hit = if (hp > 1) {
+    (copy(hp = hp.drop1), Seq())
+  } else {
+    (Empty, Seq())
+  }
+}
+object Dirt {
+  def create = Dirt(1)
+}
+case class Dirt(hp:Int) extends TileState {
+  def hit = (Empty, Seq())
+}
 object Mineral {
   def create(c:Color) = Mineral(c, 3)
 }
@@ -20,10 +35,11 @@ case class Mineral(c:Color, hp:Int) extends TileState {
   }
 }
 
-case class WorldTile(solid:Tile, empty:Tile, gem:Tile, state:TileState) {
+case class WorldTile(rock:Tile, dirt:Tile, empty:Tile, gem:Tile, state:TileState) {
   def getTile = state match {
     case Empty => empty
-    case Filled => solid
+    case Rock(_) => rock
+    case Dirt(_) => dirt
     case Mineral(_,_) => gem
   }
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {

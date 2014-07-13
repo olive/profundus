@@ -51,7 +51,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            fall:FallState, state:LivingState) {
 
   def collect(g:MineralDrop) = copy(inv=inv.collect(g))
-  def shovelPos = isShovelling.select(None, ((x, y)-->face).some)
+  def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:(Int,Int)) = {
     copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
