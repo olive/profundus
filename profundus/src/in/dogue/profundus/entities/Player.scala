@@ -14,23 +14,11 @@ case object Alive extends LivingState
 case object Dead extends LivingState
 
 
-sealed trait FallState {
-  /** number of tiles you have been falling for*/
-  val tiles:Int
-}
-object Falling { def create = Falling(0, 0) }
-case class Falling(t:Int, override val tiles:Int) extends FallState {
-  val fallTime = 6
-}
-case object Grounded extends FallState {
-  override val tiles = 0
-}
-case object Floating extends FallState {
-  override val tiles = 0
-}
+
+
 
 object Player {
-  def create(i:Int, j:Int) = {
+  def create(ij:(Int,Int)) = {
     val shovel = Shovel.create
     def getTile(d:Direction) = {
       val code = d match {
@@ -41,6 +29,8 @@ object Player {
       }
       code.mkTile(Color.Black, Color.White)
     }
+    val i = ij.x
+    val j = ij.y
     Player(i, j - 1, i, j, Down,
            shovel, getTile,
            false, false, false, false,
@@ -64,16 +54,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def spendBomb = copy(inv = inv.spendBomb)
   def spendRope = copy(inv = inv.spendRope)
-
-  def land = {
-    val newState = if (fall.tiles > 17) {
-      Dead
-    } else {
-      state
-    }
-
-    copy(fall = Grounded, state=newState)
-  }
 
   def setFacing(d:Direction) = copy(face=d)
 
@@ -109,7 +89,12 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def setFallState(s:FallState) = {
-    copy(fall=s)
+    val newPl = copy(fall=s)
+    (fall, s) match {
+      case (Falling(_, num), Grounded) if num > 6=>
+        newPl.copy(state=Dead)
+      case _ => newPl
+    }
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {

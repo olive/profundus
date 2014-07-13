@@ -10,6 +10,7 @@ import in.dogue.profundus.entities.MineralDrop
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.antiqua.geometry.{Line, Ellipse}
 import com.deweyvm.gleany.data.Point2d
+import in.dogue.profundus.doodads.{Doodad, Moon}
 
 
 case class Scheme(bgMod:Random => Color,
@@ -20,7 +21,7 @@ case class Scheme(bgMod:Random => Color,
 
 }
 
-case class TerrainScheme(sky:Scheme, grass:Scheme, dirt:Scheme, rock:Scheme)
+case class TerrainScheme(sky:Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, gem:Scheme)
 
 object Terrain {
   val dirtScheme = Scheme(
@@ -60,7 +61,6 @@ object Terrain {
           Mineral.create(mineral, empty, mineral.bgColor)
         } else {
           Rock.create(rock, empty)
-
         }
       } else if (d < 0.0) {
         Dirt.create(dirt, empty)
@@ -69,11 +69,10 @@ object Terrain {
       }
       WorldTile(state)
     }
-    Terrain(y, tiles)
+    Terrain(y, tiles, Seq(), (0,0))
   }
 
-  def createSky(y:Int, cols:Int, rows:Int, r:Random) = {
-    println(y)
+  def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val ellipse = Ellipse(cols/4, rows/2, cols/2, 3*rows/4)
     val sx = rows / 2 - 3
@@ -81,17 +80,17 @@ object Terrain {
     val (cx, cy) = (cxx.toInt, cyy.toInt - 5)
     val sy = ellipse.getY(sx).toVector.randomR(r).toInt
     val (sx2, sy2) = ((ellipse.cx - sx).toInt, (ellipse.cy + sy).toInt)
-    val l1 = Line.bresenham(sx, sy,     cx, cy)
-    val l2 = Line.bresenham(sx, sy + 1, cx, cy + 1)
-    val l3 = Line.bresenham(sx, sy + 2, cx, cy + 2)
+    val l1 = Line.bresenham(sx,  sy,      cx, cy)
+    val l2 = Line.bresenham(sx,  sy + 1,  cx, cy + 1)
+    val l3 = Line.bresenham(sx,  sy + 2,  cx, cy + 2)
     val l4 = Line.bresenham(sx2, sy2,     cx, cy)
     val l5 = Line.bresenham(sx2, sy2 + 1, cx, cy + 1)
     val l6 = Line.bresenham(sx2, sy2 + 2, cx, cy + 2)
     val lines = Vector(l1, l2, l3, l4, l5, l6)
     val tiles = noise.map { case (i, j, d) =>
       val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
-      val skyCode = Vector(CP437.`.`, CP437.`'`, CP437.` `, CP437.` `, CP437.` `).randomR(r)
-      val dim = (j + y) / cols.toDouble
+      val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
+      val dim = (j + y) / (cols*2).toDouble
       val night = skyScheme(dim).mkTile(r, skyCode)
       val grass = grassScheme(j, rows).mkTile(r, CP437.█)
       val empty = rockScheme.mkTile(r, bgCode)
@@ -116,13 +115,15 @@ object Terrain {
         }
       WorldTile(state)
     }
-    Terrain(y, tiles)
+    val moon = Moon.create(22, 0, 4)
+    Terrain(y, tiles, Seq(moon.toDoodad), (sx, sy))
   }
 
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain private (y:Int, tiles:Array2d[WorldTile]) {
+case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:(Int,Int)) {
+  def update = copy(doodads=doodads.map{_.update})
   def isSolid(s:(Int,Int)):Boolean = {
     val t = (tiles.getOption _).tupled(s)
     !t.exists{_.state.isWalkable}
@@ -131,7 +132,6 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile]) {
   def hit(ij:(Int,Int)):(Terrain, Seq[MineralDrop], Int) = {
     val t = tiles.get(ij.x, ij.y)
     val (newState, drops, damage) = t.state.hit(ij +| y)
-    println(newState)
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
     (newT, drops, damage)
   }

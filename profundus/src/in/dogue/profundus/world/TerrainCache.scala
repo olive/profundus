@@ -9,7 +9,7 @@ import in.dogue.profundus.entities.MineralDrop
 
 
 object TerrainCache {
-  def create(cols:Int, rows:Int, r:Random) = {
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache,(Int,Int)) = {
     val copy = new Random(r.nextInt())
     def gen(i:Int, r:Random, prev:Option[Terrain]) = {
       val gen = if (i <= 0) {
@@ -19,7 +19,9 @@ object TerrainCache {
       }
       gen(i*rows, cols, rows, copy)
     }
-    TerrainCache(cols, rows, Map(0->gen(0, r, None)), 0, 0, gen, r)
+    val first = gen(0, r, None)
+    val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, gen, r)
+    (cache, first.spawn)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,
@@ -79,6 +81,13 @@ case class TerrainCache private (cols:Int, rows:Int,
     copy(tMap=newMap, min=newMin, max=newMax)
   }
 
+  def update(ij:(Int,Int)):TerrainCache = {
+    val newTMap = Seq(getIndex(ij)-1, getIndex(ij), getIndex(ij)+1).foldLeft(tMap) { case (acc, i) =>
+      acc.updated(i, acc(i).update)
+    }
+    copy(tMap=newTMap)
+  }
+
   private def get(ij:(Int,Int)):Terrain = {
     tMap(getIndex(ij))
 
@@ -92,6 +101,8 @@ case class TerrainCache private (cols:Int, rows:Int,
       tMap(getIndex(ij)+1)
     )
 
-    things.foldLeft(t) {   _ <+< _.draw }
+    val doodads = things.map{_.doodads}
+
+    things.foldLeft(t) {   _ <+< _.draw } <++< doodads.flatten.map{_.draw _}
   }
 }

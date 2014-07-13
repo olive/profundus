@@ -12,7 +12,6 @@ object MineralDrop {
       (5, CP437.●.mkTile(Color.Black, c)),
       (Int.MaxValue, CP437.`.`.mkTile(Color.Black, c))
     ))
-    println("Spawned" + ij)
     MineralDrop(ij, anim, Grounded)
   }
 }

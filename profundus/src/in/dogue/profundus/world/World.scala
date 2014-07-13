@@ -7,10 +7,11 @@ import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 
 object World {
-  def create(cols:Int, rows:Int, r:Random) = {
-    val terrain = TerrainCache.create(cols, rows, r)
+  def create(cols:Int, rows:Int, r:Random):(World,(Int,Int)) = {
+    val (terrain, spawn) = TerrainCache.create(cols, rows, r)
     val es = EntityManager.create
-    World(cols, rows, es, terrain, Seq())
+    val w = World(cols, rows, es, terrain, Seq())
+    (w, spawn)
   }
 
   private def doDeformations(world:World):World = {
@@ -28,7 +29,7 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
   def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
     val (updates, particles, newEs) = es.update(this)
     val gravEs = newEs.doGravity(this)
-    val newCache = cache.checkPositions(ppos)
+    val newCache = cache.checkPositions(ppos).update(ppos)
     val newWorld = copy(cache=newCache,
                         es=gravEs,
                         ds=ds++updates)

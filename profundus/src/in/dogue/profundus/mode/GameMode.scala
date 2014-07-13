@@ -13,8 +13,8 @@ object GameMode {
   def create(cols:Int, rows:Int, i:Int, j:Int) = {
     val r = new Random(0)
     val hudHeight = 4
-    val w = World.create(cols, rows-hudHeight, r)
-    val pl = Player.create(10,10)
+    val (w,p) = World.create(cols, rows-hudHeight, r)
+    val pl = Player.create(p)
     val hud = Hud.create(cols, hudHeight, pl.inv)
     GameMode(cols, rows, pl, w, new TerrainManager(), ParticleManager.create, hud, r)
   }
