@@ -18,21 +18,33 @@ case object Dead extends LivingState
 
 
 object Player {
+
+  def getLive(d:Direction) = {
+    val code = d match {
+      case Direction.Up => CP437.▀
+      case Direction.Down => CP437.▄
+      case Direction.Left => CP437.▌
+      case Direction.Right => CP437.▐
+    }
+    code.mkTile(Color.Black, Color.White)
+  }
+
+  def getDead(d:Direction) = {
+    val code = d match {
+      case Direction.Up => CP437.▀
+      case Direction.Down => CP437.▄
+      case Direction.Left => CP437.▌
+      case Direction.Right => CP437.▐
+    }
+    code.mkTile(Color.Black, Color.Red.dim(2))
+  }
   def create(ij:(Int,Int)) = {
     val shovel = Shovel.create
-    def getTile(d:Direction) = {
-      val code = d match {
-        case Direction.Up => CP437.▀
-        case Direction.Down => CP437.▄
-        case Direction.Left => CP437.▌
-        case Direction.Right => CP437.▐
-      }
-      code.mkTile(Color.Black, Color.White)
-    }
+
     val i = ij.x
     val j = ij.y
     Player(i, j - 1, i, j, Down,
-           shovel, getTile,
+           shovel, getLive,
            false, false, false, false,
            Inventory.create,
            Grounded, Alive)
@@ -72,6 +84,15 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def getMove:Option[Direction] = {
+    state match {
+      case Alive => computeMove
+      case Dead => None
+    }
+
+
+  }
+
+  private def computeMove:Option[Direction] = {
     val dx = Controls.AxisX.zip(5,5)
     val dy = Controls.AxisY.zip(5,5)
     if (dx != 0 || dy != 0) {
@@ -92,10 +113,12 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     val newPl = copy(fall=s)
     (fall, s) match {
       case (Falling(_, num), Grounded) if num > 6=>
-        newPl.copy(state=Dead)
+        newPl.kill
       case _ => newPl
     }
   }
+
+  def kill = copy(state=Dead, face = Direction.Down, t=Player.getDead)
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
     isShovelling.select(

@@ -13,14 +13,14 @@ object EntityManager {
 }
 
 case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop], ropes:Seq[Rope]) {
-  def update(w:World):(Seq[Deformation[_]], Seq[Particle[_]], EntityManager) = {
+  def update(w:World):(Seq[Deformation[_]], Seq[KillZone[_]], Seq[Particle[_]], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
-    val (explosions, particles) = done.map{_.getExplode}.unzip
+    val (explosions, particles, kz) = done.map{_.getExplode}.unzip3
     val newEm = copy(caps=notDone,
                      gems=gems.map{_.update},
                      ropes=ropes.map{_.update(w)})
-    (explosions, particles.flatten, newEm)
+    (explosions, kz, particles.flatten, newEm)
   }
 
   def addDrops(gs:Seq[MineralDrop]) = {

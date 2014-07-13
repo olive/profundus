@@ -10,19 +10,29 @@ import Antiqua._
 import in.dogue.profundus.particles.ParticleManager
 
 object GameMode {
-  def create(cols:Int, rows:Int, i:Int, j:Int) = {
+  def create(cols:Int, rows:Int) = {
     val r = new Random(0)
     val hudHeight = 4
     val (w,p) = World.create(cols, rows-hudHeight, r)
     val pl = Player.create(p)
+    val (newWorld, _) = w.update(pl.pos)
     val hud = Hud.create(cols, hudHeight, pl.inv)
-    GameMode(cols, rows, pl, w, new TerrainManager(), ParticleManager.create, hud, r)
+    GameMode(cols, rows, pl, newWorld, new TerrainManager(), ParticleManager.create, hud, r)
   }
 }
 
 case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainManager, pm:ParticleManager, hud:Hud, r:Random) {
 
   def update = {
+    val updated = selfUpdate
+    updated.pl.state match {
+      case Dead => DeadMode.create(cols, rows, this).toMode
+      case Alive => updated.toMode
+
+    }
+  }
+
+  def selfUpdate:GameMode = {
     val climbPl = updateClimbRope(w, pl)
     val (insertedW, bombedPl) = updateItemUse(w, climbPl)
     val (strippedW, collectedPl) = insertedW.collectGems(bombedPl)
@@ -30,11 +40,8 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     val (explored, ps) = newW.update(newPl.pos)
     val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
     val newPm = pm.update
-    newPl.state match {
-      case Dead => TitleMode.create(cols, rows).toMode
-      case Alive =>
-        copy(pl=newPl, w=explored, hud=newHud, pm=newPm ++ ps).toMode
-    }
+    val killed = explored.killPlayer(newPl)
+    copy(pl=killed, w=explored, hud=newHud, pm=newPm ++ ps)
   }
 
   private def updateClimbRope(w:World, p:Player):Player = {

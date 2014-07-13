@@ -67,9 +67,13 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
     ExplosionParticle.create(i, j, 0, 8, 3).toParticle
   }
 
+  private def makeKillZone = {
+    ExplosionKillZone.create(i, j, 8, 3).toKillZone
+  }
 
-  def getExplode:(Deformation[_], Seq[Particle[_]]) = {
-    (makeDeformation, Seq(makeParticle))
+
+  def getExplode:(Deformation[_], Seq[Particle[_]], KillZone[_]) = {
+    (makeDeformation, Seq(makeParticle), makeKillZone)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
@@ -77,4 +81,5 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
   def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, fall, this)
+
 }

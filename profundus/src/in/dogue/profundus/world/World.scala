@@ -2,7 +2,7 @@ package in.dogue.profundus.world
 
 import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.profundus.entities.{Player, EntityManager}
+import in.dogue.profundus.entities.{KillZone, Player, EntityManager}
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 
@@ -10,7 +10,7 @@ object World {
   def create(cols:Int, rows:Int, r:Random):(World,(Int,Int)) = {
     val (terrain, spawn) = TerrainCache.create(cols, rows, r)
     val es = EntityManager.create
-    val w = World(cols, rows, es, terrain, Seq())
+    val w = World(cols, rows, es, terrain, Seq(), Seq())
     (w, spawn)
   }
 
@@ -24,16 +24,26 @@ object World {
   }
 }
 
-case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Seq[Deformation[_]]) {
+case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Seq[Deformation[_]], kz:Seq[KillZone[_]]) {
 
   def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
-    val (updates, particles, newEs) = es.update(this)
+    val (updates, kills, particles, newEs) = es.update(this)
+    val newKz = kz.map{_.update}.flatten
     val gravEs = newEs.doGravity(this)
     val newCache = cache.checkPositions(ppos).update(ppos)
     val newWorld = copy(cache=newCache,
                         es=gravEs,
-                        ds=ds++updates)
+                        ds=ds++updates,
+                        kz = newKz ++ kills)
     (World.doDeformations(newWorld), particles)
+  }
+
+  def killPlayer(p:Player):Player = {
+    if (kz.exists{ _.contains(p.pos)}) {
+      p.kill
+    } else{
+      p
+    }
   }
 
   def collectGems(p:Player):(World, Player) = {
