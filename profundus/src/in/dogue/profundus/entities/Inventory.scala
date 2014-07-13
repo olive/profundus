@@ -5,11 +5,11 @@ import Antiqua._
 
 object Inventory {
   def create:Inventory = {
-    Inventory(2, 0, 20, 20)
+    Inventory(2, 2, 0, 20, 20)
   }
 }
 
-case class Inventory private (bombs:Int, gems:Int, dura:Int, maxDura:Int) {
+case class Inventory private (ropes:Int, bombs:Int, gems:Int, dura:Int, maxDura:Int) {
   def hasBomb = bombs > 0
   def spendBomb = copy(bombs = bombs.drop1)
   def hasShovelUse = dura > 0
