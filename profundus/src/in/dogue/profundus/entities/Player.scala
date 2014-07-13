@@ -5,8 +5,8 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.input.Controls
 import Direction.Down
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 
 sealed trait LivingState

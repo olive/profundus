@@ -1,8 +1,8 @@
 package in.dogue.profundus.world
 
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.entities.MineralDrop
 

@@ -1,8 +1,8 @@
 package in.dogue.profundus.particles
 
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 case class Particle[T](up:T=>T,
                        drawFunc:T => TileRenderer => TileRenderer,

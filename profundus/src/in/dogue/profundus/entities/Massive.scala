@@ -2,8 +2,8 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.world.World
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 case class Massive[T](pos: T => (Int,Int),
                       move: T => ((Int,Int)) => T,

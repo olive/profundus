@@ -2,8 +2,8 @@ package in.dogue.profundus.particles
 
 import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import scala.util.Random
 
 object ExplosionParticle {

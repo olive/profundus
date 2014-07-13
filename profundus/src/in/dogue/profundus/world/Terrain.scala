@@ -4,15 +4,15 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.data.{CP437, Array2d}
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import in.dogue.profundus.entities.MineralDrop
 import in.dogue.antiqua.procgen.PerlinNoise
+
 
 object Terrain {
   def create(y:Int, cols:Int, rows:Int, r:Random) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
-    import scala.math.abs
     val tiles = noise.map { case (i, j, d) =>
       val bg = Color.Brown.dim(3 + r.nextDouble)
       val dirtc =  Color.Tan.dim(3 + r.nextDouble)
@@ -23,7 +23,8 @@ object Terrain {
       val mineralColor = Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r)
       val mineral = CP437.◘.mkTile(mineralColor, fg)
       val empty = bgCode.mkTile(bg, fg)
-      /*val state = Vector(
+      /*import scala.math.abs
+      val state = Vector(
         (abs(d*1180).toInt, Filled),
         (abs(d*1180).toInt, Empty),
         (1, Mineral.create(gemColor))
@@ -66,7 +67,6 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile]) {
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    //tr.<+++<(tiles, (w:WorldTile) => w.getTile)
     tr <++ tiles.flatten.map { case (i, j, w)  => (i, j+y, w.getTile)}
   }
 }

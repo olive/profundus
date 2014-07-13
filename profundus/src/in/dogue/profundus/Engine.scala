@@ -2,10 +2,10 @@ package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Tileset, TileRenderer, Renderer}
 import com.deweyvm.gleany.AssetLoader
-import in.dogue.profundus.mode.{Mode, GameMode}
+import in.dogue.profundus.mode.{TitleMode, Mode, GameMode}
 
 class Engine {
-  var mode:Mode[_] = GameMode.create(32, 32, 16,16).toMode
+  var mode:Mode[_] = GameMode.create(32, 32, 16,16).toMode//TitleMode.create(32, 32).toMode//
   val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("16x16"))
   val r = new Renderer(512, 512, 1, ts)
 

@@ -1,11 +1,11 @@
 package in.dogue.profundus.entities
 
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object Inventory {
   def create:Inventory = {
-    Inventory(2, 0, 100, 100)
+    Inventory(2, 0, 20, 20)
   }
 }
 

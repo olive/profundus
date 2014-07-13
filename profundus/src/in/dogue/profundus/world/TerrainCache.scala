@@ -2,8 +2,8 @@ package in.dogue.profundus.world
 
 import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.MineralDrop
 

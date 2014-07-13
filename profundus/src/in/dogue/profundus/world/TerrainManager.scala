@@ -1,8 +1,8 @@
 package in.dogue.profundus.world
 
 import in.dogue.profundus.entities.{Massive, Falling, Player}
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import in.dogue.antiqua.data.Direction
 
 class TerrainManager {

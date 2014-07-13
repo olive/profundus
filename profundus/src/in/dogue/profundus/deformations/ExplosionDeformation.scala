@@ -1,8 +1,8 @@
 package in.dogue.profundus.deformations
 
 import in.dogue.profundus.world.World
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 object ExplosionDeformation {
   def create(i:Int, j:Int, radius:Int, speed:Int) = {
     ExplosionDeformation(i, j, radius, speed, 0)

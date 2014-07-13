@@ -2,8 +2,8 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.graphics.TileRenderer
 
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.world.World

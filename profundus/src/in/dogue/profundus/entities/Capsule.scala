@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import in.dogue.antiqua.graphics.{Tile, TileRenderer, Animation}
 import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color

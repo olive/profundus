@@ -5,8 +5,8 @@ import com.deweyvm.gleany.data.Point2i
 import com.deweyvm.gleany.saving.{Settings, SettingDefaults}
 import com.deweyvm.gleany.files.PathResolver
 import com.deweyvm.gleany.logging.Logger
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object Main {
   def main(args: Array[String]) {

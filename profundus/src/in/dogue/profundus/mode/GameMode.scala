@@ -5,8 +5,8 @@ import in.dogue.profundus.world.{World, TerrainManager}
 import scala.util.Random
 import in.dogue.profundus.entities.{Alive, Dead, Player}
 import in.dogue.profundus.ui.Hud
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 import in.dogue.profundus.particles.ParticleManager
 
 object GameMode {

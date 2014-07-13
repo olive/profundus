@@ -1,8 +1,8 @@
 package in.dogue.profundus.deformations
 
 import in.dogue.profundus.world.World
-import in.dogue.antiqua.Implicits
-import Implicits._
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 case class Deformation[T](up:T => T,
                           done:T => Boolean,
