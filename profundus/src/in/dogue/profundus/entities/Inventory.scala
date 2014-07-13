@@ -5,7 +5,8 @@ import Antiqua._
 
 object Inventory {
   def create:Inventory = {
-    Inventory(2, 2, 0, 20, 20)
+    val dura = 400
+    Inventory(2, 2, 0, dura, dura)
   }
 }
 

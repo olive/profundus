@@ -60,9 +60,10 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
     cache.isGrounded(ij)
   }
 
-  def hit(ij:(Int,Int)):World = {
-    val (newCache, dropped) = cache.hit(ij)
-    copy(cache=newCache, es=es.addDrops(dropped))
+  def hit(ij:(Int,Int)):(World, Int) = {
+    val (newCache, dropped, damage) = cache.hit(ij)
+    val newWorld = copy(cache=newCache, es=es.addDrops(dropped))
+    (newWorld, damage)
   }
 
   def draw(pl:(Int,Int))(tr:TileRenderer):TileRenderer = {

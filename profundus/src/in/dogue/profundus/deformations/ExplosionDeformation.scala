@@ -25,7 +25,7 @@ case class ExplosionDeformation private (i:Int, j:Int, radius:Int, speed:Int, t:
       }
 
       indices.flatten.foldLeft(w) { case (wd, pr) =>
-        wd.hit(pr)
+        wd.hit(pr)._1
       }
 
     } else {

@@ -10,7 +10,8 @@ class TerrainManager {
     pl.shovelPos match {
       case None => (w, pl)
       case Some(p) =>
-        (w.hit(p), pl.copy(inv=pl.inv.useShovel(1)))
+        val (wHit, damage) = w.hit(p)
+        (wHit, pl.copy(inv=pl.inv.useShovel(damage)))
     }
   }
 

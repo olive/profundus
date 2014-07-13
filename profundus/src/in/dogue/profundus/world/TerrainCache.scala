@@ -1,7 +1,7 @@
 package in.dogue.profundus.world
 
 import scala.util.Random
-import in.dogue.antiqua.graphics.TileRenderer
+import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
@@ -15,7 +15,7 @@ object TerrainCache {
       val gen = if (i <= 0) {
         Terrain.createSky _
       } else {
-        Terrain.create _
+        Terrain.createCave _
       }
       gen(i*rows, cols, rows, copy)
     }
@@ -40,11 +40,11 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:(Int,Int)):(TerrainCache, Seq[MineralDrop]) = {
+  def hit(ij:(Int,Int)):(TerrainCache, Seq[MineralDrop], Int) = {
     val index = getIndex(ij)
-    val (broke, dropped) = tMap(index).hit(convert(ij))
+    val (broke, dropped, damage) = tMap(index).hit(convert(ij))
     val updated = tMap.updated(index, broke)
-    (copy(tMap=updated), dropped)
+    (copy(tMap=updated), dropped, damage)
   }
 
   private def getIndex(ij:(Int,Int)) = {
