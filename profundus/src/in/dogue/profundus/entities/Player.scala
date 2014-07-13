@@ -15,12 +15,17 @@ case object Dead extends LivingState
 
 
 sealed trait FallState {
+  /** number of tiles you have been falling for*/
   val tiles:Int
 }
+object Falling { def create = Falling(0, 0) }
 case class Falling(t:Int, override val tiles:Int) extends FallState {
   val fallTime = 6
 }
 case object Grounded extends FallState {
+  override val tiles = 0
+}
+case object Floating extends FallState {
   override val tiles = 0
 }
 
@@ -38,7 +43,7 @@ object Player {
     }
     Player(i, j - 1, i, j, Down,
            shovel, getTile,
-           false, false, false,
+           false, false, false, false,
            Inventory.create,
            Grounded, Alive)
   }
@@ -46,7 +51,7 @@ object Player {
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            shovel:Shovel, t:Direction => Tile,
-                           isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean,
+                           isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory,
                            fall:FallState, state:LivingState) {
 
@@ -58,6 +63,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def spendBomb = copy(inv = inv.spendBomb)
+  def spendRope = copy(inv = inv.spendRope)
 
   def land = {
     val newState = if (fall.tiles > 17) {
@@ -98,10 +104,11 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def update = {
     copy(isShovelling=Controls.Space.justPressed,
          isClimbing=Controls.Action.justPressed,
-         isBombing=Controls.Capsule.justPressed)
+         isBombing=Controls.Capsule.justPressed,
+         isRoping=Controls.Capsule.justPressed && Controls.Up.isPressed)
   }
 
-  private def setFallState(s:FallState) = {
+  def setFallState(s:FallState) = {
     copy(fall=s)
   }
 

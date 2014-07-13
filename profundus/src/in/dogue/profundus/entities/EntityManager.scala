@@ -9,15 +9,18 @@ import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.world.World
 
 object EntityManager {
-  def create = EntityManager(Seq(), Seq())
+  def create = EntityManager(Seq(), Seq(), Seq())
 }
 
-case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop]) {
-  def update:(Seq[Deformation[_]], Seq[Particle[_]], EntityManager) = {
-    val updated = caps.map{_.update}
-    val (done, notDone) = updated.partition{ _.isDone}
-    val (explosions, particles) = done.map { _.getExplode }.unzip
-    (explosions, particles.flatten, copy(caps=notDone, gems=gems.map{_.update}))
+case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop], ropes:Seq[Rope]) {
+  def update(w:World):(Seq[Deformation[_]], Seq[Particle[_]], EntityManager) = {
+    val upCaps = caps.map{_.update}
+    val (done, notDone) = upCaps.partition{_.isDone}
+    val (explosions, particles) = done.map{_.getExplode}.unzip
+    val newEm = copy(caps=notDone,
+                     gems=gems.map{_.update},
+                     ropes=ropes.map{_.update(w)})
+    (explosions, particles.flatten, newEm)
   }
 
   def addDrops(gs:Seq[MineralDrop]) = {
@@ -27,6 +30,11 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop]) {
   def spawnCapsule(ij:(Int,Int)) = {
     val c = Capsule.create(ij.x, ij.y)
     copy(caps=caps :+ c)
+  }
+
+  def spawnRope(ij:(Int,Int)) = {
+    val r = Rope.create(ij)
+    copy(ropes=ropes :+ r)
   }
 
   def collectGems(p:Player):(Player, EntityManager) = {
@@ -48,6 +56,6 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop]) {
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++< caps.map {_.draw _ } <++< gems.map{_.draw _}
+    tr <++< caps.map {_.draw _ } <++< gems.map{_.draw _} <++< ropes.map{_.draw _}
   }
 }

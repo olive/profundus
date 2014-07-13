@@ -13,7 +13,6 @@ object World {
     World(cols, rows, es, terrain, Seq())
   }
 
-
   private def doDeformations(world:World):World = {
     val ds = world.ds
     val deformed = ds.foldLeft(world){case (w, d) =>
@@ -27,7 +26,7 @@ object World {
 case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Seq[Deformation[_]]) {
 
   def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
-    val (updates, particles, newEs) = es.update
+    val (updates, particles, newEs) = es.update(this)
     val gravEs = newEs.doGravity(this)
     val newCache = cache.checkPositions(ppos)
     val newWorld = copy(cache=newCache,
@@ -41,13 +40,20 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
     (copy(es=newEs), newP)
   }
 
-
   def insertBomb(ij:(Int,Int)):World = {
     copy(es = es.spawnCapsule(ij))
   }
 
+  def insertRope(ij:(Int,Int)):World = {
+    copy(es = es.spawnRope(ij))
+  }
+
   def isSolid(ij:(Int,Int)):Boolean = {
     cache.isSolid(ij)
+  }
+
+  def isRope(ij:(Int,Int)):Boolean = {
+    es.ropes.exists{_.ropePos(ij)}
   }
 
   def isGrounded(ij:(Int,Int)):Boolean = {

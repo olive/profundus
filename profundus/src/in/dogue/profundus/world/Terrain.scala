@@ -29,14 +29,14 @@ object Terrain {
         (abs(d*1180).toInt, Empty),
         (1, Mineral.create(gemColor))
       ).expand.randomR(r)*/
-      val state = if (d < -0.2) {
+      val state = if (d < -0.4) {
         if (r.nextDouble > 0.99) {
           Mineral.create(mineralColor)
         } else {
           Rock.create
 
         }
-      } else if (d < 0.2) {
+      } else if (d < 0.0) {
         Dirt.create
       } else {
         Empty

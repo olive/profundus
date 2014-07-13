@@ -3,7 +3,7 @@ package in.dogue.profundus.mode
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.profundus.world.{World, TerrainManager}
 import scala.util.Random
-import in.dogue.profundus.entities.{Alive, Dead, Player}
+import in.dogue.profundus.entities._
 import in.dogue.profundus.ui.Hud
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -23,7 +23,8 @@ object GameMode {
 case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainManager, pm:ParticleManager, hud:Hud, r:Random) {
 
   def update = {
-    val (insertedW, bombedPl) = updateItemUse(w, pl)
+    val climbPl = updateClimbRope(w, pl)
+    val (insertedW, bombedPl) = updateItemUse(w, climbPl)
     val (strippedW, collectedPl) = insertedW.collectGems(bombedPl)
     val (newW, newPl) = mgr.update(strippedW, collectedPl)
     val (explored, ps) = newW.update(newPl.pos)
@@ -36,9 +37,24 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     }
   }
 
+  private def updateClimbRope(w:World, p:Player):Player = {
+    val curState = p.fall
+    if (w.isRope(p.pos)) {
+      p.setFallState(Floating)
+    } else {
+      p.setFallState(curState match {
+        case Floating => Falling.create
+        case s => s
+      })
+
+    }
+  }
+
   private def updateItemUse(w:World, p:Player):(World, Player) = {
-    if (p.isBombing && p.inv.hasBomb) {
+    if (p.isBombing && !p.isRoping && p.inv.hasBomb) {
       (w.insertBomb(p.pos --> p.face), p.spendBomb)
+    } else if (p.isRoping && p.inv.hasRope) {
+      (w.insertRope(p.pos), p.spendRope)
     } else {
       (w, p)
     }

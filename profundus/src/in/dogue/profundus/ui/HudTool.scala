@@ -27,6 +27,13 @@ object HudTool {
     (3, 0, CP437.▌, Black, DarkGrey)
   ))
 
+  val rapier = Tile.makeGroup(Vector(
+    (0, 0, `CP437`.┼, Black, Brown),
+    (1, 0, `─`, Black, Grey),
+    (2, 0, `─`, Black, Grey),
+    (3, 0, `─`, Black, Grey)
+  ))
+
   val shovelBroken = Tile.makeGroup(Vector(
     (0, 0,  \ , Black, Brown),
     (1, 0, CP437.~, Black, Brown),
@@ -35,7 +42,7 @@ object HudTool {
   ))
 
   def create(bar:DurabilityBar, tf:TextFactory) = {
-    HudTool(bar, tf, sledge)
+    HudTool(bar, tf, shovel)
   }
 }
 

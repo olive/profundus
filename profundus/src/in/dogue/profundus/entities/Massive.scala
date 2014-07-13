@@ -14,6 +14,7 @@ case class Massive[T](pos: T => (Int,Int),
     val epos = pos(self)
     val grounded = w.isGrounded(epos)
     state match {
+      case Floating => self
       case f@Falling(t, tiles) if !grounded =>
         val newT = (t + 1) % f.fallTime
         val newTiles = tiles + (newT == 0).select(0, 1)

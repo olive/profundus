@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.profundus.entities.{Massive, Falling, Player}
+import in.dogue.profundus.entities.{Floating, Massive, Falling, Player}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
@@ -50,7 +50,11 @@ class TerrainManager {
     val newP = if (specPos == pl.pos || w.isSolid(specPos)) {
       pl
     } else {
-      pl.move((specPos._1, pl.pos._2))
+      val newY = pl.fall match {
+        case Floating => specPos._2
+        case _ => pl.pos._2
+      }
+      pl.move((specPos._1, newY))
     }
 
     (w, updateClimb(w, newP))
