@@ -9,7 +9,7 @@ import in.dogue.profundus.deformations.Deformation
 object World {
   def create(cols:Int, rows:Int, r:Random):(World,(Int,Int)) = {
     val (terrain, spawn) = TerrainCache.create(cols, rows, r)
-    val es = EntityManager.create
+    val es = EntityManager.create(r)
     val w = World(cols, rows, es, terrain, Seq(), Seq())
     (w, spawn)
   }
@@ -27,23 +27,26 @@ object World {
 case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Seq[Deformation[_]], kz:Seq[KillZone[_]]) {
 
   def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
-    val (updates, kills, particles, newEs) = es.update(this)
-    val newKz = kz.map{_.update}.flatten
-    val gravEs = newEs.doGravity(this)
     val newCache = cache.checkPositions(ppos).update(ppos)
-    val newWorld = copy(cache=newCache,
-                        es=gravEs,
-                        ds=ds++updates,
-                        kz = newKz ++ kills)
+    val newW = this.copy(cache=newCache)
+    val (updates, kills, particles, newEs) = es.update(newW)
+    val newKz = kz.map{_.update}.flatten
+    val gravEs = newEs.doGravity(newW)
+    val creaEs = gravEs.updateCreatures(newCache, ppos)
+    val newWorld = newW.copy(es=creaEs,
+                             ds=ds++updates,
+                             kz = newKz ++ kills)
     (World.doDeformations(newWorld), particles)
   }
 
-  def killPlayer(p:Player):Player = {
-    if (kz.exists{ _.contains(p.pos)}) {
+  def killEntities(p:Player):(EntityManager, Player) = {
+    val pl = if (kz.exists{ _.contains(p.pos)}) {
       p.kill
     } else{
       p
     }
+    val newEs = es.doKill(kz)
+    (newEs, pl)
   }
 
   def collectGems(p:Player):(World, Player) = {
@@ -60,7 +63,7 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
   }
 
   def isSolid(ij:(Int,Int)):Boolean = {
-    cache.isSolid(ij)
+    cache.isSolid(ij) || es.existsSolid(ij)
   }
 
   def isRope(ij:(Int,Int)):Boolean = {
@@ -69,6 +72,10 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
 
   def isGrounded(ij:(Int,Int)):Boolean = {
     cache.isGrounded(ij)
+  }
+
+  def onScreen(ij:(Int,Int)):Boolean = {
+    cache.isLoaded(ij)
   }
 
   def hit(ij:(Int,Int)):(World, Int) = {

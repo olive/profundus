@@ -6,13 +6,19 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
-import in.dogue.profundus.world.World
+import in.dogue.profundus.world.{TerrainCache, World}
+import scala.util.Random
 
 object EntityManager {
-  def create = EntityManager(Seq(), Seq(), Seq())
+
+  def create(r:Random) = {
+    val rng = new Random(r.nextInt())
+    val testc = Creature.create(14,42)
+    EntityManager(Seq(), Seq(testc), Seq(), Seq(), rng)
+  }
 }
 
-case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop], ropes:Seq[Rope]) {
+case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[MineralDrop], ropes:Seq[Rope], r:Random) {
   def update(w:World):(Seq[Deformation[_]], Seq[KillZone[_]], Seq[Particle[_]], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
@@ -21,6 +27,11 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop], rope
                      gems=gems.map{_.update},
                      ropes=ropes.map{_.update(w)})
     (explosions, kz, particles.flatten, newEm)
+  }
+
+  def doKill(kz:Seq[KillZone[_]]) = {
+    val newCr = cr.filter {c => !kz.exists { k => k.contains(c.pos)}}
+    copy(cr=newCr)
   }
 
   def addDrops(gs:Seq[MineralDrop]) = {
@@ -37,6 +48,10 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop], rope
     copy(ropes=ropes :+ r)
   }
 
+  def existsSolid(ij:(Int,Int)) = {
+    caps.exists{_.pos == ij} || cr.exists {_.pos == ij}
+  }
+
   def collectGems(p:Player):(Player, EntityManager) = {
     val (newPl, newGems) = gems.foldLeft((p, List[MineralDrop]())) { case ((pl, list), g) =>
       if (g.pos == p.pos) {
@@ -48,14 +63,25 @@ case class EntityManager private (caps:Seq[Capsule], gems:Seq[MineralDrop], rope
     (newPl, copy(gems=newGems))
   }
 
+  def updateCreatures(w:TerrainCache, ppos:(Int,Int)):EntityManager = {
+    val newCr = cr.map { _.update(w, ppos, r) }
+    copy(cr=newCr)
+  }
+
   def doGravity(w:World) = {
     val newCaps = caps.map { _.toMassive.update(w) }
     val newGems = gems.map { _.toMassive.update(w) }
+    val newCr = cr.map {_.toMassive.update(w)}
     copy(caps = newCaps,
-         gems = newGems)
+         gems = newGems,
+         cr = newCr)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++< caps.map {_.draw _ } <++< gems.map{_.draw _} <++< ropes.map{_.draw _}
+    (tr <++< caps.map {_.draw _}
+        <++< gems.map{_.draw _}
+        <++< ropes.map{_.draw _}
+        <++< cr.map{_.draw _}
+      )
   }
 }

@@ -12,7 +12,7 @@ import in.dogue.profundus.particles.ParticleManager
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
     val r = new Random(0)
-    val hudHeight = 4
+    val hudHeight = 5
     val (w,p) = World.create(cols, rows-hudHeight, r)
     val pl = Player.create(p, lo)
     val (newWorld, _) = w.update(pl.pos)
@@ -28,7 +28,6 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     updated.pl.state match {
       case Dead => DeadMode.create(cols, rows, this, pl.log.lo).toMode
       case Alive => updated.toMode
-
     }
   }
 
@@ -40,8 +39,9 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     val (explored, ps) = newW.update(newPl.pos)
     val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
     val newPm = pm.update
-    val killed = explored.killPlayer(newPl)
-    copy(pl=killed, w=explored, hud=newHud, pm=newPm ++ ps)
+    val (newEs, killed) = explored.killEntities(newPl)
+    val esWorld = explored.copy(es=newEs)
+    copy(pl=killed, w=esWorld, hud=newHud, pm=newPm ++ ps)
   }
 
   private def updateClimbRope(w:World, p:Player):Player = {

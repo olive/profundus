@@ -10,9 +10,6 @@ import Antiqua._
 import in.dogue.profundus.mode.Loadout
 
 
-sealed trait LivingState
-case object Alive extends LivingState
-case object Dead extends LivingState
 
 object PlayerLog {
   def create(lo:Loadout) = {
@@ -42,7 +39,7 @@ object Player {
       case Direction.Left => CP437.▌
       case Direction.Right => CP437.▐
     }
-    code.mkTile(Color.Black, Color.White)
+    code.mkTile(Color.Black, Color.Purple)
   }
 
   def getDead(d:Direction) = {

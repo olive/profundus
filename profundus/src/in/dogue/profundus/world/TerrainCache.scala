@@ -6,6 +6,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.MineralDrop
+import in.dogue.antiqua.geometry.Line
 
 
 object TerrainCache {
@@ -37,6 +38,15 @@ case class TerrainCache private (cols:Int, rows:Int,
     get(down).isSolid(convert(down))
   }
 
+  def isLoaded(ij:(Int,Int)):Boolean = {
+    tMap.contains(getIndex(ij))
+  }
+
+  def hasLineOfSight(src:(Int,Int), dst:(Int,Int)) = {
+    val points = Line.bresenham(src.x, src.y, dst.x, dst.y)
+    !points.exists { p => isSolid(p)}
+  }
+
   private def convert(ij:(Int,Int)):(Int,Int) = {
     (ij.x, ij.y %% rows)
   }
@@ -57,7 +67,7 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   def checkPositions(ij:(Int,Int)):TerrainCache = {
     val index = getIndex(ij)
-    check(index+1).check(index-1)
+    check(index+2).check(index+1).check(index-1)
   }
 
   private def check(i:Int):TerrainCache = {
