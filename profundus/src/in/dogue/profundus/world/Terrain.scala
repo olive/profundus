@@ -116,7 +116,7 @@ object Terrain {
       WorldTile(state)
     }
     val moon = Moon.create(22, 0, 4)
-    Terrain(y, tiles, Seq(moon.toDoodad), (sx, sy))
+    Terrain(y, tiles, Seq(moon.toDoodad), (sx, sy+2))
   }
 
 
