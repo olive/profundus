@@ -7,6 +7,7 @@ import in.dogue.profundus.input.Controls
 import Direction.Down
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.mode.Loadout
 
 
 sealed trait LivingState
@@ -38,21 +39,21 @@ object Player {
     }
     code.mkTile(Color.Black, Color.Red.dim(2))
   }
-  def create(ij:(Int,Int)) = {
-    val shovel = Shovel.create
+  def create(ij:(Int,Int), lo:Loadout) = {
+    val shovel = ShovelSprite.create
 
     val i = ij.x
     val j = ij.y
     Player(i, j - 1, i, j, Down,
            shovel, getLive,
            false, false, false, false,
-           Inventory.create,
+           Inventory.create(lo),
            Grounded, Alive)
   }
 }
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
-                           shovel:Shovel, t:Direction => Tile,
+                           shovel:ShovelSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory,
                            fall:FallState, state:LivingState) {

@@ -397,6 +397,7 @@
         <w>guids</w>
         <w>hitbox</w>
         <w>joypad</w>
+        <w>loadout</w>
         <w>lwjgl</w>
         <w>minimap</w>
         <w>multiplicatively</w>

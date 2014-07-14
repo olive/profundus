@@ -19,7 +19,7 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect) {
 
   def update:Mode[_] = {
     if (Controls.Space.justPressed) {
-      Transition.create(cols, rows, this.toMode, GameMode.create(cols, rows).toMode).toMode
+      CircleTransition.create(cols, rows, this.toMode, LoadoutMode.create(cols, rows).toMode).toMode
     } else {
       this.toMode
     }

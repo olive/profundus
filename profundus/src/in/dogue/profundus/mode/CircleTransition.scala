@@ -5,13 +5,13 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.graphics.Color
 
-object Transition {
+object CircleTransition {
   def create(cols:Int, rows:Int, old:Mode[_], `new`:Mode[_]) = {
-    Transition(cols, rows, old, `new`, 0, 120)
+    CircleTransition(cols, rows, old, `new`, 0, 120)
   }
 }
 
-case class Transition private (cols:Int, rows:Int, old:Mode[_], `new`:Mode[_], t:Int, max:Int) {
+case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Mode[_], t:Int, max:Int) {
   def update = {
     if (t > max) {
       `new`
@@ -52,5 +52,5 @@ case class Transition private (cols:Int, rows:Int, old:Mode[_], `new`:Mode[_], t
     }) <+< drawCover
   }
 
-  def toMode:Mode[Transition] = Mode(_.update, _.draw, this)
+  def toMode:Mode[CircleTransition] = Mode(_.update, _.draw, this)
 }

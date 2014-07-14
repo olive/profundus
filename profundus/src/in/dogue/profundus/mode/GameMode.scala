@@ -10,11 +10,11 @@ import Antiqua._
 import in.dogue.profundus.particles.ParticleManager
 
 object GameMode {
-  def create(cols:Int, rows:Int) = {
+  def create(cols:Int, rows:Int, lo:Loadout) = {
     val r = new Random(0)
     val hudHeight = 4
     val (w,p) = World.create(cols, rows-hudHeight, r)
-    val pl = Player.create(p)
+    val pl = Player.create(p, lo)
     val (newWorld, _) = w.update(pl.pos)
     val hud = Hud.create(cols, hudHeight, pl.inv)
     GameMode(cols, rows, pl, newWorld, new TerrainManager(), ParticleManager.create, hud, r)

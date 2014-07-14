@@ -50,11 +50,12 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
     val draws = for (p <- (i - bound) to (i + bound);
                      q <- (j - bound) to (j + bound)) yield {
       def f(t:Tile) = t.setFg(t.fgColor.dim(1/getDim))
-      if (scala.math.hypot(i - p, j - q) < dist) {
-        (p, q, f _)
+      val func = if (scala.math.hypot(i - p, j - q) < dist) {
+        f _
       } else {
-        (p, q, id[Tile] _)
+        id[Tile] _
       }
+      (p, q, func)
     }
     tr `$$>` draws
   }

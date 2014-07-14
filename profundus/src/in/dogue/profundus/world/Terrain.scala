@@ -21,7 +21,48 @@ case class Scheme(bgMod:Random => Color,
 
 }
 
-case class TerrainScheme(sky:Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, gem:Scheme)
+case class TerrainScheme(sky:Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, gem:Scheme) {
+
+  private def makeEmpty(r:Random) = {
+    val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
+    rock.mkTile(r, bgCode)
+  }
+
+  def makeRock(r:Random) = {
+    val rockTile = rock.mkTile(r, CP437.█)
+    val empty = makeEmpty(r)
+    Rock.create(rockTile, empty)
+  }
+
+  def makeDirt(r:Random) = {
+    val dirtTile = dirt.mkTile(r, CP437.█)
+    val empty = makeEmpty(r)
+    Dirt.create(dirtTile, empty)
+
+  }
+
+  def makeMineral(r:Random) = {
+    val mineralTile = gem.mkTile(r, CP437.◘)
+    val empty = makeEmpty(r)
+    Mineral.create(mineralTile, empty, mineralTile.bgColor)
+  }
+
+  def makeSky(r:Random) = {
+    val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
+    val night = sky.mkTile(r, skyCode)
+    Empty(night)
+  }
+
+  def makeGrass(yj:Int, rows:Int, r:Random) = {
+    val grassTile = grass.mkTile(r, CP437.█)
+    val empty = makeEmpty(r)
+    Dirt.create(grassTile, empty)
+  }
+  type ChooseState = Int => Double => Random => TileState
+  def generateRandom(cols:Int, rows:Int, y:Int, r:Random) = {
+
+  }
+}
 
 object Terrain {
   val dirtScheme = Scheme(
@@ -35,7 +76,6 @@ object Terrain {
   def grassScheme(j:Int, rows:Int) = Scheme(
     (r:Random) => Color.DarkGreen.mix(Color.Brown, j/rows.toDouble).dim(3 + r.nextDouble),
     (r:Random) => Color.DarkGreen.mix(Color.Brown, j/(rows*2).toDouble).dim(1 + r.nextDouble)
-
   )
 
   def skyScheme(dim:Double) = Scheme(
@@ -96,7 +136,7 @@ object Terrain {
       val empty = rockScheme.mkTile(r, bgCode)
       val rock = rockScheme.mkTile(r, CP437.█)
       val dirt = dirtScheme.mkTile(r, CP437.█)
-      val pt = Point2d(i, j+y)
+      val pt = (i, j+y)
       val state =
         if (lines.exists{_.contains(pt)} && y == 0) {
           Empty(empty)

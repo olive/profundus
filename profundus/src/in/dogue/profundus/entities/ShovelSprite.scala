@@ -5,7 +5,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.{Direction, CP437}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-object Shovel {
+object ShovelSprite {
   def create = {
     import Direction._
     def tiles(d:Direction) = {
@@ -17,11 +17,11 @@ object Shovel {
       }
       code.mkTile(Color.Black, Color.White)
     }
-    Shovel(tiles)
+    ShovelSprite(tiles)
   }
 }
 
-case class Shovel private (tiles:Direction => Tile) {
+case class ShovelSprite private (tiles:Direction => Tile) {
   def draw(d:Direction)(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     val x = i + d.dx
     val y = j + d.dy
