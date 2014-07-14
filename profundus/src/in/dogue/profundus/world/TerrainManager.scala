@@ -11,7 +11,7 @@ class TerrainManager {
       case None => (w, pl)
       case Some(p) =>
         val (wHit, damage) = w.hit(p)
-        (wHit, pl.copy(inv=pl.inv.useShovel(damage)))
+        (wHit, pl.hitTool(damage))
     }
   }
 

@@ -14,8 +14,23 @@ sealed trait LivingState
 case object Alive extends LivingState
 case object Dead extends LivingState
 
+object PlayerLog {
+  def create(lo:Loadout) = {
+    PlayerLog(lo, 0, 0, lo.gems, 0, 0, 0, 0, 0)
+  }
 
+}
 
+case class PlayerLog(lo:Loadout, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int) {
+  def useBomb = copy(bombsUsed = bombsUsed + 1)
+  def useRope = copy(ropesUsed = ropesUsed + 1)
+  def getGem = copy(gemsCollected = gemsCollected + 1)
+  def spendGem = copy(gemsSpent = gemsSpent + 1)
+  def useFuel = copy(fuelUsed = fuelUsed + 1)
+  def breakTool = copy(toolsBroken = toolsBroken + 1)
+  def setDepth(d:Int) = copy(deepest = math.max(d, deepest))
+  def incrTime = copy(timeSpent = timeSpent + 1)
+}
 
 
 object Player {
@@ -47,7 +62,7 @@ object Player {
     Player(i, j - 1, i, j, Down,
            shovel, getLive,
            false, false, false, false,
-           Inventory.create(lo),
+           Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive)
   }
 }
@@ -55,21 +70,30 @@ object Player {
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            shovel:ShovelSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
-                           inv:Inventory,
+                           inv:Inventory, log:PlayerLog,
                            fall:FallState, state:LivingState) {
 
-  def collect(g:MineralDrop) = copy(inv=inv.collect(g))
+  def collect(g:MineralDrop) = copy(inv=inv.collect(g), log=log.getGem)
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:(Int,Int)) = {
     copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
   }
 
-  def spendBomb = copy(inv = inv.spendBomb)
-  def spendRope = copy(inv = inv.spendRope)
+  def spendBomb = copy(inv = inv.spendBomb, log=log.useBomb)
+  def spendRope = copy(inv = inv.spendRope, log=log.useRope)
 
   def setFacing(d:Direction) = copy(face=d)
-
+  def hitTool(dmg:Int) = {
+    val prevDur = inv.tool.dura
+    val newInv = inv.useShovel(dmg)
+    val newLog = if (newInv.tool.dura == 0 && prevDur > 0) {
+      log.breakTool
+    } else {
+      log
+    }
+    copy(log=newLog, inv=newInv)
+  }
 
   private def chooseFace(dx:Int, dy:Int):Direction = {
     if (dx == Direction.Left.dx) {
@@ -89,8 +113,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
       case Alive => computeMove
       case Dead => None
     }
-
-
   }
 
   private def computeMove:Option[Direction] = {
@@ -107,7 +129,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     copy(isShovelling=Controls.Space.justPressed,
          isClimbing=Controls.Action.justPressed,
          isBombing=Controls.Capsule.justPressed,
-         isRoping=Controls.Capsule.justPressed && Controls.Up.isPressed)
+         isRoping=Controls.Capsule.justPressed && Controls.Up.isPressed,
+         log=log.setDepth(pos.y).incrTime)
   }
 
   def setFallState(s:FallState) = {
