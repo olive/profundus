@@ -2,7 +2,7 @@ package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Tileset, TileRenderer, Renderer}
 import com.deweyvm.gleany.{GleanyGame, AssetLoader}
-import in.dogue.profundus.mode.{TitleMode, LoadoutMode, Mode, GameMode}
+import in.dogue.profundus.mode.{TitleMode, Mode}
 import in.dogue.profundus.input.Controls
 
 class Engine {

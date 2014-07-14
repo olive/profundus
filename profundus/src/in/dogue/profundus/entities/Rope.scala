@@ -80,19 +80,19 @@ case class Rope private (bottom:(Int,Int), state:RopeState) {
     state match {
       case FlyUp(_, amt) =>
         val (x, y) = bottom -| amt
-        tr <+ (x, y, CP437.°.mkTile(Color.Black, Color.White))
+        tr <| (x, y, CP437.°.mkTile(Color.Black, Color.White))
       case r@RollDown(len, _, amt) =>
         val (x, y) = bottom -| r.len
         val draws = (0 until (amt-1)) map { k =>
-          (x, y + k +1, CP437.|.mkTile(Color.Black, Color.White))
+          (x, y + k +1, CP437.│.mkTile(Color.Black, Color.White))
         }
-        tr <++ draws
+        tr <|| draws
       case p@Steady(len) =>
         val (x, y) = bottom
         val draws = (0 until len) map { k =>
-          (x, y - k, CP437.|.mkTile(Color.Black, Color.White))
+          (x, y - k, CP437.│.mkTile(Color.Black, Color.White))
         }
-        tr <++ draws
+        tr <|| draws
     }
   }
 }

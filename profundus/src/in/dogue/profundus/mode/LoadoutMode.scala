@@ -127,7 +127,7 @@ object Loadout {
     val (r2, rope) = makeSimpleSlider(x1, y0, Hud.ropeIcon, fillRopes, ropeCost, 1)(lo.ropes)
     val (r3, gem) =  makeSimpleSlider(x0, y1, Hud.gemIcon, fillGems, gemCost*5, 5)(lo.gems)
     val (r4, fuel) = makeSimpleSlider(x1, y1, Hud.fuelIcon, fillFuel, fuelCost, 1)(lo.fuel)
-    (rem - (r1 + r2 + r3 + r4), Vector(cap, gem, rope, fuel))
+    (rem - (r1 + r2 + r3 + r4), Vector(cap, rope, gem, fuel))
   }
 
   def makeTool(rem:Int, lo:Loadout):(Int, Slider) = {
