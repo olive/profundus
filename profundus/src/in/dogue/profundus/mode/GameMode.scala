@@ -16,7 +16,7 @@ object GameMode {
     val hudHeight = 5
     val (w,p) = World.create(cols, rows-hudHeight, r)
     val pl = Player.create(p, lo)
-    val (newWorld, _) = w.update(pl.pos)
+    val (newWorld, _) = w.update(pl.pos, pl.state)
     val hud = Hud.create(cols, hudHeight, pl.inv)
     GameMode(cols, rows, pl, newWorld, new TerrainManager(), ParticleManager.create, hud, r)
   }
@@ -37,7 +37,7 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     val (insertedW, bombedPl) = updateItemUse(w, climbPl)
     val (strippedW, collectedPl) = insertedW.collectGems(bombedPl)
     val (newW, newPl, pps) = mgr.update(strippedW, collectedPl)
-    val (explored, ps) = newW.update(newPl.pos)
+    val (explored, ps) = newW.update(newPl.pos, newPl.state)
     val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
     val newPm = pm.update
     val (newEs, killed, dps) = explored.killEntities(newPl)

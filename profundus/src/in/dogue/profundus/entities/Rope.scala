@@ -5,7 +5,7 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.world.World
+import in.dogue.profundus.world.{TerrainCache, World}
 import in.dogue.antiqua.algebra.Monoid
 
 sealed trait RopeState {
@@ -64,21 +64,21 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     case Steady(top, len) => between(ij, top.x, top.y, top.y + len)
   }
 
-  def update(w:World):Rope = {
+  def update(tc:TerrainCache):Rope = {
     val newState:RopeState = state match {
-      case f@FlyUp(_,_,_) => updateFlyUp(f, w)
-      case d@DropDown(_,_,_) => updateDropDown(d, w)
+      case f@FlyUp(_,_,_) => updateFlyUp(f, tc)
+      case d@DropDown(_,_,_) => updateDropDown(d, tc)
       case s@Steady(_,_) => updateSteady(s)
     }
 
     copy(state=newState)
   }
 
-  private def updateFlyUp(f:FlyUp, w:World) = {
+  private def updateFlyUp(f:FlyUp, tc:TerrainCache) = {
     val newT = f.t + 1
     if (newT % f.flySpeed == 0) {
       val top = f.top
-      if (w.isSolid(top --> Direction.Up) || f.len + 1 == f.maxLength) {
+      if (tc.isSolid(top --> Direction.Up) || f.len + 1 == f.maxLength) {
         DropDown.create(top)
       } else {
         f.incrLen
@@ -88,11 +88,11 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     }
   }
 
-  private def updateDropDown(d:DropDown, w:World) = {
+  private def updateDropDown(d:DropDown, tc:TerrainCache) = {
     val newT = d.t + 1
     if (newT % d.dropSpeed == 0) {
       val bottom = d.bot
-      if (w.isSolid(bottom --> Direction.Down) || d.len + 1 == d.maxLength) {
+      if (tc.isSolid(bottom --> Direction.Down) || d.len + 1 == d.maxLength) {
         Steady.create(d.bot -| d.len, d.len)
       } else {
         d.incrLen

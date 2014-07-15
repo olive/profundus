@@ -2,10 +2,13 @@ package in.dogue.profundus.world
 
 import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.profundus.entities.{KillZone, Player, EntityManager}
+import in.dogue.profundus.entities._
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.antiqua.data.Direction
+import in.dogue.profundus.particles.Particle
+import in.dogue.profundus.deformations.Deformation
+import in.dogue.profundus.entities.KillZone
 
 object World {
   def create(cols:Int, rows:Int, r:Random):(World,(Int,Int)) = {
@@ -17,26 +20,28 @@ object World {
 
   private def doDeformations(world:World):World = {
     val ds = world.ds
-    val deformed = ds.foldLeft(world){case (w, d) =>
-      d.apply(w)
+    val seed = (world.cache, Seq[MineralDrop](), 0)
+    val (deformed, mins, _) = ds.foldLeft(seed){case ((tc, mins, dmg), d) =>
+      val (nc, drop, hit) = d.apply(tc)
+      (nc, drop ++ mins, dmg+hit)
     }
     val newDs = ds.map{_.update}.flatten
-    deformed.copy(ds = newDs)
+    world.copy(ds = newDs, cache=deformed, es=world.es.addDrops(mins))
   }
 }
 
 case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Seq[Deformation[_]], kz:Seq[KillZone[_]]) {
 
-  def update(ppos:(Int,Int)):(World, Seq[Particle[A] forSome {type A}]) = {
+  def update(ppos:(Int,Int), pState:LivingState):(World, Seq[Particle[A] forSome {type A}]) = {
     val newCache = cache.checkPositions(ppos).update(ppos)
     val newW = this.copy(cache=newCache)
-    val (updates, kills, particles, newEs) = es.update(newW)
+    val (updates, kills, particles, newEs) = es.update(newW.cache)
     val newKz = kz.map{_.update}.flatten
-    val gravEs = newEs.doGravity(newW)
-    val creaEs = gravEs.updateCreatures(newCache, ppos)
+    val gravEs = newEs.doGravity(newW.cache)
+    val (creaEs, cKills) = gravEs.updateCreatures(newCache, ppos, pState)
     val newWorld = newW.copy(es=creaEs,
                              ds=ds++updates,
-                             kz = newKz ++ kills)
+                             kz = newKz ++ kills ++ cKills)
     (World.doDeformations(newWorld), particles)
   }
 
@@ -83,11 +88,11 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
     cache.isLoaded(ij)
   }
 
-  def hit(ij:(Int,Int)):(World, Int) = {
+  /*def hit(ij:(Int,Int)):(World, Int) = {
     val (newCache, dropped, damage) = cache.hit(ij)
     val newWorld = copy(cache=newCache, es=es.addDrops(dropped))
     (newWorld, damage)
-  }
+  }*/
 
   def draw(pl:(Int,Int))(tr:TileRenderer):TileRenderer = {
     tr <+< cache.draw(pl) <+< es.draw

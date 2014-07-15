@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.world.World
+import in.dogue.profundus.world.{TerrainCache, World}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 
@@ -10,9 +10,9 @@ case class Massive[T](pos: T => (Int,Int),
                       setState: T => FallState => T,
                       state:FallState,
                       self:T) {
-  def update(w:World) = {
+  def update(tc:TerrainCache) = {
     val epos = pos(self)
-    val grounded = w.isGrounded(epos)
+    val grounded = tc.isGrounded(epos)
     state match {
       case Floating => self
       case f@Falling(t, tiles) if !grounded =>

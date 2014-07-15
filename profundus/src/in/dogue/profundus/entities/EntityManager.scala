@@ -20,13 +20,13 @@ object EntityManager {
 }
 
 case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[MineralDrop], ropes:Seq[Rope], r:Random) {
-  def update(w:World):(Seq[Deformation[_]], Seq[KillZone[_]], Seq[Particle[_]], EntityManager) = {
+  def update(tc:TerrainCache):(Seq[Deformation[_]], Seq[KillZone[_]], Seq[Particle[_]], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
     val (explosions, particles, kz) = done.map{_.getExplode}.unzip3
     val newEm = copy(caps=notDone,
                      gems=gems.map{_.update},
-                     ropes=ropes.map{_.update(w)})
+                     ropes=ropes.map{_.update(tc)})
     (explosions, kz, particles.flatten, newEm)
   }
 
@@ -35,7 +35,6 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
   }
 
   def doKill(kz:Seq[KillZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
-
     val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} }
     val ps = dead.map {_.getDeathParticle}
     (copy(cr=newCr), ps)
@@ -70,15 +69,15 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     (newPl, copy(gems=newGems))
   }
 
-  def updateCreatures(w:TerrainCache, ppos:(Int,Int)):EntityManager = {
-    val newCr = cr.map { _.update(w, ppos, r) }
-    copy(cr=newCr)
+  def updateCreatures(w:TerrainCache, ppos:(Int,Int), pState:LivingState):(EntityManager, Seq[KillZone[_]]) = {
+    val (newCr, attacks) = cr.map { _.update(w, ppos, pState, r) }.unzip
+    (copy(cr=newCr), attacks.flatten)
   }
 
-  def doGravity(w:World) = {
-    val newCaps = caps.map { _.toMassive.update(w) }
-    val newGems = gems.map { _.toMassive.update(w) }
-    val newCr = cr.map {_.toMassive.update(w)}
+  def doGravity(tr:TerrainCache) = {
+    val newCaps = caps.map { _.toMassive.update(tr) }
+    val newGems = gems.map { _.toMassive.update(tr) }
+    val newCr = cr.map {_.toMassive.update(tr)}
     copy(caps = newCaps,
          gems = newGems,
          cr = newCr)
