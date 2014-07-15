@@ -8,6 +8,7 @@ import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.world.{TerrainCache, World}
 import scala.util.Random
+import in.dogue.antiqua.data.Direction
 
 object EntityManager {
 
@@ -29,9 +30,15 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     (explosions, kz, particles.flatten, newEm)
   }
 
-  def doKill(kz:Seq[KillZone[_]]) = {
-    val newCr = cr.filter {c => !kz.exists { k => k.contains(c.pos)}}
-    copy(cr=newCr)
+  def interact(pl:Player):(Player, EntityManager) = {
+    (pl, this)
+  }
+
+  def doKill(kz:Seq[KillZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
+
+    val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} }
+    val ps = dead.map {_.getDeathParticle}
+    (copy(cr=newCr), ps)
   }
 
   def addDrops(gs:Seq[MineralDrop]) = {
@@ -43,8 +50,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     copy(caps=caps :+ c)
   }
 
-  def spawnRope(ij:(Int,Int)) = {
-    val r = Rope.create(ij)
+  def spawnRope(ij:(Int,Int), d:Direction) = {
+    val r = Rope.create(ij, d)
     copy(ropes=ropes :+ r)
   }
 

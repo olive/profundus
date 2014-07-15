@@ -8,6 +8,7 @@ import in.dogue.profundus.ui.Hud
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.ParticleManager
+import in.dogue.antiqua.data.Direction
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
@@ -35,13 +36,13 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
     val climbPl = updateClimbRope(w, pl)
     val (insertedW, bombedPl) = updateItemUse(w, climbPl)
     val (strippedW, collectedPl) = insertedW.collectGems(bombedPl)
-    val (newW, newPl) = mgr.update(strippedW, collectedPl)
+    val (newW, newPl, pps) = mgr.update(strippedW, collectedPl)
     val (explored, ps) = newW.update(newPl.pos)
     val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
     val newPm = pm.update
-    val (newEs, killed) = explored.killEntities(newPl)
+    val (newEs, killed, dps) = explored.killEntities(newPl)
     val esWorld = explored.copy(es=newEs)
-    copy(pl=killed, w=esWorld, hud=newHud, pm=newPm ++ ps)
+    copy(pl=killed, w=esWorld, hud=newHud, pm=newPm ++ ps ++ dps ++ pps)
   }
 
   private def updateClimbRope(w:World, p:Player):Player = {
@@ -58,10 +59,10 @@ case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainM
   }
 
   private def updateItemUse(w:World, p:Player):(World, Player) = {
-    if (p.isBombing && !p.isRoping && p.inv.hasBomb) {
+    if (p.isBombing && p.inv.hasBomb) {
       (w.insertBomb(p.pos --> p.face), p.spendBomb)
     } else if (p.isRoping && p.inv.hasRope) {
-      (w.insertRope(p.pos), p.spendRope)
+      (w.insertRope(p.pos, p.face), p.spendRope)
     } else {
       (w, p)
     }

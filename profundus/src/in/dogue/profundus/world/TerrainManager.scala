@@ -4,6 +4,7 @@ import in.dogue.profundus.entities.{Floating, Massive, Falling, Player}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
+import in.dogue.profundus.particles.Particle
 
 class TerrainManager {
   private def updateShovel(w:World, pl:Player):(World, Player) = {
@@ -43,8 +44,9 @@ class TerrainManager {
   }
 
 
-  def update(ww:World, pp:Player):(World, Player) = {
-    val (w, oldPl) = updateShovel(ww, pp.update)
+  def update(ww:World, pp:Player):(World, Player, Seq[Particle[_]]) = {
+    val (tryP, ps) = pp.update
+    val (w, oldPl) = updateShovel(ww, tryP)
     val dir = oldPl.getMove
     val pl = processFall(w, updateFacing(dir, oldPl).toMassive)
     val specPos = dir.map {pl.pos --> _}.getOrElse(pl.pos)
@@ -58,6 +60,6 @@ class TerrainManager {
       pl.move((specPos._1, newY))
     }
 
-    (w, updateClimb(w, newP))
+    (w, updateClimb(w, newP), ps)
   }
 }

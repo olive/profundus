@@ -8,7 +8,7 @@ import Direction.Down
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.mode.Loadout
-
+import in.dogue.profundus.particles.{Particle, DeathParticle}
 
 
 object PlayerLog {
@@ -60,7 +60,7 @@ object Player {
            shovel, getLive,
            false, false, false, false,
            Inventory.create(lo), PlayerLog.create(lo),
-           Grounded, Alive)
+           Grounded, Alive, false)
   }
 }
 
@@ -68,7 +68,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            shovel:ShovelSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory, log:PlayerLog,
-                           fall:FallState, state:LivingState) {
+                           fall:FallState, state:LivingState, justKilled:Boolean) {
 
   def collect(g:MineralDrop) = copy(inv=inv.collect(g), log=log.getGem)
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
@@ -123,23 +123,31 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def update = {
-    copy(isShovelling=Controls.Space.justPressed,
-         isClimbing=Controls.Action.justPressed,
-         isBombing=Controls.Capsule.justPressed,
-         isRoping=Controls.Capsule.justPressed && Controls.Up.isPressed,
-         log=log.setDepth(pos.y).incrTime)
+
+    val newP = copy(isShovelling=Controls.Space.justPressed,
+                    isClimbing=Controls.Action.justPressed,
+                    isBombing=Controls.Capsule.justPressed,
+                    isRoping=Controls.Rope.justPressed,
+                    log=log.setDepth(pos.y).incrTime)
+    if (justKilled) {
+      (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
+    } else {
+      (newP, Seq())
+    }
   }
 
   def setFallState(s:FallState) = {
     val newPl = copy(fall=s)
     (fall, s) match {
-      case (Falling(_, num), Grounded) if num > 6=>
+      case (Falling(_, num), Grounded) if num > 6 =>
         newPl.kill
       case _ => newPl
     }
   }
 
-  def kill = copy(state=Dead, face = Direction.Down, t=Player.getDead)
+  def kill:Player = {
+    copy(state=Dead, face = Direction.Down, t=Player.getDead, justKilled=true)
+  }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
     isShovelling.select(

@@ -5,6 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.profundus.entities.{KillZone, Player, EntityManager}
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
+import in.dogue.antiqua.data.Direction
 
 object World {
   def create(cols:Int, rows:Int, r:Random):(World,(Int,Int)) = {
@@ -39,14 +40,18 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
     (World.doDeformations(newWorld), particles)
   }
 
-  def killEntities(p:Player):(EntityManager, Player) = {
+  def interact(p:Player):(Player, EntityManager) = {
+    es.interact(p)
+  }
+
+  def killEntities(p:Player):(EntityManager, Player, Seq[Particle[A] forSome {type A}]) = {
     val pl = if (kz.exists{ _.contains(p.pos)}) {
       p.kill
     } else{
       p
     }
-    val newEs = es.doKill(kz)
-    (newEs, pl)
+    val (newEs, ps) = es.doKill(kz)
+    (newEs, pl, ps)
   }
 
   def collectGems(p:Player):(World, Player) = {
@@ -58,8 +63,8 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
     copy(es = es.spawnCapsule(ij))
   }
 
-  def insertRope(ij:(Int,Int)):World = {
-    copy(es = es.spawnRope(ij))
+  def insertRope(ij:(Int,Int), d:Direction):World = {
+    copy(es = es.spawnRope(ij, d))
   }
 
   def isSolid(ij:(Int,Int)):Boolean = {
@@ -67,7 +72,7 @@ case class World(cols:Int, rows:Int, es:EntityManager, cache:TerrainCache, ds:Se
   }
 
   def isRope(ij:(Int,Int)):Boolean = {
-    es.ropes.exists{_.ropePos(ij)}
+    es.ropes.exists{_.ropeContains(ij)}
   }
 
   def isGrounded(ij:(Int,Int)):Boolean = {

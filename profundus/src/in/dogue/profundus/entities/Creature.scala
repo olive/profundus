@@ -7,6 +7,7 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.world.TerrainCache
 import scala.util.Random
+import in.dogue.profundus.particles.{DeathParticle, Particle}
 
 object Creature {
   def create(i:Int, j:Int) = {
@@ -93,6 +94,8 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     }
 
   }
+
+  def getDeathParticle:Particle[_] = DeathParticle.create(i, j, 60).toParticle
 
   def draw(tr:TileRenderer):TileRenderer = {
     tr <| (i, j, tile)

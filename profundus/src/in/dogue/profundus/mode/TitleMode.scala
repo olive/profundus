@@ -1,6 +1,6 @@
 package in.dogue.profundus.mode
 
-import in.dogue.antiqua.graphics.{Rect, Border, TileRenderer}
+import in.dogue.antiqua.graphics.{Tile, Rect, Border, TileRenderer}
 import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
@@ -18,11 +18,13 @@ object TitleMode {
     }
     val border = Border.standard(CP437.doubleBorder, Color.Black, Color.White)(cols, rows)
     val rect = Rect.createTextured(cols, rows, mk, new Random())
-    TitleMode(cols, rows, border, rect)
+    val title = Tile.groupFromFile("profundusmap2", "tiles", CP437.intToCode, _.mkTile(Color.Brown.dim(4), Color.Tan.dim(1))).filter { case (i, j, t) =>
+    t.code != CP437.` `.toCode}
+    TitleMode(cols, rows, border, rect, title)
   }
 }
 
-case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect) {
+case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect, title:TileGroup) {
 
   def update:Mode[_] = {
     if (Controls.Space.justPressed) {
@@ -32,7 +34,9 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect) {
     }
   }
 
-  def draw(tr:TileRenderer):TileRenderer = tr <+< r.draw(0,0) <+< border.draw(0, 0)
+  def draw(tr:TileRenderer):TileRenderer = {
+    tr <+< r.draw(0,0) <+< border.draw(0, 0) <++ (title |+| (9,7))
+  }
 
   def toMode = Mode[TitleMode](_.update, _.draw, this)
 }
