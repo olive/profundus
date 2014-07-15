@@ -26,7 +26,7 @@ sealed trait ToolType {
   def toTool = Tool(durability, this)
 }
 case object Shovel extends ToolType {
-  override val durability = 1000
+  override val durability = 20
   override val digDamage = 3
   override val icon = Tile.makeGroup(Vector(
     (0, 0, CP437.`[`, Black, Brown),

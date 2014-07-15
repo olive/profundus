@@ -42,19 +42,19 @@ class TerrainManager {
     }
   }
 
-  private def processFall[T](tc:TerrainCache, p:Massive[T]) = {
+  private def processFall[T](tc:TerrainCache, p:Massive[T]): T = {
     p.update(tc)
   }
 
 
-  def update(ww:World, pp:Player):(World, Player, Seq[Particle[_]]) = {
+  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[MineralDrop], Seq[Particle[_]]) = {
     val (tryP, ps) = pp.update
-    val (tc, drops, oldPl) = updateShovel(ww.cache, tryP)
-    val added = ww.copy(cache=tc, es=ww.es.addDrops(drops))
+
+    val (tc, drops, oldPl) = updateShovel(tcache, tryP)
     val dir = oldPl.getMove
     val pl = processFall(tc, updateFacing(dir, oldPl).toMassive)
     val specPos = dir.map {pl.pos --> _}.getOrElse(pl.pos)
-    val newP = if (specPos == pl.pos || added.isSolid(specPos)) {
+    val newP = if (specPos == pl.pos || tc.isSolid(specPos)) {
       pl
     } else {
       val newY = pl.fall match {
@@ -63,7 +63,7 @@ class TerrainManager {
       }
       pl.move((specPos._1, newY))
     }
-
-    (added, updateClimb(tc, newP), ps)
+    val plResult = updateClimb(tc, newP)
+    (tc, plResult, drops, ps)
   }
 }

@@ -9,72 +9,40 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.ParticleManager
 import in.dogue.antiqua.data.Direction
+import in.dogue.profundus.experimental.GreatWorld
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
     val r = new Random(0)
     val hudHeight = 5
-    val (w,p) = World.create(cols, rows-hudHeight, r)
-    val pl = Player.create(p, lo)
-    val (newWorld, _) = w.update(pl.pos, pl.state)
-    val hud = Hud.create(cols, hudHeight, pl.inv)
-    GameMode(cols, rows, pl, newWorld, new TerrainManager(), ParticleManager.create, hud, r)
+    //val (w,p) = World.create(cols, rows-hudHeight, r)
+    //val pl = Player.create(p, lo)
+    //val (newWorld, _) = w.update(pl.pos, pl.state)
+    val gw = GreatWorld.create(cols, rows - hudHeight, lo, r)
+    val hud = Hud.create(cols, hudHeight, gw.p.inv)
+    GameMode(cols, rows, gw, hud, r)
   }
 }
 
-case class GameMode private(cols:Int, rows:Int, pl:Player, w:World, mgr:TerrainManager, pm:ParticleManager, hud:Hud, r:Random) {
+case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random) {
 
   def update = {
     val updated = selfUpdate
-    updated.pl.state match {
-      case Dead => DeadMode.create(cols, rows, this, pl.log.lo).toMode
+    updated.gw.p.state match {
+      case Dead => DeadMode.create(cols, rows, this, updated.gw.p.log.lo).toMode
       case Alive => updated.toMode
     }
   }
 
   def selfUpdate:GameMode = {
-    val climbPl = updateClimbRope(w, pl)
-    val (insertedW, bombedPl) = updateItemUse(w, climbPl)
-    val (strippedW, collectedPl) = insertedW.collectGems(bombedPl)
-    val (newW, newPl, pps) = mgr.update(strippedW, collectedPl)
-    val (explored, ps) = newW.update(newPl.pos, newPl.state)
-    val newHud = hud.atDepth(pl.pos.y).withInventory(pl.inv)
-    val newPm = pm.update
-    val (newEs, killed, dps) = explored.killEntities(newPl)
-    val esWorld = explored.copy(es=newEs)
-    copy(pl=killed, w=esWorld, hud=newHud, pm=newPm ++ ps ++ dps ++ pps)
+    copy(gw=gw.update)
   }
 
-  private def updateClimbRope(w:World, p:Player):Player = {
-    val curState = p.fall
-    if (w.isRope(p.pos)) {
-      p.setFallState(Floating)
-    } else {
-      p.setFallState(curState match {
-        case Floating => Falling.create
-        case s => s
-      })
 
-    }
-  }
-
-  private def updateItemUse(w:World, p:Player):(World, Player) = {
-    if (p.isBombing && p.inv.hasBomb) {
-      (w.insertBomb(p.pos --> p.face), p.spendBomb)
-    } else if (p.isRoping && p.inv.hasRope) {
-      (w.insertRope(p.pos, p.face), p.spendRope)
-    } else {
-      (w, p)
-    }
-
-  }
   //world tiles are all on 0,0 so they must be adjusted by the players position, whereas the players position is absolute
   def draw(tr:TileRenderer):TileRenderer = {
-    val offset = 0//5
     tr.withMove(0, hud.height){ t =>
-      t.withMove(0, -pl.y - offset - 16) { worldPos =>
-        worldPos <+< w.draw(pl.pos)  <+< pl.draw <+< pm.draw
-      }
+      t <+< gw.draw
     }.<+<(hud.draw)
   }
 

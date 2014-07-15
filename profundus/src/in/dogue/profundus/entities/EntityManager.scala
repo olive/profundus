@@ -6,7 +6,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
-import in.dogue.profundus.world.{TerrainCache, World}
+import in.dogue.profundus.world.TerrainCache
 import scala.util.Random
 import in.dogue.antiqua.data.Direction
 
@@ -44,6 +44,10 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     copy(gems=gems ++ gs)
   }
 
+  def isRope(ij:(Int,Int)) = {
+    ropes.exists{_.ropeContains(ij)}
+  }
+
   def spawnCapsule(ij:(Int,Int)) = {
     val c = Capsule.create(ij.x, ij.y)
     copy(caps=caps :+ c)
@@ -75,8 +79,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
   }
 
   def doGravity(tr:TerrainCache) = {
-    val newCaps = caps.map { _.toMassive.update(tr) }
-    val newGems = gems.map { _.toMassive.update(tr) }
+    val newCaps = caps.map {_.toMassive.update(tr)}
+    val newGems = gems.map {_.toMassive.update(tr)}
     val newCr = cr.map {_.toMassive.update(tr)}
     copy(caps = newCaps,
          gems = newGems,
