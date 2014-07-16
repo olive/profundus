@@ -12,7 +12,6 @@ import in.dogue.antiqua.data.CP437
 
 object ResultMode {
   def create(cols:Int, rows:Int, pl:PlayerLog) = {
-    import Profundus.tf
     val r = new Random()
     def f(r:Random):Tile = {
       val bg = Red.dim(6 + r.nextDouble)
@@ -22,8 +21,24 @@ object ResultMode {
     }
     val rect = Rect.createTextured(cols, rows, f, r)
     val b = Profundus.border(cols, rows)
-    val name = tf.create(pl.name).toTileGroup |+| (1,1)
-    ResultMode(cols, rows, pl, rect, b, Seq(name).flatten)
+    def mk(s:String) = Profundus.tf.create(s).toTileGroup
+    val draws = Seq(
+      mk("Name: " + pl.name) |+| (1,1),
+      mk("Loadout: Feisty") |+| (1,3),
+      mk("Killed by: Demons") |+| (1, 5),
+      mk("Ropes used        : " + pl.ropesUsed) |+| (1, 7),
+      mk("Capsules used     : " + pl.bombsUsed) |+| (1, 8),
+      mk("Fuel used         : " + pl.fuelUsed) |+| (1, 9),
+      mk("Minerals traded   : " + pl.gemsSpent) |+| (1, 10),
+      mk("Minerals got      : " + pl.gemsCollected) |+| (1, 11),
+      mk("Pounds earth moved: " + pl.tilesDug) |+| (1, 13),
+      mk("Lived for         : " + pl.timeSpent) |+| (1, 14),
+      mk("Depth reached     : " + pl.deepest) |+| (1, 15),
+      mk("You will be remembered") |+| (4,41),
+      mk("      as a Fool.") |+| (4,42)
+    )
+
+    ResultMode(cols, rows, pl, rect, b, draws.flatten)
   }
 }
 
