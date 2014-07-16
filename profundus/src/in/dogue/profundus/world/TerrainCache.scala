@@ -10,7 +10,7 @@ import in.dogue.antiqua.geometry.Line
 
 
 object TerrainCache {
-  def create(cols:Int, rows:Int, r:Random):(TerrainCache,(Int,Int)) = {
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell) = {
     val copy = new Random(r.nextInt())
     def gen(i:Int, r:Random, prev:Option[Terrain]) = {
       val gen = if (i <= 0) {
@@ -32,20 +32,20 @@ case class TerrainCache private (cols:Int, rows:Int,
                                  tMap:Map[Int, Terrain], max:Int, min:Int,
                                  mkNext:(Int, Random, Option[Terrain]) => (Terrain, Seq[Creature]),
                                  r:Random) {
-  def isSolid(ij:(Int,Int)):Boolean = {
+  def isSolid(ij:Cell):Boolean = {
     get(ij).isSolid(convert(ij))
   }
 
-  def isGrounded(ij:(Int,Int)):Boolean = {
+  def isGrounded(ij:Cell):Boolean = {
     val down = ij --> Direction.Down
     get(down).isSolid(convert(down))
   }
 
-  def isLoaded(ij:(Int,Int)):Boolean = {
+  def isLoaded(ij:Cell):Boolean = {
     tMap.contains(getIndex(ij))
   }
 
-  def hasLineOfSight(src:(Int,Int), dst:(Int,Int)) = {
+  def hasLineOfSight(src:Cell, dst:Cell) = {
     val points = Line.bresenham(src.x, src.y, dst.x, dst.y)
     !points.exists { p => isSolid(p)}
   }
@@ -63,25 +63,25 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   }
 
-  private def convert(ij:(Int,Int)):(Int,Int) = {
+  private def convert(ij:Cell):Cell = {
     (ij.x, ij.y %% rows)
   }
 
 
-  def hit(ij:(Int,Int), dmg:Int):(TerrainCache, Seq[MineralDrop], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int):(TerrainCache, Seq[MineralDrop], Int, Boolean) = {
     val index = getIndex(ij)
     val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg)
     val updated = tMap.updated(index, broke)
     (copy(tMap=updated), dropped, damage, broken)
   }
 
-  private def getIndex(ij:(Int,Int)) = {
+  private def getIndex(ij:Cell) = {
     val y = ij.y
     val yy = (y < 0).select(y, y-(rows-1))
     yy/rows
   }
 
-  def checkPositions(ij:(Int,Int)):(TerrainCache, Seq[Creature]) = {
+  def checkPositions(ij:Cell):(TerrainCache, Seq[Creature]) = {
     val index = getIndex(ij)
     val seed = (this, Seq[Creature]())
     Seq(index+2, index+2, index-1).foldLeft(seed) { case ((map, cs), i) =>
@@ -115,20 +115,20 @@ case class TerrainCache private (cols:Int, rows:Int,
     (newTc, cs)
   }
 
-  def update(ij:(Int,Int)):TerrainCache = {
+  def update(ij:Cell):TerrainCache = {
     val newTMap = Seq(getIndex(ij)-1, getIndex(ij), getIndex(ij)+1).foldLeft(tMap) { case (acc, i) =>
       acc.updated(i, acc(i).update)
     }
     copy(tMap=newTMap)
   }
 
-  private def get(ij:(Int,Int)):Terrain = {
+  private def get(ij:Cell):Terrain = {
     tMap(getIndex(ij))
 
 
   }
 
-  def draw(ij:(Int,Int))(t:TileRenderer):TileRenderer = {
+  def draw(ij:Cell)(t:TileRenderer):TileRenderer = {
     //optimization: only draw the two on screen
     val things = Vector(
       tMap(getIndex(ij)-1),

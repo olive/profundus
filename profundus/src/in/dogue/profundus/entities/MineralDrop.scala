@@ -8,7 +8,7 @@ import Antiqua._
 import in.dogue.profundus.world.WorldTile
 
 object MineralDrop {
-  def create(ij:(Int,Int), c:Color) = {
+  def create(ij:Cell, c:Color) = {
     def anim = Animation.create(Vector(
       (5, CP437.●.mkTile(Color.Black, c)),
       (Int.MaxValue, CP437.`.`.mkTile(Color.Black, c))
@@ -17,7 +17,7 @@ object MineralDrop {
   }
 }
 
-case class MineralDrop private (ij:(Int,Int), a:Animation, fall:FallState) {
+case class MineralDrop private (ij:Cell, a:Animation, fall:FallState) {
   def pos = ij
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = copy(ij=ij)
 

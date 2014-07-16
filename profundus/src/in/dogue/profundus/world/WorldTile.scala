@@ -14,13 +14,13 @@ sealed trait TileType {
   val bg:Tile
   val isWalkable:Boolean = false
   type Update= (TileType, Seq[MineralDrop], Int, Boolean)
-  def hit:((Int,Int), Int) => Update
-  def standard(f:( (Int,Int), Int) => (TileType, Int, Boolean)): ((Int,Int), Int) => Update = { case (ij, dmg) =>
+  def hit:(Cell, Int) => Update
+  def standard(f:(Cell, Int) => (TileType, Int, Boolean)): (Cell, Int) => Update = { case (ij, dmg) =>
     val (tt, toolDmg, broke) = f(ij, dmg)
     (tt, Seq(), toolDmg, broke)
   }
 
-  def toEmpty(toolDamage:Int, hp:Int, cop:Int=>TileType):((Int,Int),Int) => Update = standard { case (ij, dmg) =>
+  def toEmpty(toolDamage:Int, hp:Int, cop:Int=>TileType):(Cell,Int) => Update = standard { case (ij, dmg) =>
     val newHp =  hp.drop(dmg)
     val newTile = if (newHp > 0) {
       cop(newHp)

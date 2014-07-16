@@ -47,21 +47,21 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     copy(gems=gems ++ gs)
   }
 
-  def isRope(ij:(Int,Int)) = {
+  def isRope(ij:Cell) = {
     ropes.exists{_.ropeContains(ij)}
   }
 
-  def spawnCapsule(ij:(Int,Int)) = {
+  def spawnCapsule(ij:Cell) = {
     val c = Capsule.create(ij.x, ij.y)
     copy(caps=caps :+ c)
   }
 
-  def spawnRope(ij:(Int,Int), d:Direction) = {
+  def spawnRope(ij:Cell, d:Direction) = {
     val r = Rope.create(ij, d)
     copy(ropes=ropes :+ r)
   }
 
-  def existsSolid(ij:(Int,Int)) = {
+  def existsSolid(ij:Cell) = {
     caps.exists{_.pos == ij} || cr.exists {_.pos == ij}
   }
 
@@ -76,7 +76,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     (newPl, copy(gems=newGems))
   }
 
-  def updateCreatures(w:TerrainCache, ppos:(Int,Int), pState:LivingState):(EntityManager, Seq[KillZone[_]]) = {
+  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[KillZone[_]]) = {
     val (newCr, attacks) = cr.map { _.update(w, ppos, pState, r) }.unzip
     (copy(cr=newCr), attacks.flatten)
   }

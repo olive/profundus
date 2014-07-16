@@ -224,7 +224,7 @@ object Terrain {
   }
 
   def placeSpikes(terrain:Terrain, r:Random):Terrain = {
-    def get(ij:(Int,Int)):Boolean = terrain.tiles.getOption(ij.x, ij.y).exists{_.isWalkable}
+    def get(ij:Cell):Boolean = terrain.tiles.getOption(ij.x, ij.y).exists{_.isWalkable}
     def mkSpike(d:Direction, r:Random):WorldTile = {
       import Direction._
       val code = d match {
@@ -264,15 +264,15 @@ object Terrain {
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:(Int,Int)) {
+case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:Cell) {
   def update = copy(doodads=doodads.map{_.update})
-  def isSolid(s:(Int,Int)):Boolean = {
+  def isSolid(s:Cell):Boolean = {
     val t = (tiles.getOption _).tupled(s)
     !t.exists{_.state.isWalkable}
   }
 
 
-  def hit(ij:(Int,Int), dmg:Int):(Terrain, Seq[MineralDrop], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int):(Terrain, Seq[MineralDrop], Int, Boolean) = {
     val t = tiles.get(ij.x, ij.y)
     val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))

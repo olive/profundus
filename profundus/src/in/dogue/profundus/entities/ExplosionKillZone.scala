@@ -12,7 +12,7 @@ object ExplosionKillZone {
 case class ExplosionKillZone private (i:Int, j:Int, radius:Int, speed:Int, t:Int) {
   def update = copy(t=t+1)
   def isDone = t > radius*speed
-  def contains(ij:(Int,Int)) = {
+  def contains(ij:Cell) = {
     scala.math.hypot(ij.x - i, ij.y - j) < t/speed
   }
   def toKillZone:KillZone[ExplosionKillZone] = {

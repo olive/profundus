@@ -209,7 +209,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     }
   }
 
-  def cameraY(ppos:(Int,Int)) = {
+  def cameraY(ppos:Cell) = {
     val res = if (ppos.y < 48) {
       val offset = (ppos.y + 48)/2
       val result = -offset + 32

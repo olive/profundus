@@ -5,7 +5,7 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.world.{TerrainCache, World}
+import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.algebra.Monoid
 
 sealed trait RopeState {
@@ -15,30 +15,30 @@ sealed trait RopeState {
   val flySpeed = 5
 }
 
-object FlyUp { def create(src:(Int,Int)) = FlyUp(src, 0, 0) }
-case class FlyUp private (private val src:(Int,Int), len:Int, t:Int) extends RopeState {
+object FlyUp { def create(src:Cell) = FlyUp(src, 0, 0) }
+case class FlyUp private (private val src:Cell, len:Int, t:Int) extends RopeState {
   def incrLen = copy(len=len+1, t=0)
   def x = src.x
   def y = src.y
   def top = src -| len
 }
 
-object DropDown { def create(top:(Int,Int)) = DropDown(top, 0, 0) }
-case class DropDown private (private val top:(Int,Int), len:Int, t:Int) extends RopeState {
+object DropDown { def create(top:Cell) = DropDown(top, 0, 0) }
+case class DropDown private (private val top:Cell, len:Int, t:Int) extends RopeState {
   def incrLen = copy(len=len+1, t=0)
   def x = top.x
   def y = top.y
   def bot = top +| len
 }
 
-object Steady { def create(top:(Int,Int), len:Int) = Steady(top, len) }
-case class Steady private (private val top:(Int,Int), len:Int) extends RopeState {
+object Steady { def create(top:Cell, len:Int) = Steady(top, len) }
+case class Steady private (private val top:Cell, len:Int) extends RopeState {
   def x = top.x
   def y = top.y
 }
 
 object Rope {
-  def create(ij:(Int,Int), d:Direction) = {
+  def create(ij:Cell, d:Direction) = {
     val tf = TileFactory(Color.Black, Color.White)
     val nub = tf(CP437.a)
     val top = tf(CP437.⌠)
@@ -56,9 +56,9 @@ object Rope {
 case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, bottomT:Tile) {
 
   /** y2 > y1 */
-  private def between(ij:(Int, Int), x:Int, y1:Int, y2:Int) = ij.x == x && ij.y >= y1 && ij.y <= y2
+  private def between(ij:Cell, x:Int, y1:Int, y2:Int) = ij.x == x && ij.y >= y1 && ij.y <= y2
 
-  def ropeContains(ij:(Int,Int)) = state match {
+  def ropeContains(ij:Cell) = state match {
     case FlyUp(_, _, _) => false
     case DropDown(top, len, _) => between(ij, top.x, top.y, top.y + len)
     case Steady(top, len) => between(ij, top.x, top.y, top.y + len)

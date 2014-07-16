@@ -53,7 +53,7 @@ object Player {
     }
     code.mkTile(Color.Black, Color.Red.dim(2))
   }
-  def create(ij:(Int,Int), lo:Loadout) = {
+  def create(ij:Cell, lo:Loadout) = {
     val shovel = ShovelSprite.create
 
     val i = ij.x
