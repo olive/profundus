@@ -1,10 +1,11 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.graphics.{TileRenderer, Animation}
-import in.dogue.antiqua.data.CP437
+import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.world.WorldTile
 
 object MineralDrop {
   def create(ij:(Int,Int), c:Color) = {
@@ -18,7 +19,7 @@ object MineralDrop {
 
 case class MineralDrop private (ij:(Int,Int), a:Animation, fall:FallState) {
   def pos = ij
-  def move(ij:(Int,Int)) = copy(ij=ij)
+  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = copy(ij=ij)
 
   def setState(f:FallState) = {
     copy(fall=f)

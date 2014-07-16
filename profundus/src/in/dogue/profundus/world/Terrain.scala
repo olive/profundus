@@ -1,7 +1,7 @@
 package in.dogue.profundus.world
 
-import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.antiqua.data.{Code, CP437, Array2d}
+import in.dogue.antiqua.graphics.{Tile, TileRenderer}
+import in.dogue.antiqua.data.{Direction, Code, CP437, Array2d}
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
@@ -173,7 +173,7 @@ object Terrain {
       }
       WorldTile(state(r))
     }
-    Terrain(y, tiles, Seq(), (0,0))
+    placeSpikes(Terrain(y, tiles, Seq(), (0,0)), r)
   }
 
   def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
@@ -223,6 +223,44 @@ object Terrain {
     Terrain(y, tiles, Seq(moon.toDoodad), (l1(0).x, l1(0).y))
   }
 
+  def placeSpikes(terrain:Terrain, r:Random):Terrain = {
+    def get(ij:(Int,Int)):Boolean = terrain.tiles.getOption(ij.x, ij.y).exists{_.isWalkable}
+    def mkSpike(d:Direction, r:Random):WorldTile = {
+      import Direction._
+      val code = d match {
+        case Left => CP437.◄
+        case Right => CP437.►
+        case Down => CP437.▼
+        case Up => CP437.▲
+      }
+      val empty = emptyScheme.getBg(r)
+      val tile: Tile = code.mkTile(empty, Color.White)
+      val emptyTile = CP437.` `.mkTile(empty, empty)
+      WorldTile(Spike.create(tile, emptyTile, d))
+    }
+    val ts = terrain.tiles.map { case (i, j, t) =>
+      val p = (i, j)
+      val left = get(p |- 1)
+      val right = get(p |+ 1)
+      val down = get(p +| 1)
+      val up = get(p -| 1)
+      if (r.nextDouble > 0.9) {
+        if (down && !up && t.isWalkable) {
+          mkSpike(Direction.Down, r)
+        } else if (up && !down && t.isWalkable) {
+          mkSpike(Direction.Up, r)
+        } else {
+          t
+        }
+
+      } else {
+        t
+      }
+    }
+
+    terrain.copy(tiles=ts)
+  }
+
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
@@ -232,6 +270,7 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[
     val t = (tiles.getOption _).tupled(s)
     !t.exists{_.state.isWalkable}
   }
+
 
   def hit(ij:(Int,Int), dmg:Int):(Terrain, Seq[MineralDrop], Int, Boolean) = {
     val t = tiles.get(ij.x, ij.y)

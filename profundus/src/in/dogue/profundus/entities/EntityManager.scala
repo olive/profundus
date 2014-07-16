@@ -38,7 +38,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
   }
 
   def doKill(kz:Seq[KillZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
-    val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} }
+    val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} && !(c.live == Alive)}
     val ps = dead.map {_.getDeathParticle}
     (copy(cr=newCr), ps)
   }
@@ -85,7 +85,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     val newCaps = caps.map {_.toMassive.update(tr)}
     val newGems = gems.map {_.toMassive.update(tr)}
     val (offscreen, onscreen) = cr.partition { c => tr.isLoaded(c.pos) }
-    val newCr = onscreen.map {_.toMassive.update(tr)} ++ offscreen
+    val newCr = offscreen.map {_.toMassive.update(tr)} ++ onscreen
     copy(caps = newCaps,
          gems = newGems,
          cr = newCr)

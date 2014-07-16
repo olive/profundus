@@ -50,6 +50,19 @@ case class TerrainCache private (cols:Int, rows:Int,
     !points.exists { p => isSolid(p)}
   }
 
+  def getTouching(ij:Cell):Direction => Option[WorldTile] = {
+    def g(p:Cell) = (get(p).tiles.getOption _).tupled(convert(p)).filter { !_.isWalkable }
+    import Direction._
+    def touching(d:Direction) = d match {
+      case Down => g(ij +| 1)
+      case Up => g(ij -| 1)
+      case Left => g(ij |- 1)
+      case Right => g(ij |+ 1)
+    }
+    touching
+
+  }
+
   private def convert(ij:(Int,Int)):(Int,Int) = {
     (ij.x, ij.y %% rows)
   }

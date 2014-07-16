@@ -5,7 +5,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.world.TerrainCache
+import in.dogue.profundus.world.{Spike, WorldTile, TerrainCache}
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle}
 
@@ -35,7 +35,18 @@ case class Wander private (t:Int) extends CreatureState {
 case class Creature private (i:Int, j:Int, tile:Tile,
                              fall:FallState, live:LivingState, state:CreatureState) {
   def pos = (i, j)
-  def move(ij:(Int,Int)) = copy(i=ij.x, j=ij.y)
+  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
+    val newCr = copy(i=ij.x, j=ij.y)
+    if (newTouching(Direction.Down).exists {
+      case WorldTile(Spike(_,_,dir,_)) => true
+      case a => false
+
+    }) {
+      newCr.copy(live=Dead)
+    } else {
+      newCr
+    }
+  }
   def setFall(f:FallState) = copy(fall=f)
 
 
@@ -43,7 +54,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     val self = if (w.t % 60 == 0) {
       val dir = Vector(Direction.Left, Direction.Right).randomR(r)
       if (!c.isSolid(pos --> dir)) {
-        move(pos --> dir)
+        move(pos --> dir, dir, c.getTouching(pos --> dir))
       } else {
         this
       }
@@ -108,11 +119,11 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     }
 
   }
-
-  def getDeathParticle:Particle[_] = DeathParticle.create(i, j, 60).toParticle
-
   def draw(tr:TileRenderer):TileRenderer = {
     tr <| (i, j, tile)
   }
+
+  def getDeathParticle:Particle[_] = DeathParticle.create(i, j, 60).toParticle
+
   def toMassive:Massive[Creature] = Massive(_.pos, _.move, _.setFall, fall, this)
 }

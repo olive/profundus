@@ -28,11 +28,13 @@ class TerrainManager {
       if (       pl.face == Left
               && tc.isSolid(pl.pos --> Left)
               && !tc.isSolid(pl.pos --> Left --> Up)) {
-        pl.move(pl.pos --> Left --> Up)
+        val newPos = pl.pos --> Left --> Up
+        pl.move(newPos, Left, tc.getTouching(newPos))
       } else if (pl.face == Right
               && tc.isSolid(pl.pos --> Right)
-              && !tc.isSolid(pl.pos --> Right --> Up)) {
-        pl.move(pl.pos --> Right --> Up)
+              && !tc.isSolid(pl.pos --> Up --> Right)) {
+        val newPos = pl.pos --> Right --> Up
+        pl.move(newPos, Right, tc.getTouching(newPos))
       } else {
         pl
       }
@@ -57,10 +59,14 @@ class TerrainManager {
       pl
     } else {
       val newY = pl.fall match {
-        case Floating => specPos._2
-        case _ => pl.pos._2
+        case Floating => specPos.y
+        case _ => pl.pos.y
       }
-      pl.move((specPos._1, newY))
+      val newPos = (specPos.x, newY)
+      val dx = pp.pos.x - specPos.x
+      val dy = 0
+      val face = pl.chooseFace(dx, dy)
+      pl.move(newPos, face, tc.getTouching(newPos))
     }
     val plResult = updateClimb(tc, newP)
     (tc, plResult, drops, ps)

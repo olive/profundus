@@ -9,6 +9,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.mode.Loadout
 import in.dogue.profundus.particles.{Particle, DeathParticle}
+import in.dogue.profundus.world.{Spike, WorldTile}
 
 
 object PlayerLog {
@@ -76,12 +77,22 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def collect(g:MineralDrop) = copy(inv=inv.collect(g), log=log.getGem)
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
   def pos = (x, y)
-  def move(newPos:(Int,Int)) = {
-    copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
+  def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
+    val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
+    if (newTouching(Direction.Down).exists {
+      case WorldTile(Spike(_,_,dir,_)) => true
+      case a => false
+
+    }) {
+      newP.kill
+    } else {
+      newP
+    }
   }
 
-  def spendBomb = copy(inv = inv.spendBomb, log=log.useBomb)
-  def spendRope = copy(inv = inv.spendRope, log=log.useRope)
+
+  def spendBomb = copy(inv = inv.spendBomb, log = log.useBomb)
+  def spendRope = copy(inv = inv.spendRope, log = log.useRope)
 
   def setFacing(d:Direction) = copy(face=d)
   def hitTool(dmg:Int, broken:Boolean) = {
@@ -96,7 +107,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     copy(log=newLog2, inv=newInv)
   }
 
-  private def chooseFace(dx:Int, dy:Int):Direction = {
+  def chooseFace(dx:Int, dy:Int):Direction = {
     if (dx == Direction.Left.dx) {
       Direction.Left
     } else if (dx == Direction.Right.dx) {
@@ -120,7 +131,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     val dx = Controls.AxisX.isPressed
     val dy = Controls.AxisY.isPressed
     val newT = (dx !=0 || dy != 0).select(0, moveT+1)
-    val moveSpeed = fall.moveSlow.select(6, 12)
+    val moveSpeed = fall.moveSlow.select(4, 8)
 
     val face = if (newT > 0 && newT % moveSpeed == 0) {
       chooseFace(dx, dy).some
@@ -146,7 +157,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     isRoping=Controls.Rope.justPressed,
                     log=log.setDepth(pos.y).incrTime)
     if (justKilled) {
-      println("Just killed!")
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {
       (newP, Seq())

@@ -6,6 +6,7 @@ import Antiqua._
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.entities.MineralDrop
 import scala.collection.script.Update
+import in.dogue.antiqua.data.Direction
 
 
 sealed trait TileType {
@@ -28,16 +29,13 @@ sealed trait TileType {
     }
     (newTile, toolDamage, newHp <= 0)
   }
-  def getDrop = Seq()
-  def getDamage = 1
 }
 
 case class Empty(override val tile:Tile) extends TileType {
   override val isWalkable = true
   override val bg = tile
-  override def getDamage = 0
   override def hit = { case _ =>
-    (this, getDrop, getDamage, false)
+    (this, Seq(), 0, false)
   }
 }
 
@@ -83,7 +81,15 @@ case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
 
+object Spike { def create(t:Tile, bg:Tile, spike:Direction) = Spike(t, bg, spike, 0) }
+case class Spike(override val tile:Tile, override val bg:Tile, spike:Direction, hp:Int) extends TileType {
+  val toolDamage = 1
+  def setHp(i:Int) = copy(hp=i)
+  override def hit = toEmpty(toolDamage, hp, setHp)
+}
+
 case class WorldTile(state:TileType) {
+  def isWalkable = state.isWalkable
   def tile = state.tile
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     val tile = state.tile

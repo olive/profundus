@@ -3,10 +3,11 @@ package in.dogue.profundus.entities
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.graphics.{Tile, TileRenderer, Animation}
-import in.dogue.antiqua.data.CP437
+import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
+import in.dogue.profundus.world.WorldTile
 
 object Capsule {
   val stick = CP437.║.mkTile(Color.Black, Color.Red.dim(2))
@@ -33,7 +34,7 @@ object Capsule {
 case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallState, t:Int){
 
   def pos = (i, j)
-  def move(p:(Int,Int)) = copy(i=p.x, j=p.y)
+  def move(p:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = copy(i=p.x, j=p.y)
   def setState(f:FallState) = copy(fall=f)
   def update = {
     copy(a=a.smap {_.update}, t=t+1)
