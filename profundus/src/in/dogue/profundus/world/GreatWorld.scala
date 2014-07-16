@@ -190,9 +190,9 @@ object GreatWorld {
 
 
   def create(cols:Int, rows:Int, lo:Loadout, r:Random) = {
-    val (cache, spawn) = TerrainCache.create(cols, rows, r)
+    val (cache, spawn, spawnFace) = TerrainCache.create(cols, rows, r)
     val (tc, cs) = cache.checkPositions(spawn)
-    val p = Player.create(spawn, lo)
+    val p = Player.create(spawn, spawnFace, lo)
     val em = EntityManager.create(r).spawnCreatures(cs)
     val tm = new TerrainManager()
     val pm = ParticleManager.create

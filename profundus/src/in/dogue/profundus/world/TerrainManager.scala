@@ -19,7 +19,7 @@ class TerrainManager {
   }
 
   private def updateFacing(dir:Direction, pl:Player):Player = {
-    pl.copy(face=dir)
+    pl.setFacing(dir)
   }
 
   private def updateClimb(tc:TerrainCache, pl:Player):Player = {

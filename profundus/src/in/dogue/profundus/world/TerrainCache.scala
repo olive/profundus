@@ -10,7 +10,7 @@ import in.dogue.antiqua.geometry.Line
 
 
 object TerrainCache {
-  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell) = {
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
     def gen(i:Int, r:Random, prev:Option[Terrain]) = {
       val gen = if (i <= 0) {
@@ -25,7 +25,7 @@ object TerrainCache {
     }
     val (first,_) = gen(0, r, None)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, gen, r)
-    (cache, first.spawn)
+    (cache, first.spawn, first.spawnFace)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,

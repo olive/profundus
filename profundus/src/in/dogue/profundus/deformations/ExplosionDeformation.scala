@@ -26,9 +26,11 @@ case class ExplosionDeformation private (i:Int, j:Int, tickDamage:Int, radius:In
         }
       }
       val seed = (tc, Seq[Pickup[_]]())
-      val (newTc, mins) = indices.flatten.foldLeft(seed) { case ((ttc, mins), pr) =>
-        val (newTc, drops, _, _) = ttc.hit(pr, tickDamage)
+      val (newTc, mins) = indices.flatten.foldLeft(seed) { case ((ttc, mins), ij) =>
+
+        val (newTc, drops, _, _) = ttc.hit(ij, tickDamage)
         (newTc, mins ++ drops)
+
       }
       (newTc, mins, 0)
 

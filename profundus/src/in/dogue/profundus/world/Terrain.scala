@@ -173,7 +173,7 @@ object Terrain {
       }
       WorldTile(state(r))
     }
-    placeSpikes(Terrain(y, tiles, Seq(), (0,0)), r)
+    placeSpikes(Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
   }
 
   def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
@@ -181,7 +181,8 @@ object Terrain {
     val circle = Circle((cols/2, rows/2), rows/4)
     val pi = Math.PI
     val base = pi/8
-    val angle = Vector(r.nextDouble * base + pi, 2*pi - r.nextDouble * base).randomR(r)
+    val (face, angle) = Vector((Direction.Right, r.nextDouble * base + pi),
+                       (Direction.Left, 2*pi - r.nextDouble * base)).randomR(r)
     val upper = circle.angleToEdge(angle)
     val l1 = Line.bresenham(upper.x, upper.y - 1, circle.x, circle.y - 1)
     val l2 = Line.bresenham(upper.x, upper.y    , circle.x, circle.y)
@@ -220,7 +221,7 @@ object Terrain {
       WorldTile(state(r))
     }
     val moon = Moon.create(3*cols/4-5, -5, 4)
-    Terrain(y, tiles, Seq(moon.toDoodad), (l1(0).x, l1(0).y))
+    Terrain(y, tiles, Seq(moon.toDoodad), (l1(0).x, l1(0).y), face)
   }
 
   def placeSpikes(terrain:Terrain, r:Random):Terrain = {
@@ -264,7 +265,7 @@ object Terrain {
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:Cell) {
+case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:Cell, spawnFace:Direction) {
   def update = copy(doodads=doodads.map{_.update})
   def isSolid(s:Cell):Boolean = {
     val t = (tiles.getOption _).tupled(s)

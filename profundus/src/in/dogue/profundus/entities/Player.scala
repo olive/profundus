@@ -10,6 +10,7 @@ import Antiqua._
 import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.world.{Spike, WorldTile}
 import in.dogue.profundus.mode.loadout.Loadout
+import in.dogue.profundus.Game
 
 
 object PlayerLog {
@@ -53,12 +54,12 @@ object Player {
     }
     code.mkTile(Color.Black, Color.Red.dim(2))
   }
-  def create(ij:Cell, lo:Loadout) = {
+  def create(ij:Cell, face:Direction, lo:Loadout) = {
     val shovel = ShovelSprite.create
 
     val i = ij.x
     val j = ij.y
-    Player(i, j - 1, i, j, Down,
+    Player(i, j - 1, i, j, face,
            shovel, getLive,
            false, false, false, false,
            Inventory.create(lo), PlayerLog.create(lo),
@@ -79,6 +80,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
+    println("move " + Game.t)
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
     if (newTouching(Direction.Down).exists {
       case WorldTile(Spike(_,_,dir,_)) => true
@@ -95,7 +97,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def spendBomb = copy(inv = inv.spendBomb, log = log.useBomb)
   def spendRope = copy(inv = inv.spendRope, log = log.useRope)
 
-  def setFacing(d:Direction) = copy(face=d)
+  def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
   def hitTool(dmg:Int, broken:Boolean) = {
     val prevDur = inv.tool.dura
     val newInv = inv.useTool(dmg)
