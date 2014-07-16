@@ -105,6 +105,7 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
   def isKillableAt(p:Cell) = {
     ropeContains(p)
   }
+
   def kill = copy(live=Dead)
 
   private def updateSteady(s:Steady) = {

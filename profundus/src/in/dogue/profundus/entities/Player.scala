@@ -80,7 +80,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
-    println("move " + Game.t)
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
     if (newTouching(Direction.Down).exists {
       case WorldTile(Spike(_,_,dir,_)) => true

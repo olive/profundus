@@ -158,7 +158,6 @@ object Terrain {
           } else {
             mineral
           }
-
         } else if (d < -0.6) {
           rock2
         } else if (d < -0.4){
@@ -182,7 +181,7 @@ object Terrain {
     val pi = Math.PI
     val base = pi/8
     val (face, angle) = Vector((Direction.Right, r.nextDouble * base + pi),
-                       (Direction.Left, 2*pi - r.nextDouble * base)).randomR(r)
+                               (Direction.Left, 2*pi - r.nextDouble * base)).randomR(r)
     val upper = circle.angleToEdge(angle)
     val l1 = Line.bresenham(upper.x, upper.y - 1, circle.x, circle.y - 1)
     val l2 = Line.bresenham(upper.x, upper.y    , circle.x, circle.y)

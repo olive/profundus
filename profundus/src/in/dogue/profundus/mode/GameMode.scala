@@ -9,9 +9,10 @@ import in.dogue.profundus.world.GreatWorld
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
+    val worldCols = cols*4
     val r = new Random(0)
     val hudHeight = 5
-    val gw = GreatWorld.create(cols, rows - hudHeight, lo, r)
+    val gw = GreatWorld.create(worldCols, rows - hudHeight, lo, r)
     val hud = Hud.create(cols, hudHeight, gw.p.inv)
     GameMode(cols, rows, gw, hud, r)
   }

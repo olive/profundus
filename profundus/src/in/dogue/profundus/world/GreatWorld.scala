@@ -256,7 +256,10 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   def draw(tr:TileRenderer):TileRenderer = {
     val offset = 0//5
-    tr.withMove(0, -p.y - offset + cameraY(p.pos)) { worldPos =>
+    val screenSize = 32
+    val cols = 32*4
+    val cameraX = p.x.clamp(screenSize/2, cols - screenSize/2)
+    tr.withMove(-cameraX + 16, -p.y - offset + cameraY(p.pos)) { worldPos =>
       (worldPos <+< cache.draw(p.pos)
                 <+< em.draw
                 <+< p.draw
