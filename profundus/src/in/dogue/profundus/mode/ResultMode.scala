@@ -9,6 +9,7 @@ import in.dogue.profundus.Profundus
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color._
 import in.dogue.antiqua.data.CP437
+import in.dogue.profundus.mode.loadout.LoadoutMode
 
 object ResultMode {
   def create(cols:Int, rows:Int, pl:PlayerLog) = {

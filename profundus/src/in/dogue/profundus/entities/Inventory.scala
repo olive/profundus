@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.mode.Loadout
+import in.dogue.profundus.mode.loadout.Loadout
 
 object Inventory {
   def create(lo:Loadout):Inventory = {

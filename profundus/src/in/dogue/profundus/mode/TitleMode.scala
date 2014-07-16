@@ -8,6 +8,7 @@ import Antiqua._
 import in.dogue.profundus.input.Controls
 import scala.util.Random
 import in.dogue.profundus.Profundus
+import in.dogue.profundus.mode.loadout.LoadoutMode
 
 object TitleMode {
   def create(cols:Int, rows:Int) = {

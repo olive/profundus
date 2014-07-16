@@ -7,9 +7,9 @@ import in.dogue.profundus.input.Controls
 import Direction.Down
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.mode.Loadout
 import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.world.{Spike, WorldTile}
+import in.dogue.profundus.mode.loadout.Loadout
 
 
 object PlayerLog {

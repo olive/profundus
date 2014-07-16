@@ -10,7 +10,7 @@ import in.dogue.profundus.entities.KillZone
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import scala.util.Random
-import in.dogue.profundus.mode.Loadout
+import in.dogue.profundus.mode.loadout.Loadout
 
 sealed trait NewSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends NewSpawn

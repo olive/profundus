@@ -7,7 +7,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.graphics.Color
 import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.mode.Loadout
+import in.dogue.profundus.mode.loadout.Loadout
 
 object Slider {
   def create(i:Int, j:Int,

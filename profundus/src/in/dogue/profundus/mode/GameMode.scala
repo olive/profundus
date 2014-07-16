@@ -5,6 +5,7 @@ import scala.util.Random
 import in.dogue.profundus.entities._
 import in.dogue.profundus.ui.Hud
 import in.dogue.profundus.experimental.GreatWorld
+import in.dogue.profundus.mode.loadout.Loadout
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
