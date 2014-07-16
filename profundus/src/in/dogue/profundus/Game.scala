@@ -3,12 +3,15 @@ package in.dogue.profundus
 import com.deweyvm.gleany.{Glean, GleanyGame, GleanyInitializer}
 import java.util.concurrent.{Executors, Callable, TimeUnit}
 import in.dogue.profundus.input.Controls
-
+object Game {
+  var t = 0
+}
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {
   private lazy val engine = new Engine()
   override def update() {
     Controls.update()
     engine.update()
+    Game.t += 1
   }
 
   override def draw() {

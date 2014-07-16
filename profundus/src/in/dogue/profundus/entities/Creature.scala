@@ -69,11 +69,12 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
     val dx = math.signum(ppos.x - i)
     val dy = math.signum(ppos.y - j)
+    val moved = pos |+| ((dx, dy))
     val seen = copy(tile=CP437.b.mkTile(Color.Black, Color.Yellow))
     val newC = c.update(ppos)
     if (isAdjacent) {
       (newC, seen, Seq(SingleTileKillZone(ppos).toKillZone))
-    } else if (newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
+    } else if (moved != ppos && newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
       (newC, copy(i=i+dx, j=j+dy), Seq())
     } else {
       (newC, seen, Seq())

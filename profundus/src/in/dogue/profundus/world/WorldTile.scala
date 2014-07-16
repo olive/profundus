@@ -25,13 +25,15 @@ sealed trait TileType {
     val newTile = if (newHp > 0) {
       cop(newHp)
     } else {
-      Empty(bg)
+      Empty(bg, true)
     }
     (newTile, toolDamage, newHp <= 0)
   }
+
+  val bgSolid = true
 }
 
-case class Empty(override val tile:Tile) extends TileType {
+case class Empty(override val tile:Tile, override val bgSolid:Boolean) extends TileType {
   override val isWalkable = true
   override val bg = tile
   override def hit = { case _ =>

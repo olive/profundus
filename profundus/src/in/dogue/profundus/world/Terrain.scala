@@ -28,9 +28,9 @@ case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:S
     empty.mkTile(r, bgCode)
   }
 
-  def makeEmpty(r:Random) = {
+  def makeEmpty(bgSolid:Boolean)(r:Random) = {
     val empty = emptyTile(r)
-    Empty(empty)
+    Empty(empty, bgSolid)
   }
 
   def makeClay(r:Random) = {
@@ -78,7 +78,7 @@ case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:S
   def makeSky(dim:Double)(r:Random) = {
     val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
     val night = sky(dim).mkTile(r, skyCode)
-    Empty(night)
+    Empty(night, false)
   }
 
   def makeGrass(yj:Int, rows:Int)(r:Random) = {
@@ -150,7 +150,7 @@ object Terrain {
       val dirt = scheme.makeDirt _
       val clay = scheme.makeClay _
       val mineral = scheme.makeMineral _
-      val empty = scheme.makeEmpty _
+      val empty = scheme.makeEmpty(true) _
       val state = if (d < -0.2) {
         if (r.nextDouble > 0.99) {
           if (r.nextBoolean) {
@@ -197,7 +197,7 @@ object Terrain {
       val dim = (j + y) / (cols*2).toDouble
       val night = scheme.makeSky(dim) _
       val grass = scheme.makeGrass(j + y, rows) _
-      val empty = scheme.makeEmpty _
+      val empty = scheme.makeEmpty(true) _
       val rock = scheme.makeRock _
       val dirt = scheme.makeDirt _
       val pt = (i, j+y)
