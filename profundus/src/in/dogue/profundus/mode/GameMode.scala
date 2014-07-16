@@ -4,8 +4,8 @@ import in.dogue.antiqua.graphics.TileRenderer
 import scala.util.Random
 import in.dogue.profundus.entities._
 import in.dogue.profundus.ui.Hud
-import in.dogue.profundus.experimental.GreatWorld
 import in.dogue.profundus.mode.loadout.Loadout
+import in.dogue.profundus.world.GreatWorld
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {

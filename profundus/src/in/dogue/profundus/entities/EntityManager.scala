@@ -56,8 +56,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     copy(caps=caps :+ c)
   }
 
-  def spawnRope(ij:Cell, d:Direction) = {
-    val r = Rope.create(ij, d)
+  def spawnRope(r:Rope) = {
     copy(ropes=ropes :+ r)
   }
 
@@ -66,7 +65,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
   }
 
   def collectGems(p:Player):(Player, EntityManager) = {
-    val (newPl, newGems) = gems.foldLeft((p, List[MineralDrop]())) { case ((pl, list), g) =>
+    val seed = (p, List[MineralDrop]())
+    val (newPl, newGems) = gems.foldLeft(seed) { case ((pl, list), g) =>
       if (g.pos == p.pos) {
         (p.collect(g), list)
       } else {

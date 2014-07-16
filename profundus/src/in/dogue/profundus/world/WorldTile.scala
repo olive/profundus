@@ -80,7 +80,15 @@ object Mineral { def create(t:Tile, bg:Tile, c:Color) = Mineral(t, bg, c, 3) }
 case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int) extends TileType {
   val toolDamage = 1
   def setHp(i:Int) = copy(hp=i)
-  override def hit = toEmpty(toolDamage, hp, setHp)
+  override def hit = { case (ij, dmg) =>
+    val newHp =  hp.drop(dmg)
+    val newTile = if (newHp > 0) {
+      copy(hp=newHp)
+    } else {
+      Empty(bg, true)
+    }
+    (newTile, Seq(MineralDrop.create(ij, c)), toolDamage, newHp <= 0)
+  }
 }
 
 object Spike { def create(t:Tile, bg:Tile, spike:Direction) = Spike(t, bg, spike, 0) }

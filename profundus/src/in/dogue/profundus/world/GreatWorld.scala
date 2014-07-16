@@ -1,16 +1,18 @@
-package in.dogue.profundus.experimental
+package in.dogue.profundus.world
 
-import in.dogue.profundus.entities._
-import in.dogue.profundus.world.{TerrainCache, TerrainManager}
-import in.dogue.profundus.particles.{Particle, ParticleManager}
+
+import in.dogue.profundus.particles.{ParticleManager}
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.profundus.Profundus
-import in.dogue.profundus.deformations.Deformation
-import in.dogue.profundus.entities.KillZone
+import in.dogue.profundus.entities._
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import scala.util.Random
 import in.dogue.profundus.mode.loadout.Loadout
+import in.dogue.profundus.particles.Particle
+import in.dogue.profundus.deformations.Deformation
+import in.dogue.profundus.entities.KillZone
+import in.dogue.antiqua.data.Direction
 
 sealed trait NewSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends NewSpawn
@@ -43,10 +45,29 @@ object GreatWorld {
   private def updateItemUse : Update[Unit] = standard { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
+    val tc = gw.cache
+    val doNothing = (em, pp)
     val (newEm, newP) = if (pp.isBombing && pp.inv.hasBomb) {
-      (em.spawnCapsule(pp.pos --> pp.face), pp.spendBomb)
+      val capPos = pp.pos --> pp.face
+      if (!tc.isSolid(capPos)) {
+        (em.spawnCapsule(capPos), pp.spendBomb)
+      } else {
+        doNothing
+      }
     } else if (pp.isRoping && pp.inv.hasRope) {
-      (em.spawnRope(pp.pos, pp.face), pp.spendRope)
+      val state = if (pp.face.isVertical && !tc.isSolid(pp.pos --> Direction.Up)) {
+        Rope.create(FlyUp.create(pp.pos)).some
+      } else if (!tc.isSolid(pp.pos --> pp.face)){
+        Rope.create(DropDown.create(pp.pos --> pp.face)).some
+      } else {
+        None
+      }
+      state.map { r =>
+        (em.spawnRope(r), pp.spendRope)
+      }.getOrElse {
+        doNothing
+      }
+
     } else {
       (em, pp)
     }

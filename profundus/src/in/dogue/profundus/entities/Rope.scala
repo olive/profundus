@@ -38,17 +38,12 @@ case class Steady private (private val top:Cell, len:Int) extends RopeState {
 }
 
 object Rope {
-  def create(ij:Cell, d:Direction) = {
-    val tf = TileFactory(Color.Black, Color.White)
-    val nub = tf(CP437.a)
-    val top = tf(CP437.⌠)
-    val mid = tf(CP437.│)
-    val bot = tf(CP437.⌡)
-    val state = if (d.isVertical) {
-      FlyUp.create(ij)
-    } else {
-      DropDown.create(ij --> d)
-    }
+  private val tf = TileFactory(Color.Black, Color.White)
+  private val nub = tf(CP437.a)
+  private val top = tf(CP437.⌠)
+  private val mid = tf(CP437.│)
+  private val bot = tf(CP437.⌡)
+  def create(state:RopeState) = {
     Rope(state, nub, top, mid, bot)
   }
 }
