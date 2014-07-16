@@ -24,6 +24,7 @@ object Main {
       "sprites",
       "sfx",
       "music",
+      "data",
       "shaders",
       "maps"
     )
