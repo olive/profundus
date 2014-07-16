@@ -42,39 +42,31 @@ case class Empty(override val tile:Tile) extends TileType {
 }
 
 object Rock3 { def create(t:Tile, bg:Tile) = Rock3(t, bg, 50) }
-
 case class Rock3(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 50
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
-
 }
 
 object Rock2 { def create(t:Tile, bg:Tile) = Rock2(t, bg, 15) }
-
 case class Rock2(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 15
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
-
 }
-
 
 object Rock { def create(t:Tile, bg:Tile) = Rock(t, bg, 5) }
 case class Rock(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 5
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
-
 }
 
 object Clay { def create(t:Tile, bg:Tile) = Clay(t, bg, 2) }
 case class Clay(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 5
   def setHp(i:Int) = copy(hp=i)
-
   override def hit = toEmpty(toolDamage, hp, setHp)
-
 }
 
 object Dirt { def create(t:Tile, bg:Tile) = Dirt(t, bg, 1) }
@@ -82,7 +74,6 @@ case class Dirt(override val tile:Tile, override val bg:Tile, hp:Int) extends Ti
   val toolDamage = 1
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
-
 }
 
 object Mineral { def create(t:Tile, bg:Tile, c:Color) = Mineral(t, bg, c, 3) }
@@ -90,7 +81,6 @@ case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int
   val toolDamage = 1
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
-
 }
 
 case class WorldTile(state:TileType) {
