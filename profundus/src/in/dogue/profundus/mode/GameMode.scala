@@ -21,7 +21,7 @@ case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random
   def update = {
     val updated = selfUpdate
     updated.gw.p.state match {
-      case Dead => DeadMode.create(cols, rows, this, updated.gw.p.log.lo).toMode
+      case Dead => DeadMode.create(cols, rows, this, updated.gw.p.log).toMode
       case Alive => updated.toMode
     }
   }

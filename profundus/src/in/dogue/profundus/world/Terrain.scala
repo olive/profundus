@@ -8,7 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.MineralDrop
 import in.dogue.antiqua.procgen.PerlinNoise
-import in.dogue.antiqua.geometry.{Line, Ellipse}
+import in.dogue.antiqua.geometry.{Circle, Line, Ellipse}
 import com.deweyvm.gleany.data.Point2d
 import in.dogue.profundus.doodads.{Doodad, Moon}
 
@@ -178,18 +178,20 @@ object Terrain {
 
   def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
-    val ellipse = Ellipse(cols/4, rows/2, cols/2, 3*rows/4)
-    val sx = rows / 2 - 3
-    val (cxx, cyy) = ellipse.center
-    val (cx, cy) = (cxx.toInt, cyy.toInt - 5)
-    val sy = ellipse.getY(sx).toVector.randomR(r).toInt
-    val (sx2, sy2) = ((ellipse.cx - sx).toInt, (ellipse.cy + sy).toInt)
-    val l1 = Line.bresenham(sx,  sy,      cx, cy)
-    val l2 = Line.bresenham(sx,  sy + 1,  cx, cy + 1)
-    val l3 = Line.bresenham(sx,  sy + 2,  cx, cy + 2)
-    val l4 = Line.bresenham(sx2, sy2,     cx, cy)
-    val l5 = Line.bresenham(sx2, sy2 + 1, cx, cy + 1)
-    val l6 = Line.bresenham(sx2, sy2 + 2, cx, cy + 2)
+    val circle = Circle((cols/2, rows/2), rows/4)
+    val pi = Math.PI
+    val base = pi/8
+    val angle = Vector(r.nextDouble * base + pi, 2*pi - r.nextDouble * base).randomR(r)
+    val upper = circle.angleToEdge(angle)
+    val l1 = Line.bresenham(upper.x, upper.y - 1, circle.x, circle.y - 1)
+    val l2 = Line.bresenham(upper.x, upper.y    , circle.x, circle.y)
+    val angle2 = r.nextDouble()*pi/4 + pi/2
+    val lower = circle.angleToEdge(angle2)
+    val l3 = Line.bresenham(circle.x,   circle.y, lower.x, lower.y)
+    val l4 = Line.bresenham(circle.x+1, circle.y, lower.x+1, lower.y)
+    val finalX = 4 + r.nextInt(cols-8)
+    val l5 = Line.bresenham(lower.x, lower.y, finalX, rows)
+    val l6 = Line.bresenham(lower.x+1, lower.y, finalX+1, rows)
     val lines = Vector(l1, l2, l3, l4, l5, l6)
     val tiles = noise.map { case (i, j, d) =>
       val dim = (j + y) / (cols*2).toDouble
@@ -202,10 +204,10 @@ object Terrain {
       val state =
         if (lines.exists{_.contains(pt)} && y == 0) {
           empty
-        } else if (ellipse.contains((i, j)) && y == 0) {
+        } else if (circle.contains((i, j)) && y == 0) {
           dirt
-        } else if (j + y > 16) {
-          if (d > 0 || j + y < 20) {
+        } else if (j + y > rows/2) {
+          if (d > 0 || j + y < rows/2 + 4) {
             grass
           } else if (d < -0.4) {
             rock
@@ -217,8 +219,8 @@ object Terrain {
         }
       WorldTile(state(r))
     }
-    val moon = Moon.create(22, 0, 4)
-    Terrain(y, tiles, Seq(moon.toDoodad), (sx, sy+2))
+    val moon = Moon.create(3*cols/4-5, -5, 4)
+    Terrain(y, tiles, Seq(moon.toDoodad), (l1(0).x, l1(0).y))
   }
 
 
@@ -231,11 +233,11 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[
     !t.exists{_.state.isWalkable}
   }
 
-  def hit(ij:(Int,Int), dmg:Int):(Terrain, Seq[MineralDrop], Int) = {
+  def hit(ij:(Int,Int), dmg:Int):(Terrain, Seq[MineralDrop], Int, Boolean) = {
     val t = tiles.get(ij.x, ij.y)
-    val (newState, drops, damage) = t.state.hit(ij +| y, dmg)
+    val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
-    (newT, drops, damage)
+    (newT, drops, damage, broken)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

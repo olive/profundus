@@ -11,6 +11,7 @@ import in.dogue.profundus.entities._
 import scala.util.Random
 import in.dogue.antiqua.graphics.Text
 import in.dogue.profundus.world.{Difficulty, Easy, Normal, Hard}
+import in.dogue.profundus.Profundus
 
 object LoadoutMode {
   def create(cols:Int, rows:Int, initial:Option[Loadout]) = {
@@ -23,7 +24,7 @@ object LoadoutMode {
       code.mkTile(bg, fg)
     }
     val rect = Rect.createTextured(cols, rows, mk, new Random(0))
-    val border = Border.standard(CP437.doubleBorder, Color.Black, Color.White)(cols, rows)
+    val border = Profundus.border(cols, rows)
     val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
     val lo = initial.getOrElse(Loadout.default)
     val (rem, std) = Loadout.makeSliders(pts, lo)
@@ -41,7 +42,7 @@ object LoadoutMode {
 }
 object LoadoutSection {
   def create(cols:Int, rows:Int, i:Int, j:Int, title:String, tr:TextFactory) = {
-    val border = Border.standard(CP437.doubleBorder, Color.Black, Color.White)(cols, rows)
+    val border = Profundus.border(cols, rows)
     val text = tr.create(title)
     LoadoutSection(i, j, border, text)
   }
@@ -54,7 +55,7 @@ case class LoadoutSection private (i:Int, j:Int, b:Border, text:Text) {
 }
 
 object Loadout {
-  val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
+  val tf = Profundus.tf
   val bombCost = 25
   val ropeCost = 25
   val toolCost = 32

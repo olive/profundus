@@ -13,8 +13,8 @@ class TerrainManager {
     pl.shovelPos match {
       case None => (tc, Seq(), pl)
       case Some(p) =>
-        val (wHit, drops, damage) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/)
-        (wHit, drops, pl.hitTool(damage))
+        val (wHit, drops, damage, broken) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/)
+        (wHit, drops, pl.hitTool(damage, broken))
     }
   }
 

@@ -55,11 +55,11 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:(Int,Int), dmg:Int):(TerrainCache, Seq[MineralDrop], Int) = {
+  def hit(ij:(Int,Int), dmg:Int):(TerrainCache, Seq[MineralDrop], Int, Boolean) = {
     val index = getIndex(ij)
-    val (broke, dropped, damage) = tMap(index).hit(convert(ij), dmg)
+    val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg)
     val updated = tMap.updated(index, broke)
-    (copy(tMap=updated), dropped, damage)
+    (copy(tMap=updated), dropped, damage, broken)
   }
 
   private def getIndex(ij:(Int,Int)) = {

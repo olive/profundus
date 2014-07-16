@@ -8,8 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.{Capsule, Inventory}
 import in.dogue.antiqua.graphics.Text
-
-
+import in.dogue.profundus.Profundus
 
 
 object Hud {
@@ -18,7 +17,7 @@ object Hud {
   val fuelIcon = CP437.f.mkTile(Color.Black, Color.Red)
   def create(cols:Int, rows:Int, inv:Inventory):Hud = {
     val rect = Rect.createPlain(cols, rows, CP437.` `.mkTile(Color.Black, Color.White))
-    val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
+    val tf = Profundus.tf
     val shovel = HudTool.create(DurabilityBar.create(inv.tool.`type`.durability), tf, inv)
     Hud(cols, rect, inv, shovel, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), tf)
   }

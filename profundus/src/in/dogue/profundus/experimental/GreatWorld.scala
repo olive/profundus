@@ -209,10 +209,21 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     }
   }
 
+  def cameraY(ppos:(Int,Int)) = {
+    val res = if (ppos.y < 48) {
+      val offset = (ppos.y + 48)/2
+      val result = -offset + 32
+      result
+    } else {
+      -15
+    }
+    math.min(res, 0)
+  }
+
 
   def draw(tr:TileRenderer):TileRenderer = {
     val offset = 0//5
-    tr.withMove(0, -p.y - offset - 16) { worldPos =>
+    tr.withMove(0, -p.y - offset + cameraY(p.pos)) { worldPos =>
       (worldPos <+< cache.draw(p.pos)
                 <+< em.draw
                 <+< p.draw

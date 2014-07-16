@@ -1,10 +1,13 @@
 package in.dogue.profundus
 
-import in.dogue.antiqua.graphics.Tile
+import in.dogue.antiqua.graphics.{Border, TextFactory, Tile}
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.experimental.{NewDeformations, NewKillZones, NewParticles}
 import in.dogue.profundus.entities.KillZone
 import in.dogue.profundus.deformations.Deformation
+import com.deweyvm.gleany.graphics.Color
+import in.dogue.antiqua.data.CP437
+import sun.io.CharToByteCp437
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle[_]]) {
@@ -20,4 +23,7 @@ object Profundus {
     def ns = NewDeformations(s)
   }
   implicit def deformations2NewSpawn(s:Seq[Deformation[_]]) = new AugNewDeformations(s)
+
+  val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
+  val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
 }

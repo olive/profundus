@@ -13,12 +13,13 @@ import in.dogue.profundus.particles.{Particle, DeathParticle}
 
 object PlayerLog {
   def create(lo:Loadout) = {
-    PlayerLog(lo, 0, 0, lo.gems, 0, 0, 0, 0, 0)
+    PlayerLog(lo, "name", "title", "killedby", 0, 0, lo.gems, 0, 0, 0, 0, 0, 0)
   }
 
 }
 
-case class PlayerLog(lo:Loadout, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int) {
+case class PlayerLog(lo:Loadout, name:String, title:String, killedBy:String, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int) {
+  def digTile = copy(tilesDug=tilesDug+1)
   def useBomb = copy(bombsUsed = bombsUsed + 1)
   def useRope = copy(ropesUsed = ropesUsed + 1)
   def getGem = copy(gemsCollected = gemsCollected + 1)
@@ -83,7 +84,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def spendRope = copy(inv = inv.spendRope, log=log.useRope)
 
   def setFacing(d:Direction) = copy(face=d)
-  def hitTool(dmg:Int) = {
+  def hitTool(dmg:Int, broken:Boolean) = {
     val prevDur = inv.tool.dura
     val newInv = inv.useTool(dmg)
     val newLog = if (newInv.tool.dura == 0 && prevDur > 0) {
@@ -91,7 +92,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     } else {
       log
     }
-    copy(log=newLog, inv=newInv)
+    val newLog2 = broken.select(newLog, newLog.digTile)
+    copy(log=newLog2, inv=newInv)
   }
 
   private def chooseFace(dx:Int, dy:Int):Direction = {

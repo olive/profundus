@@ -7,6 +7,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.input.Controls
 import scala.util.Random
+import in.dogue.profundus.Profundus
 
 object TitleMode {
   def create(cols:Int, rows:Int) = {
@@ -16,7 +17,7 @@ object TitleMode {
       val fg = Color.Tan.dim(1 + r.nextDouble)
       code.mkTile(bg, fg)
     }
-    val border = Border.standard(CP437.doubleBorder, Color.Black, Color.White)(cols, rows)
+    val border = Profundus.border(cols, rows)
     val rect = Rect.createTextured(cols, rows, mk, new Random())
     val title = Tile.groupFromFile("profundusmap2", "tiles", CP437.intToCode, _.mkTile(Color.Brown.dim(4), Color.Tan.dim(1))).filter { case (i, j, t) =>
     t.code != CP437.` `.toCode}
