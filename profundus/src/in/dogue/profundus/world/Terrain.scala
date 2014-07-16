@@ -21,61 +21,103 @@ case class Scheme(bgMod:Random => Color,
 
 }
 
-case class TerrainScheme(sky:Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, gem:Scheme) {
+case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, rock2:Scheme, rock3:Scheme, gem:Scheme, clay:Scheme, empty:Scheme) {
 
-  private def makeEmpty(r:Random) = {
+  private def emptyTile(r:Random) = {
     val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
-    rock.mkTile(r, bgCode)
+    empty.mkTile(r, bgCode)
+  }
+
+  def makeEmpty(r:Random) = {
+    val empty = emptyTile(r)
+    Empty(empty)
+  }
+
+  def makeClay(r:Random) = {
+    val clayTile = clay.mkTile(r, CP437.-)
+    val empty = emptyTile(r)
+    Clay.create(clayTile, empty)
+  }
+
+  def `make???`(r:Random) = {
+    val tile = ??? //.mkTile(r, CP437.⌂)
+    ???
+  }
+
+  def makeRock3(r:Random) = {
+    val rockTile = rock3.mkTile(r, CP437.`#`)
+    val empty = emptyTile(r)
+    Rock3.create(rockTile, empty)
+  }
+
+  def makeRock2(r:Random) = {
+    val rockTile = rock2.mkTile(r, CP437.≡)
+    val empty = emptyTile(r)
+    Rock2.create(rockTile, empty)
   }
 
   def makeRock(r:Random) = {
-    val rockTile = rock.mkTile(r, CP437.█)
-    val empty = makeEmpty(r)
+    val rockTile = rock.mkTile(r, CP437.`=`)
+    val empty = emptyTile(r)
     Rock.create(rockTile, empty)
   }
 
   def makeDirt(r:Random) = {
     val dirtTile = dirt.mkTile(r, CP437.█)
-    val empty = makeEmpty(r)
+    val empty = emptyTile(r)
     Dirt.create(dirtTile, empty)
 
   }
 
   def makeMineral(r:Random) = {
     val mineralTile = gem.mkTile(r, CP437.◘)
-    val empty = makeEmpty(r)
+    val empty = emptyTile(r)
     Mineral.create(mineralTile, empty, mineralTile.bgColor)
   }
 
-  def makeSky(r:Random) = {
+  def makeSky(dim:Double)(r:Random) = {
     val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
-    val night = sky.mkTile(r, skyCode)
+    val night = sky(dim).mkTile(r, skyCode)
     Empty(night)
   }
 
-  def makeGrass(yj:Int, rows:Int, r:Random) = {
+  def makeGrass(yj:Int, rows:Int)(r:Random) = {
     val grassTile = grass.mkTile(r, CP437.█)
-    val empty = makeEmpty(r)
+    val empty = emptyTile(r)
     Dirt.create(grassTile, empty)
   }
-  type ChooseState = Int => Double => Random => TileState
-  def generateRandom(cols:Int, rows:Int, y:Int, r:Random) = {
 
-  }
 }
 
 object Terrain {
   val dirtScheme = Scheme(
-    (r:Random) => Color.Brown.dim(3 + r.nextDouble),
-    (r:Random) => Color.Tan.dim(3 + r.nextDouble)
+    (r:Random) => Color.Brown.dim(6 + r.nextDouble),
+    (r:Random) => Color.Brown.dim(3 + r.nextDouble)
+  )
+
+  val emptyScheme = Scheme(
+    (r:Random) => Color.Tan.dim(2 + r.nextDouble),
+    (r:Random) => Color.Tan.dim(1 + r.nextDouble)
   )
   val rockScheme = Scheme(
-    (r:Random) => Color.Brown.dim(3 + r.nextDouble),
-    (r:Random) => Color.Grey.dim(1 + r.nextDouble)
+    (r:Random) => Color.Grey.dim(6 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(3 + r.nextDouble)
   )
-  def grassScheme(j:Int, rows:Int) = Scheme(
-    (r:Random) => Color.DarkGreen.mix(Color.Brown, j/rows.toDouble).dim(3 + r.nextDouble),
-    (r:Random) => Color.DarkGreen.mix(Color.Brown, j/(rows*2).toDouble).dim(1 + r.nextDouble)
+
+
+  val rock2Scheme = Scheme(
+    (r:Random) => Color.Grey.dim(10 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(6 + r.nextDouble)
+  )
+
+  val rock3Scheme = Scheme(
+    (r:Random) => Color.Green.dim(6 + r.nextDouble),
+    (r:Random) => Color.Green.dim(3 + r.nextDouble)
+  )
+
+  val grassScheme = Scheme(
+    (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),
+    (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(1 + r.nextDouble)
   )
 
   def skyScheme(dim:Double) = Scheme(
@@ -85,29 +127,51 @@ object Terrain {
 
   val gemScheme = Scheme(
     (r:Random) => Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r),
-    (r:Random) => Color.Grey.dim(1 + r.nextDouble)
+    (r:Random) => Color.Grey.dim(3 + r.nextDouble)
   )
+
+  def r2(r:Random) = {
+    val x = r.nextDouble
+    (1 - x)*(1 - x)
+  }
+  val clayScheme = Scheme(
+    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(6 + r.nextDouble),
+    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(3 + r.nextDouble)
+  )
+
+  val scheme = TerrainScheme(skyScheme, grassScheme, dirtScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, clayScheme, emptyScheme)
 
   def createCave(y:Int, cols:Int, rows:Int, r:Random) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val tiles = noise.map { case (i, j, d) =>
-      val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
-      val rock = rockScheme.mkTile(r, CP437.█)
-      val dirt = dirtScheme.mkTile(r, CP437.█)
-      val empty = rockScheme.mkTile(r, bgCode)
-      val mineral = gemScheme.mkTile(r, CP437.◘)
-      val state = if (d < -0.4) {
+      val rock = scheme.makeRock _
+      val rock2 = scheme.makeRock2 _
+      val rock3 = scheme.makeRock3 _
+      val dirt = scheme.makeDirt _
+      val clay = scheme.makeClay _
+      val mineral = scheme.makeMineral _
+      val empty = scheme.makeEmpty _
+      val state = if (d < -0.2) {
         if (r.nextDouble > 0.99) {
-          Mineral.create(mineral, empty, mineral.bgColor)
+          if (r.nextBoolean) {
+            rock3
+          } else {
+            mineral
+          }
+
+        } else if (d < -0.6) {
+          rock2
+        } else if (d < -0.4){
+          rock
         } else {
-          Rock.create(rock, empty)
+          clay
         }
       } else if (d < 0.0) {
-        Dirt.create(dirt, empty)
+        dirt
       } else {
-        Empty(empty)
+        empty
       }
-      WorldTile(state)
+      WorldTile(state(r))
     }
     Terrain(y, tiles, Seq(), (0,0))
   }
@@ -128,32 +192,30 @@ object Terrain {
     val l6 = Line.bresenham(sx2, sy2 + 2, cx, cy + 2)
     val lines = Vector(l1, l2, l3, l4, l5, l6)
     val tiles = noise.map { case (i, j, d) =>
-      val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
-      val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
       val dim = (j + y) / (cols*2).toDouble
-      val night = skyScheme(dim).mkTile(r, skyCode)
-      val grass = grassScheme(j, rows).mkTile(r, CP437.█)
-      val empty = rockScheme.mkTile(r, bgCode)
-      val rock = rockScheme.mkTile(r, CP437.█)
-      val dirt = dirtScheme.mkTile(r, CP437.█)
+      val night = scheme.makeSky(dim) _
+      val grass = scheme.makeGrass(j + y, rows) _
+      val empty = scheme.makeEmpty _
+      val rock = scheme.makeRock _
+      val dirt = scheme.makeDirt _
       val pt = (i, j+y)
       val state =
         if (lines.exists{_.contains(pt)} && y == 0) {
-          Empty(empty)
+          empty
         } else if (ellipse.contains((i, j)) && y == 0) {
-          Dirt.create(dirt, empty)
+          dirt
         } else if (j + y > 16) {
           if (d > 0 || j + y < 20) {
-            Dirt.create(grass, empty)
+            grass
           } else if (d < -0.4) {
-            Rock.create(rock, empty)
+            rock
           } else {
-            Dirt.create(dirt, empty)
+            dirt
           }
         } else {
-          Empty(night)
+          night
         }
-      WorldTile(state)
+      WorldTile(state(r))
     }
     val moon = Moon.create(22, 0, 4)
     Terrain(y, tiles, Seq(moon.toDoodad), (sx, sy+2))
@@ -169,9 +231,9 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[
     !t.exists{_.state.isWalkable}
   }
 
-  def hit(ij:(Int,Int)):(Terrain, Seq[MineralDrop], Int) = {
+  def hit(ij:(Int,Int), dmg:Int):(Terrain, Seq[MineralDrop], Int) = {
     val t = tiles.get(ij.x, ij.y)
-    val (newState, drops, damage) = t.state.hit(ij +| y)
+    val (newState, drops, damage) = t.state.hit(ij +| y, dmg)
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
     (newT, drops, damage)
   }

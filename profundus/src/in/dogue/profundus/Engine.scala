@@ -6,10 +6,10 @@ import in.dogue.profundus.mode.{Loadout, GameMode, TitleMode, Mode}
 import in.dogue.profundus.input.Controls
 
 class Engine {
-  val m = GameMode.create(32, 32, Loadout.default)//TitleMode.create(32, 32)//
+  val m = GameMode.create(32, 32 + 16, Loadout.default)//TitleMode.create(32, 32)//
   var mode:Mode[_] = m.toMode
   val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("16x16"))
-  val r = new Renderer(512, 512, 1, ts)
+  val r = new Renderer(512, 512 + 256, 1, ts)
 
   def update() = {
     if (Controls.Escape.justPressed) {

@@ -5,7 +5,6 @@ import Antiqua._
 import in.dogue.antiqua.graphics.{Tile, TileRenderer, Animation}
 import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.world.World
 import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
 
@@ -61,7 +60,7 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
   private def makeDeformation = {
-    ExplosionDeformation.create(i, j, 8, 3).toDeformation
+    ExplosionDeformation.create(i, j, 1, 8, 3).toDeformation
   }
 
   private def makeParticle = {

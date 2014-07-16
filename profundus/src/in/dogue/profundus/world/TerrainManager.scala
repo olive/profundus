@@ -4,7 +4,6 @@ import in.dogue.profundus.entities._
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.entities.Massive
 import in.dogue.profundus.particles.Particle
 import scala.Some
@@ -14,13 +13,13 @@ class TerrainManager {
     pl.shovelPos match {
       case None => (tc, Seq(), pl)
       case Some(p) =>
-        val (wHit, drops, damage) = tc.hit(p)
+        val (wHit, drops, damage) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/)
         (wHit, drops, pl.hitTool(damage))
     }
   }
 
-  private def updateFacing(dir:Option[Direction], pl:Player):Player = {
-    dir.map{d => pl.copy(face=d)}.getOrElse(pl)
+  private def updateFacing(dir:Direction, pl:Player):Player = {
+    pl.copy(face=dir)
   }
 
   private def updateClimb(tc:TerrainCache, pl:Player):Player = {
@@ -51,8 +50,8 @@ class TerrainManager {
     val (tryP, ps) = pp.update
 
     val (tc, drops, oldPl) = updateShovel(tcache, tryP)
-    val dir = oldPl.getMove
-    val pl = processFall(tc, updateFacing(dir, oldPl).toMassive)
+    val (movePl, dir) = oldPl.getMove
+    val pl = processFall(tc, updateFacing(movePl.instDir, movePl).toMassive)
     val specPos = dir.map {pl.pos --> _}.getOrElse(pl.pos)
     val newP = if (specPos == pl.pos || tc.isSolid(specPos)) {
       pl

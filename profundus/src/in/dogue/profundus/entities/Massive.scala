@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.world.{TerrainCache, World}
+import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 

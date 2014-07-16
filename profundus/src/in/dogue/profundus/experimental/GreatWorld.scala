@@ -73,7 +73,10 @@ object GreatWorld {
 
   private def updateCache : Update[Unit] = standard { case (gw, ()) =>
     val ppos = gw.p.pos
-    gw.setTc(gw.cache.checkPositions(ppos).update(ppos))
+    val cache = gw.cache
+    val (tc, cs) = cache.checkPositions(ppos)
+    val em = gw.em.spawnCreatures(cs)
+    gw.setTc(tc.update(ppos)).setEm(em)
   }
 
   private def updateEs : Update[Unit] = { case (gw, ()) =>
@@ -111,7 +114,7 @@ object GreatWorld {
     }
     val newEm = gw.em.addDrops(mins)
     val newDs = ds.map{_.update}.flatten
-    gw.copy(ds = newDs, cache=deformed, em=newEm)
+    gw.setDs(newDs).setTc(deformed).setEm(newEm)
   }
 
   private def updateParticles : Update[Unit] =  standard { case (gw, ()) =>
@@ -155,9 +158,9 @@ object GreatWorld {
 
   def create(cols:Int, rows:Int, lo:Loadout, r:Random) = {
     val (cache, spawn) = TerrainCache.create(cols, rows, r)
-    val tc = cache.checkPositions(spawn)
+    val (tc, cs) = cache.checkPositions(spawn)
     val p = Player.create(spawn, lo)
-    val em = EntityManager.create(r)
+    val em = EntityManager.create(r).spawnCreatures(cs)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val gw = GreatWorld(p, em, tm, pm, tc, Seq(), Seq(), Seq())

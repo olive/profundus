@@ -14,8 +14,7 @@ object EntityManager {
 
   def create(r:Random) = {
     val rng = new Random(r.nextInt())
-    val testc = Creature.create(14,42)
-    EntityManager(Seq(), Seq(testc), Seq(), Seq(), rng)
+    EntityManager(Seq(), Seq(), Seq(), Seq(), rng)
   }
 }
 
@@ -28,6 +27,10 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
                      gems=gems.map{_.update},
                      ropes=ropes.map{_.update(tc)})
     (explosions, kz, particles.flatten, newEm)
+  }
+
+  def spawnCreatures(cs:Seq[Creature]) = {
+    copy(cr=cr++cs)
   }
 
   def interact(pl:Player):(Player, EntityManager) = {
@@ -81,7 +84,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
   def doGravity(tr:TerrainCache) = {
     val newCaps = caps.map {_.toMassive.update(tr)}
     val newGems = gems.map {_.toMassive.update(tr)}
-    val newCr = cr.map {_.toMassive.update(tr)}
+    val (offscreen, onscreen) = cr.partition { c => tr.isLoaded(c.pos) }
+    val newCr = onscreen.map {_.toMassive.update(tr)} ++ offscreen
     copy(caps = newCaps,
          gems = newGems,
          cr = newCr)

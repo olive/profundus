@@ -1,16 +1,16 @@
 package in.dogue.profundus.deformations
 
-import in.dogue.profundus.world.{TerrainCache, World}
+import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.MineralDrop
 
 object ExplosionDeformation {
-  def create(i:Int, j:Int, radius:Int, speed:Int) = {
-    ExplosionDeformation(i, j, radius, speed, 0)
+  def create(i:Int, j:Int, tickDamage:Int, radius:Int, speed:Int) = {
+    ExplosionDeformation(i, j, tickDamage, radius, speed, 0)
   }
 }
-case class ExplosionDeformation private (i:Int, j:Int, radius:Int, speed:Int, t:Int) {
+case class ExplosionDeformation private (i:Int, j:Int, tickDamage:Int, radius:Int, speed:Int, t:Int) {
   def update = copy(t=t+1)
   def isDone = t > radius*speed
 
@@ -27,7 +27,7 @@ case class ExplosionDeformation private (i:Int, j:Int, radius:Int, speed:Int, t:
       }
       val seed = (tc, Seq[MineralDrop]())
       val (newTc, mins) = indices.flatten.foldLeft(seed) { case ((ttc, mins), pr) =>
-        val (newTc, drops, _) = ttc.hit(pr)
+        val (newTc, drops, _) = ttc.hit(pr, tickDamage)
         (newTc, mins ++ drops)
       }
       (newTc, mins, 0)

@@ -7,7 +7,7 @@ import com.deweyvm.gleany.graphics.Color
 
 object CircleTransition {
   def create(cols:Int, rows:Int, old:Mode[_], `new`:Mode[_]) = {
-    CircleTransition(cols, rows, old, `new`, 0, 120)
+    CircleTransition(cols, rows, old, `new`, 0, 30)
   }
 }
 

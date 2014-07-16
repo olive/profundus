@@ -1,11 +1,11 @@
 package in.dogue.profundus.world
 
 import scala.util.Random
-import in.dogue.antiqua.graphics.{Tile, TileRenderer}
+import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.MineralDrop
+import in.dogue.profundus.entities.{Creature, MineralDrop}
 import in.dogue.antiqua.geometry.Line
 
 
@@ -18,16 +18,19 @@ object TerrainCache {
       } else {
         Terrain.createCave _
       }
-      gen(i*rows, cols, rows, copy)
+      val t = gen(i*rows, cols, rows, copy)
+      val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+      val cs = (i > 0).select(Seq(), Seq(Creature.create(x, y + i*rows)))
+      (t, cs)
     }
-    val first = gen(0, r, None)
+    val (first,_) = gen(0, r, None)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, gen, r)
     (cache, first.spawn)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,
                                  tMap:Map[Int, Terrain], max:Int, min:Int,
-                                 mkNext:(Int, Random, Option[Terrain]) => Terrain,
+                                 mkNext:(Int, Random, Option[Terrain]) => (Terrain, Seq[Creature]),
                                  r:Random) {
   def isSolid(ij:(Int,Int)):Boolean = {
     get(ij).isSolid(convert(ij))
@@ -52,9 +55,9 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:(Int,Int)):(TerrainCache, Seq[MineralDrop], Int) = {
+  def hit(ij:(Int,Int), dmg:Int):(TerrainCache, Seq[MineralDrop], Int) = {
     val index = getIndex(ij)
-    val (broke, dropped, damage) = tMap(index).hit(convert(ij))
+    val (broke, dropped, damage) = tMap(index).hit(convert(ij), dmg)
     val updated = tMap.updated(index, broke)
     (copy(tMap=updated), dropped, damage)
   }
@@ -65,30 +68,38 @@ case class TerrainCache private (cols:Int, rows:Int,
     yy/rows
   }
 
-  def checkPositions(ij:(Int,Int)):TerrainCache = {
+  def checkPositions(ij:(Int,Int)):(TerrainCache, Seq[Creature]) = {
     val index = getIndex(ij)
-    check(index+2).check(index+1).check(index-1)
+    val seed = (this, Seq[Creature]())
+    Seq(index+2, index+2, index-1).foldLeft(seed) { case ((map, cs), i) =>
+      val (next, newCs) = map.check(i)
+      (next, cs ++ newCs)
+    }
   }
 
-  private def check(i:Int):TerrainCache = {
-    val (newMap, newMin, newMax) = if (i > max) {
-      val mm = ((max+1) to i).foldLeft(tMap) { case (map, k) =>
+  //fixme -- code clones
+  private def check(i:Int):(TerrainCache, Seq[Creature]) = {
+    val (newMap, newMin, newMax, cs) = if (i > max) {
+      val seed = (tMap, Seq[Creature]())
+      val (mm, cs) = ((max+1) to i).foldLeft(seed) { case ((map, cs), k) =>
         val prev = map(k-1)
-        val next = mkNext(k, r, prev.some)
-        map.updated(k, next)
+        val (next, moreCs) = mkNext(k, r, prev.some)
+        (map.updated(k, next), moreCs ++ cs)
       }
-      (mm, min, i)
+      (mm, min, i, cs)
     } else if (i < min) {
-      val mm = ((min - 1) to (i, -1)).foldLeft(tMap) { case (map, k) =>
+      val seed = (tMap, Seq[Creature]())
+      val (mm, cs) = ((min - 1) to (i, -1)).foldLeft(seed) { case ((map, cs), k) =>
         val prev = map(k+1)
-        val next = mkNext(k, r, prev.some)
-        map.updated(k, next)
+        val (next, moreCs)  = mkNext(k, r, prev.some)
+        (map.updated(k, next), moreCs ++ cs)
       }
-      (mm, i, max)
+      (mm, i, max, cs)
     } else {
-      (tMap, min, max)
+      (tMap, min, max, Seq())
     }
-    copy(tMap=newMap, min=newMin, max=newMax)
+    val newTc = copy(tMap=newMap, min=newMin, max=newMax)
+    (newTc, cs)
   }
 
   def update(ij:(Int,Int)):TerrainCache = {
@@ -100,6 +111,7 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   private def get(ij:(Int,Int)):Terrain = {
     tMap(getIndex(ij))
+
 
   }
 

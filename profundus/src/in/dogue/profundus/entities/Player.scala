@@ -60,7 +60,8 @@ object Player {
            shovel, getLive,
            false, false, false, false,
            Inventory.create(lo), PlayerLog.create(lo),
-           Grounded, Alive, false)
+           Grounded, Alive, false,
+           0)
   }
 }
 
@@ -68,7 +69,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            shovel:ShovelSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory, log:PlayerLog,
-                           fall:FallState, state:LivingState, justKilled:Boolean) {
+                           fall:FallState, state:LivingState, justKilled:Boolean,
+                           moveT:Int) {
 
   def collect(g:MineralDrop) = copy(inv=inv.collect(g), log=log.getGem)
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
@@ -83,7 +85,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def setFacing(d:Direction) = copy(face=d)
   def hitTool(dmg:Int) = {
     val prevDur = inv.tool.dura
-    val newInv = inv.useShovel(dmg)
+    val newInv = inv.useTool(dmg)
     val newLog = if (newInv.tool.dura == 0 && prevDur > 0) {
       log.breakTool
     } else {
@@ -105,21 +107,33 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   }
 
-  def getMove:Option[Direction] = {
+  def getMove:(Player, Option[Direction]) = {
     state match {
       case Alive => computeMove
-      case Dead => None
+      case Dead => (this, None)
     }
   }
 
-  private def computeMove:Option[Direction] = {
-    val dx = Controls.AxisX.zip(5,5)
-    val dy = Controls.AxisY.zip(5,5)
-    if (dx != 0 || dy != 0) {
+  private def computeMove:(Player, Option[Direction]) = {
+    val dx = Controls.AxisX.isPressed
+    val dy = Controls.AxisY.isPressed
+    val newT = (dx !=0 || dy != 0).select(0, moveT+1)
+    val moveSpeed = fall.moveSlow.select(6, 12)
+
+    val face = if (newT > 0 && newT % moveSpeed == 0) {
       chooseFace(dx, dy).some
     } else {
       None
     }
+
+    (copy(moveT=newT), face)
+
+  }
+  /** instantaneous direction */
+  def instDir = {
+    val dx = Controls.AxisX.isPressed
+    val dy = Controls.AxisY.isPressed
+    (dx !=0 || dy != 0).select(face, chooseFace(dx, dy))
   }
 
   def update = {
@@ -130,6 +144,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     isRoping=Controls.Rope.justPressed,
                     log=log.setDepth(pos.y).incrTime)
     if (justKilled) {
+      println("Just killed!")
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {
       (newP, Seq())
@@ -139,14 +154,14 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def setFallState(s:FallState) = {
     val newPl = copy(fall=s)
     (fall, s) match {
-      case (Falling(_, num), Grounded) if num > 6 =>
+      case (Falling(_, num), Grounded) if num > 20 =>
         newPl.kill
       case _ => newPl
     }
   }
 
   def kill:Player = {
-    copy(state=Dead, face = Direction.Down, t=Player.getDead, justKilled=true)
+    copy(state=Dead, face = Direction.Down, t=Player.getDead, justKilled=state != Dead)
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
