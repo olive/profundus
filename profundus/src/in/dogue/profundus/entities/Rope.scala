@@ -32,7 +32,7 @@ case class DropDown private (private val top:Cell, len:Int, t:Int) extends RopeS
 }
 
 object Steady { def create(top:Cell, len:Int) = Steady(top, len) }
-case class Steady private (private val top:Cell, len:Int) extends RopeState {
+case class Steady private (top:Cell, len:Int) extends RopeState {
   def x = top.x
   def y = top.y
 }
@@ -44,11 +44,11 @@ object Rope {
   private val mid = tf(CP437.│)
   private val bot = tf(CP437.⌡)
   def create(state:RopeState) = {
-    Rope(state, nub, top, mid, bot)
+    Rope(state, nub, top, mid, bot, Alive)
   }
 }
 
-case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, bottomT:Tile) {
+case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, bottomT:Tile, live:LivingState) {
 
   /** y2 > y1 */
   private def between(ij:Cell, x:Int, y1:Int, y2:Int) = ij.x == x && ij.y >= y1 && ij.y <= y2
@@ -59,27 +59,31 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     case Steady(top, len) => between(ij, top.x, top.y, top.y + len)
   }
 
-  def update(tc:TerrainCache):Rope = {
-    val newState:RopeState = state match {
+  def update(tc:TerrainCache):(Option[Rope], Seq[Pickup[_]]) = {
+    val (rs, picks) = state match {
       case f@FlyUp(_,_,_) => updateFlyUp(f, tc)
-      case d@DropDown(_,_,_) => updateDropDown(d, tc)
+      case d@DropDown(_,_,_) => (updateDropDown(d, tc).some, Seq())
       case s@Steady(_,_) => updateSteady(s)
     }
-
-    copy(state=newState)
+    (rs.map { s => copy(state=s) }, picks)
   }
 
-  private def updateFlyUp(f:FlyUp, tc:TerrainCache) = {
+  private def updateFlyUp(f:FlyUp, tc:TerrainCache):(Option[RopeState], Seq[Pickup[_]]) = {
     val newT = f.t + 1
     if (newT % f.flySpeed == 0) {
       val top = f.top
       if (tc.isSolid(top --> Direction.Up) || f.len + 1 == f.maxLength) {
-        DropDown.create(top)
+        if (tc.isBackgroundSolid(top)) {
+          (DropDown.create(top).some, Seq())
+        } else {
+          (None, Seq(RopePickup.create(top).toPickup))
+        }
+
       } else {
-        f.incrLen
+        (f.incrLen.some, Seq())
       }
     } else {
-      f.copy(t=newT)
+      (f.copy(t=newT).some, Seq())
     }
   }
 
@@ -97,7 +101,20 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     }
   }
 
-  private def updateSteady(s:Steady) = s
+
+  def isKillableAt(p:Cell) = {
+    ropeContains(p)
+  }
+  def kill = copy(live=Dead)
+
+  private def updateSteady(s:Steady) = {
+    if (live == Dead) {
+      (None, Seq(RopePickup.create(s.top).toPickup))
+    } else {
+      (s.some, Seq())
+    }
+
+  }
 
 
   private def drawFlyUp(f:FlyUp)(tr:TileRenderer):TileRenderer = {

@@ -6,7 +6,7 @@ import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.MineralDrop
+import in.dogue.profundus.entities.{Pickup, MineralPickup}
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.antiqua.geometry.{Circle, Line, Ellipse}
 import com.deweyvm.gleany.data.Point2d
@@ -271,8 +271,13 @@ case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[
     !t.exists{_.state.isWalkable}
   }
 
+  def isBackgroundSolid(s:Cell):Boolean = {
+    val t = (tiles.getOption _).tupled(s)
+    t.exists{_.state.bgSolid}
+  }
 
-  def hit(ij:Cell, dmg:Int):(Terrain, Seq[MineralDrop], Int, Boolean) = {
+
+  def hit(ij:Cell, dmg:Int):(Terrain, Seq[Pickup[_]], Int, Boolean) = {
     val t = tiles.get(ij.x, ij.y)
     val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
     val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))

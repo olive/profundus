@@ -9,7 +9,7 @@ import in.dogue.profundus.particles.Particle
 import scala.Some
 
 class TerrainManager {
-  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[MineralDrop], Player) = {
+  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[Pickup[_]], Player) = {
     pl.shovelPos match {
       case None => (tc, Seq(), pl)
       case Some(p) =>
@@ -48,7 +48,7 @@ class TerrainManager {
   }
 
 
-  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[MineralDrop], Seq[Particle[_]]) = {
+  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[Pickup[_]], Seq[Particle[_]]) = {
     val (tryP, ps) = pp.update
 
     val (tc, drops, oldPl) = updateShovel(tcache, tryP)

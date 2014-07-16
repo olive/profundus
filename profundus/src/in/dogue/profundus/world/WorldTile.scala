@@ -4,7 +4,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.entities.MineralDrop
+import in.dogue.profundus.entities.{Pickup, MineralPickup}
 import scala.collection.script.Update
 import in.dogue.antiqua.data.Direction
 
@@ -13,7 +13,7 @@ sealed trait TileType {
   val tile:Tile
   val bg:Tile
   val isWalkable:Boolean = false
-  type Update= (TileType, Seq[MineralDrop], Int, Boolean)
+  type Update= (TileType, Seq[Pickup[_]], Int, Boolean)
   def hit:(Cell, Int) => Update
   def standard(f:(Cell, Int) => (TileType, Int, Boolean)): (Cell, Int) => Update = { case (ij, dmg) =>
     val (tt, toolDmg, broke) = f(ij, dmg)
@@ -87,7 +87,7 @@ case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int
     } else {
       Empty(bg, true)
     }
-    (newTile, Seq(MineralDrop.create(ij, c)), toolDamage, newHp <= 0)
+    (newTile, Seq(MineralPickup.create(ij, c).toPickup), toolDamage, newHp <= 0)
   }
 }
 

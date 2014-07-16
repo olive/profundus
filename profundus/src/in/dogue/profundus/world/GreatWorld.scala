@@ -74,10 +74,21 @@ object GreatWorld {
     gw.setEm(newEm).setPlayer(newP)
   }
 
+  private def updateShovel : Update[Unit] = standard { case (gw, ()) =>
+    val pp = gw.p
+    val em = gw.em
+    val newEm = pp.shovelPos match {
+      case None => em
+      case Some(pos) => em.hitRopes(pos)
+
+    }
+    gw.setEm(newEm)
+  }
+
   private def collectGems : Update[Unit] = standard { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
-    val (newP, newEm) = em.collectGems(pp)
+    val (newP, newEm) = em.collectPickups(pp)
     gw.setEm(newEm).setPlayer(newP)
   }
 
@@ -128,7 +139,7 @@ object GreatWorld {
   private def updateDeformations :Update[Unit] = standard { case (gw, ()) =>
     val ds = gw.ds
     val cache = gw.cache
-    val seed = (cache, Seq[MineralDrop]())
+    val seed = (cache, Seq[Pickup[_]]())
     val (deformed, mins) = ds.foldLeft(seed){case ((tc, mins), d) =>
       val (nc, drop, _) = d.apply(tc)
       (nc, drop ++ mins)
@@ -159,6 +170,7 @@ object GreatWorld {
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
         #+ updateItemUse
+        #+ updateShovel
         #+ collectGems
         #+ updatePlayer
         #+ updateCache

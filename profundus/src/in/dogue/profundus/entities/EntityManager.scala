@@ -8,7 +8,6 @@ import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.world.TerrainCache
 import scala.util.Random
-import in.dogue.antiqua.data.Direction
 
 object EntityManager {
 
@@ -18,15 +17,27 @@ object EntityManager {
   }
 }
 
-case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[MineralDrop], ropes:Seq[Rope], r:Random) {
+case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq[Pickup[_]], ropes:Seq[Rope], r:Random) {
   def update(tc:TerrainCache):(Seq[Deformation[_]], Seq[KillZone[_]], Seq[Particle[_]], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
     val (explosions, particles, kz) = done.map{_.getExplode}.unzip3
+    val (newRopes, pickups) = ropes.map{_.update(tc)}.unzip
     val newEm = copy(caps=notDone,
-                     gems=gems.map{_.update},
-                     ropes=ropes.map{_.update(tc)})
+                     picks=picks.map{_.update} ++ pickups.flatten,
+                     ropes=newRopes.flatten)
     (explosions, kz, particles.flatten, newEm)
+  }
+
+  def hitRopes(pos:Cell) = {
+    val newRopes = ropes.map { r =>
+      if (r.isKillableAt(pos)) {
+        r.kill
+      } else {
+        r
+      }
+    }
+    copy(ropes=newRopes)
   }
 
   def spawnCreatures(cs:Seq[Creature]) = {
@@ -43,8 +54,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     (copy(cr=newCr), ps)
   }
 
-  def addDrops(gs:Seq[MineralDrop]) = {
-    copy(gems=gems ++ gs)
+  def addDrops(gs:Seq[Pickup[_]]) = {
+    copy(picks=picks ++ gs)
   }
 
   def isRope(ij:Cell) = {
@@ -64,16 +75,17 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
     caps.exists{_.pos == ij} || cr.exists {_.pos == ij}
   }
 
-  def collectGems(p:Player):(Player, EntityManager) = {
-    val seed = (p, List[MineralDrop]())
-    val (newPl, newGems) = gems.foldLeft(seed) { case ((pl, list), g) =>
-      if (g.pos == p.pos) {
-        (p.collect(g), list)
+  def collectPickups(p:Player):(Player, EntityManager) = {
+    val seed = (p, List[Pickup[_]]())
+    val (newPl, newGems) = picks.foldLeft(seed) { case ((pl, list), g) =>
+      if (g.getPos == p.pos) {
+
+        (g.collect(p), list)
       } else {
         (p, g :: list)
       }
     }
-    (newPl, copy(gems=newGems))
+    (newPl, copy(picks=newGems))
   }
 
   def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[KillZone[_]]) = {
@@ -83,17 +95,17 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], gems:Seq[
 
   def doGravity(tr:TerrainCache) = {
     val newCaps = caps.map {_.toMassive.update(tr)}
-    val newGems = gems.map {_.toMassive.update(tr)}
+    val newGems = picks.map {_.toMassive.update(tr)}
     val (offscreen, onscreen) = cr.partition { c => tr.isLoaded(c.pos) }
     val newCr = offscreen.map {_.toMassive.update(tr)} ++ onscreen
     copy(caps = newCaps,
-         gems = newGems,
+         picks = newGems,
          cr = newCr)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
     (tr <++< caps.map {_.draw _}
-        <++< gems.map{_.draw _}
+        <++< picks.map{_.draw _}
         <++< ropes.map{_.draw _}
         <++< cr.map{_.draw _}
       )

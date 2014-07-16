@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.{Creature, MineralDrop}
+import in.dogue.profundus.entities.{Pickup, Creature, MineralPickup}
 import in.dogue.antiqua.geometry.Line
 
 
@@ -34,6 +34,10 @@ case class TerrainCache private (cols:Int, rows:Int,
                                  r:Random) {
   def isSolid(ij:Cell):Boolean = {
     get(ij).isSolid(convert(ij))
+  }
+
+  def isBackgroundSolid(ij:Cell):Boolean = {
+    get(ij).isBackgroundSolid(convert(ij))
   }
 
   def isGrounded(ij:Cell):Boolean = {
@@ -68,7 +72,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:Cell, dmg:Int):(TerrainCache, Seq[MineralDrop], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int):(TerrainCache, Seq[Pickup[_]], Int, Boolean) = {
     val index = getIndex(ij)
     val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg)
     val updated = tMap.updated(index, broke)

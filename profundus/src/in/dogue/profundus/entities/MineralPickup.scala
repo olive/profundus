@@ -7,29 +7,26 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.world.WorldTile
 
-object MineralDrop {
+object MineralPickup {
   def create(ij:Cell, c:Color) = {
     def anim = Animation.create(Vector(
       (5, CP437.●.mkTile(Color.Black, c)),
       (Int.MaxValue, CP437.`.`.mkTile(Color.Black, c))
     ))
-    MineralDrop(ij, anim, Grounded)
+    MineralPickup(ij, anim)
   }
 }
 
-case class MineralDrop private (ij:Cell, a:Animation, fall:FallState) {
-  def pos = ij
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = copy(ij=ij)
-
-  def setState(f:FallState) = {
-    copy(fall=f)
-  }
+case class MineralPickup private (ij:Cell, a:Animation) {
 
   def update = copy(a=a.update)
-  def draw(tr:TileRenderer):TileRenderer = {
+
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <+< a.drawFg(ij.x, ij.y)
   }
 
-
-  def toMassive:Massive[MineralDrop] = Massive(_.pos, _.move, _.setState, fall, this)
+  def onPickup(pl:Player) = {
+    pl.collectMineral(this)
+  }
+  def toPickup:Pickup[MineralPickup] = Pickup(ij, Grounded, _.update, _.onPickup, _.draw, this)
 }

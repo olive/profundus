@@ -3,7 +3,7 @@ package in.dogue.profundus.deformations
 import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.MineralDrop
+import in.dogue.profundus.entities.{Pickup, MineralPickup}
 
 object ExplosionDeformation {
   def create(i:Int, j:Int, tickDamage:Int, radius:Int, speed:Int) = {
@@ -25,7 +25,7 @@ case class ExplosionDeformation private (i:Int, j:Int, tickDamage:Int, radius:In
           None
         }
       }
-      val seed = (tc, Seq[MineralDrop]())
+      val seed = (tc, Seq[Pickup[_]]())
       val (newTc, mins) = indices.flatten.foldLeft(seed) { case ((ttc, mins), pr) =>
         val (newTc, drops, _, _) = ttc.hit(pr, tickDamage)
         (newTc, mins ++ drops)

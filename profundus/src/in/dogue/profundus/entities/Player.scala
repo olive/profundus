@@ -74,7 +74,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            fall:FallState, state:LivingState, justKilled:Boolean,
                            moveT:Int) {
 
-  def collect(g:MineralDrop) = copy(inv=inv.collect(g), log=log.getGem)
+  def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
+  def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
   def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
   def pos = (x, y)
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
