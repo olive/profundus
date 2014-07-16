@@ -1,8 +1,6 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.entities.KillZone
-import in.dogue.profundus.entities.SingleTileKillZone
 
 case class SingleTileKillZone(ij:Cell) {
   def update = this

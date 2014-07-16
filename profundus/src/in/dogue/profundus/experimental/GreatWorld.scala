@@ -28,7 +28,7 @@ object GreatWorld {
     val em = gw.em
     val p = gw.p
     val curState = p.fall
-    val newState = if (em.isRope(p.pos)) {
+    val newState = if (em.isRope(p.pos) && p.state == Alive) {
       Floating
     } else {
       curState match {
