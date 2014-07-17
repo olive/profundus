@@ -77,7 +77,7 @@ object GreatWorld {
   private def updateShovel : Update[Unit] = standard { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
-    val newEm = pp.shovelPos match {
+    val newEm = pp.toolPos match {
       case None => em
       case Some(pos) => em.hitRopes(pos)
 

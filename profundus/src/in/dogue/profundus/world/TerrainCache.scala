@@ -50,7 +50,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   def isLoaded(ij:Cell):Boolean = {
-    tMap.contains(getIndex(ij))
+    tMap.contains(getIndex(ij --> Direction.Down))
   }
 
   def hasLineOfSight(src:Cell, dst:Cell) = {
@@ -59,7 +59,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   def getTouching(ij:Cell):Direction => Option[WorldTile] = {
-    def g(p:Cell) = (get(p).tiles.getOption _).tupled(convert(p)).filter { !_.isWalkable }
+    def g(p:Cell) = ((get(p).tiles.getOption _).tupled(convert(p)).filter { !_.isWalkable }).onlyIf(isLoaded(p)).flatten
     import Direction._
     def touching(d:Direction) = d match {
       case Down => g(ij +| 1)

@@ -19,12 +19,12 @@ object HudTool {
   ))
 
 
-  def create(bar:DurabilityBar, tf:TextFactory, inv:Inventory) = {
+  def create(bar:ValueBar, tf:TextFactory, inv:Inventory) = {
     HudTool(bar, tf, inv.tool.`type`.icon)
   }
 }
 
-case class HudTool private (bar:DurabilityBar, tf:TextFactory, icon:TileGroup) {
+case class HudTool private (bar:ValueBar, tf:TextFactory, icon:TileGroup) {
   def withTool(tool:Tool) = {
     val d = tool.dura
     val max = tool.`type`.durability

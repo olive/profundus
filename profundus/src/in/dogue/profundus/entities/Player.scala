@@ -60,6 +60,7 @@ object Player {
     val i = ij.x
     val j = ij.y
     Player(i, j - 1, i, j, face,
+           StaminaBar.create(100, 5),
            shovel, getLive,
            false, false, false, false,
            Inventory.create(lo), PlayerLog.create(lo),
@@ -69,6 +70,7 @@ object Player {
 }
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
+                           stam:StaminaBar,
                            shovel:ShovelSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory, log:PlayerLog,
@@ -77,7 +79,9 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
   def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
-  def shovelPos = (isShovelling && inv.hasShovelUse).select(None, ((x, y)-->face).some)
+  def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
+  def hasStamina = stam.amt >= inv.tool.`type`.stamCost
+  def canUseTool = inv.hasShovelUse && hasStamina
   def pos = (x, y)
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
@@ -106,7 +110,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
       log
     }
     val newLog2 = broken.select(newLog, newLog.digTile)
-    copy(log=newLog2, inv=newInv)
+    val newStam = stam.remove(inv.tool.`type`.stamCost)
+    copy(log=newLog2, inv=newInv, stam=newStam)
   }
 
   def chooseFace(dx:Int, dy:Int):Direction = {
@@ -153,11 +158,12 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def update = {
 
-    val newP = copy(isShovelling=Controls.Space.justPressed,
+    val newP = copy(isShovelling=Controls.Space.justPressed && canUseTool,
                     isClimbing=Controls.Action.justPressed,
                     isBombing=Controls.Capsule.justPressed,
                     isRoping=Controls.Rope.justPressed,
-                    log=log.setDepth(pos.y).incrTime)
+                    log=log.setDepth(pos.y).incrTime,
+                    stam=stam.update)
     if (justKilled) {
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {

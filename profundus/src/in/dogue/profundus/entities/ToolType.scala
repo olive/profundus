@@ -22,12 +22,14 @@ case class Tool(dura:Int, `type`:ToolType) {
 sealed trait ToolType {
   val durability:Int
   val digDamage:Int
+  val stamCost:Int
   val icon:TileGroup
   def toTool = Tool(durability, this)
 }
 case object Shovel extends ToolType {
   override val durability = 1000
   override val digDamage = 3
+  override val stamCost = 5
   override val icon = Tile.makeGroup(Vector(
     (0, 0, CP437.`[`, Black, Brown),
     (1, 0, CP437.`─`, Black, Brown),
@@ -39,6 +41,7 @@ case object Shovel extends ToolType {
 case object Mallet extends ToolType {
   override val durability = 2000
   override val digDamage = 5
+  override val stamCost = 15
   override val icon = Tile.makeGroup(Vector(
     (1, 0, CP437.`─`, Black, Brown),
     (2, 0, CP437.`─`, Black, Brown),
@@ -48,6 +51,7 @@ case object Mallet extends ToolType {
 case object Mattock extends ToolType {
   override val durability = 500
   override val digDamage = 15
+  override val stamCost = 10
   override val icon = Tile.makeGroup(Vector(
     (1, 0, CP437.`─`, Black, Brown),
     (2, 0, CP437.`─`, Black, Brown),
@@ -57,6 +61,7 @@ case object Mattock extends ToolType {
 case object Rapier extends ToolType {
   override val durability = 100
   override val digDamage = 1
+  override val stamCost = 5
   override val icon = Tile.makeGroup(Vector(
     (0, 0, `CP437`.┼, Black, Brown),
     (1, 0, CP437.`─`, Black, Grey),

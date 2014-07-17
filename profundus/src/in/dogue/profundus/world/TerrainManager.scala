@@ -10,11 +10,11 @@ import scala.Some
 
 class TerrainManager {
   private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[Pickup[_]], Player) = {
-    pl.shovelPos match {
-      case None => (tc, Seq(), pl)
+    pl.toolPos match {
       case Some(p) =>
         val (wHit, drops, damage, broken) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/)
         (wHit, drops, pl.hitTool(damage, broken))
+      case None => (tc, Seq(), pl)
     }
   }
 

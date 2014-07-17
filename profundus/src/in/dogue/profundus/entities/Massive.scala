@@ -10,8 +10,11 @@ case class Massive[T](pos: T => Cell,
                       setState: T => FallState => T,
                       state:FallState,
                       self:T) {
-  def update(tc:TerrainCache) = {
+  def update(tc:TerrainCache): T = {
     val epos = pos(self)
+    if (!tc.isLoaded(epos)) {
+      return self
+    }
     val grounded = tc.isGrounded(epos)
     state match {
       case Floating => self

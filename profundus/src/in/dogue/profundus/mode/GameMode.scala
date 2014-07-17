@@ -6,6 +6,7 @@ import in.dogue.profundus.entities._
 import in.dogue.profundus.ui.Hud
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.world.GreatWorld
+import in.dogue.profundus.input.Controls
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
@@ -13,7 +14,7 @@ object GameMode {
     val r = new Random(0)
     val hudHeight = 5
     val gw = GreatWorld.create(worldCols, rows - hudHeight, lo, r)
-    val hud = Hud.create(cols, hudHeight, gw.p.inv)
+    val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.stam.vb)
     GameMode(cols, rows, gw, hud, r)
   }
 }
@@ -21,15 +22,21 @@ object GameMode {
 case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random) {
 
   def update = {
-    val updated = selfUpdate
-    updated.gw.p.state match {
-      case Dead => DeadMode.create(cols, rows, this, updated.gw.p.log).toMode
-      case Alive => updated.toMode
+    if (Controls.Pause.justPressed) {
+      PauseMode.create(this.toMode).toMode
+    } else {
+      val updated = selfUpdate
+      updated.gw.p.state match {
+        case Dead => DeadMode.create(cols, rows, this, updated.gw.p.log).toMode
+        case Alive => updated.toMode
+      }
     }
+
   }
 
   def selfUpdate:GameMode = {
-    copy(gw=gw.update, hud=hud.withInventory(gw.p.inv).atDepth(gw.p.y))
+    val pl = gw.p
+    copy(gw=gw.update, hud=hud.withInventory(pl.inv).atDepth(pl.y).withStam(pl.stam.amt))
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

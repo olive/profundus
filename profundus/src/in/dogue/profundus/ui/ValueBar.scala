@@ -5,14 +5,14 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-object DurabilityBar {
-  def create(max:Int) = {
-    val tFull = CP437.█.mkTile(Color.Black, Color.White)
-    val tHalf = CP437.▌.mkTile(Color.Black, Color.White)
-    DurabilityBar(max, max, tFull, tHalf)
+object ValueBar {
+  def create(max:Int, c:Color) = {
+    val tFull = CP437.█.mkTile(Color.Black, c)
+    val tHalf = CP437.▌.mkTile(Color.Black, c)
+    ValueBar(max, max, tFull, tHalf)
   }
 }
-case class DurabilityBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
+case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
 
   def isEmpty = amt == 0
 

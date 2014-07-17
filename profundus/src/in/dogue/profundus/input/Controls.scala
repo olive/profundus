@@ -15,6 +15,7 @@ object Controls {
   val Action = makeKb(Input.Keys.N)
   val Capsule = makeKb(Input.Keys.E)
   val Rope = makeKb(Input.Keys.I)
+  val Pause = makeKb(Input.Keys.P)
   val Escape = makeKb(Input.Keys.ESCAPE)
 
   val AxisX = new AxisControl(Left, Right)
