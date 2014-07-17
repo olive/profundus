@@ -6,8 +6,10 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
-import in.dogue.profundus.world.TerrainCache
+import in.dogue.profundus.world.{WorldSpawn, FoodSpawn, CreatureSpawn, TerrainCache}
 import scala.util.Random
+import in.dogue.profundus.entities.killzones.KillZone
+import in.dogue.profundus.entities.pickups.Pickup
 
 object EntityManager {
 
@@ -38,6 +40,16 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
       }
     }
     copy(ropes=newRopes)
+  }
+
+  def addSpawns(spawns:Seq[WorldSpawn]) = {
+    spawns.foldLeft(this) { case (man, sp) =>
+      sp match {
+        case CreatureSpawn(cs) => man.spawnCreatures(cs)
+        case FoodSpawn(fs) => man.addDrops(fs)
+      }
+
+    }
   }
 
   def spawnCreatures(cs:Seq[Creature]) = {

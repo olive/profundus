@@ -11,16 +11,17 @@ import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.world.{Spike, WorldTile}
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.Game
+import in.dogue.profundus.entities.pickups.{FoodType, RopePickup, MineralPickup}
 
 
 object PlayerLog {
   def create(lo:Loadout) = {
-    PlayerLog(lo, "name", "title", "killedby", 0, 0, lo.gems, 0, 0, 0, 0, 0, 0)
+    PlayerLog(lo, "name", "title", "killedby", 0, 0, lo.gems, 0, 0, 0, 0, 0, 0, Vector())
   }
 
 }
 
-case class PlayerLog(lo:Loadout, name:String, title:String, killedBy:String, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int) {
+case class PlayerLog(lo:Loadout, name:String, title:String, killedBy:String, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
   def digTile = copy(tilesDug=tilesDug+1)
   def useBomb = copy(bombsUsed = bombsUsed + 1)
   def useRope = copy(ropesUsed = ropesUsed + 1)
@@ -29,6 +30,7 @@ case class PlayerLog(lo:Loadout, name:String, title:String, killedBy:String, bom
   def useFuel = copy(fuelUsed = fuelUsed + 1)
   def breakTool = copy(toolsBroken = toolsBroken + 1)
   def setDepth(d:Int) = copy(deepest = math.max(d, deepest))
+  def eatFood(food:FoodType) = copy(foodEaten=foodEaten :+ food)
   def incrTime = copy(timeSpent = timeSpent + 1)
 }
 
@@ -55,7 +57,7 @@ object Player {
     code.mkTile(Color.Black, Color.Red.dim(2))
   }
   def create(ij:Cell, face:Direction, lo:Loadout) = {
-    val shovel = ShovelSprite.create
+    val shovel = ToolSprite.create
 
     val i = ij.x
     val j = ij.y
@@ -71,7 +73,7 @@ object Player {
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            stam:StaminaBar,
-                           shovel:ShovelSprite, t:Direction => Tile,
+                           shovel:ToolSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory, log:PlayerLog,
                            fall:FallState, state:LivingState, justKilled:Boolean,
@@ -79,6 +81,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
   def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
+  def collectFood(typ:FoodType) = copy(stam=stam.eatFood(typ), log=log.eatFood(typ))
   def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = inv.hasShovelUse && hasStamina

@@ -8,6 +8,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.world.{Spike, WorldTile, TerrainCache}
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle}
+import in.dogue.profundus.entities.killzones.{SingleTileKillZone, KillZone}
 
 object Creature {
   def create(i:Int, j:Int) = {

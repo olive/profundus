@@ -4,9 +4,9 @@ import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.entities.{Pickup, MineralPickup}
 import scala.collection.script.Update
 import in.dogue.antiqua.data.Direction
+import in.dogue.profundus.entities.pickups.{Pickup, MineralPickup}
 
 
 sealed trait TileType {

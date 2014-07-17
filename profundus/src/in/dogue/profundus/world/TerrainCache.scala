@@ -5,8 +5,9 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.{Pickup, Creature, MineralPickup}
+import in.dogue.profundus.entities.Creature
 import in.dogue.antiqua.geometry.Line
+import in.dogue.profundus.entities.pickups.{Toadstool, FoodPickup, Pickup}
 
 
 object TerrainCache {
@@ -24,7 +25,13 @@ object TerrainCache {
         val (x, y) = (r.nextInt(cols), r.nextInt(rows))
         Creature.create(x, y + i*rows)
       }
-      val cs = (i > 0).select(Seq(), made)
+
+      val food=(0 until 10) map { case _ =>
+        val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+        FoodPickup.create((x, y + i*rows), Toadstool).toPickup
+
+      }
+      val cs = (i > 0).select(Seq(), Seq(CreatureSpawn(made), FoodSpawn(food)))
       (t, cs)
     }
     val (first,_) = gen(0, r, None)
@@ -34,7 +41,7 @@ object TerrainCache {
 }
 case class TerrainCache private (cols:Int, rows:Int,
                                  tMap:Map[Int, Terrain], max:Int, min:Int,
-                                 mkNext:(Int, Random, Option[Terrain]) => (Terrain, Seq[Creature]),
+                                 mkNext:(Int, Random, Option[Terrain]) => (Terrain, Seq[WorldSpawn]),
                                  r:Random) {
   def isSolid(ij:Cell):Boolean = {
     get(ij).isSolid(convert(ij))
@@ -89,19 +96,19 @@ case class TerrainCache private (cols:Int, rows:Int,
     yy/rows
   }
 
-  def checkPositions(ij:Cell):(TerrainCache, Seq[Creature]) = {
+  def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn]) = {
     val index = getIndex(ij)
-    val seed = (this, Seq[Creature]())
-    Seq(index+2, index+2, index-1).foldLeft(seed) { case ((map, cs), i) =>
+    val seed = (this, Seq[WorldSpawn]())
+    Seq(index+2, index+1, index-1).foldLeft(seed) { case ((map, cs), i) =>
       val (next, newCs) = map.check(i)
       (next, cs ++ newCs)
     }
   }
 
   //fixme -- code clones
-  private def check(i:Int):(TerrainCache, Seq[Creature]) = {
+  private def check(i:Int):(TerrainCache, Seq[WorldSpawn]) = {
     val (newMap, newMin, newMax, cs) = if (i > max) {
-      val seed = (tMap, Seq[Creature]())
+      val seed = (tMap, Seq[WorldSpawn]())
       val (mm, cs) = ((max+1) to i).foldLeft(seed) { case ((map, cs), k) =>
         val prev = map(k-1)
         val (next, moreCs) = mkNext(k, r, prev.some)
@@ -109,7 +116,7 @@ case class TerrainCache private (cols:Int, rows:Int,
       }
       (mm, min, i, cs)
     } else if (i < min) {
-      val seed = (tMap, Seq[Creature]())
+      val seed = (tMap, Seq[WorldSpawn]())
       val (mm, cs) = ((min - 1) to (i, -1)).foldLeft(seed) { case ((map, cs), k) =>
         val prev = map(k+1)
         val (next, moreCs)  = mkNext(k, r, prev.some)

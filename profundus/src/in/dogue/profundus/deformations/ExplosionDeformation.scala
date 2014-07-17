@@ -3,7 +3,7 @@ package in.dogue.profundus.deformations
 import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.{Pickup, MineralPickup}
+import in.dogue.profundus.entities.pickups.Pickup
 
 object ExplosionDeformation {
   def create(i:Int, j:Int, tickDamage:Int, radius:Int, speed:Int) = {

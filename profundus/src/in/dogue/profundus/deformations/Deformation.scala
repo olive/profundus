@@ -3,7 +3,7 @@ package in.dogue.profundus.deformations
 import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.{Pickup}
+import in.dogue.profundus.entities.pickups.Pickup
 
 case class Deformation[T](up:T => T,
                           done:T => Boolean,

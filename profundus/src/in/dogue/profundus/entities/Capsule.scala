@@ -8,6 +8,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
 import in.dogue.profundus.world.WorldTile
+import in.dogue.profundus.entities.killzones.{KillZone, ExplosionKillZone}
 
 object Capsule {
   val stick = CP437.║.mkTile(Color.Black, Color.Red.dim(2))

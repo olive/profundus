@@ -2,12 +2,12 @@ package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Border, TextFactory, Tile}
 import in.dogue.profundus.particles.Particle
-import in.dogue.profundus.entities.KillZone
 import in.dogue.profundus.deformations.Deformation
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
 import sun.io.CharToByteCp437
 import in.dogue.profundus.world.{NewDeformations, NewKillZones, NewParticles}
+import in.dogue.profundus.entities.killzones.KillZone
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle[_]]) {

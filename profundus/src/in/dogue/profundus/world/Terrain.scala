@@ -6,11 +6,11 @@ import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.{Pickup, MineralPickup}
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.antiqua.geometry.{Circle, Line, Ellipse}
 import com.deweyvm.gleany.data.Point2d
 import in.dogue.profundus.doodads.{Doodad, Moon}
+import in.dogue.profundus.entities.pickups.Pickup
 
 
 case class Scheme(bgMod:Random => Color,
@@ -37,11 +37,6 @@ case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:S
     val clayTile = clay.mkTile(r, CP437.-)
     val empty = emptyTile(r)
     Clay.create(clayTile, empty)
-  }
-
-  def `make???`(r:Random) = {
-    val tile = ??? //.mkTile(r, CP437.⌂)
-    ???
   }
 
   def makeRock3(r:Random) = {

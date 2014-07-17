@@ -7,6 +7,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.algebra.Monoid
+import in.dogue.profundus.entities.pickups.{Pickup, RopePickup}
 
 sealed trait RopeState {
   val throwHeight = 6

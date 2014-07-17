@@ -1,11 +1,11 @@
-package in.dogue.profundus.entities
+package in.dogue.profundus.entities.pickups
 
 import in.dogue.antiqua.graphics.{TileRenderer, Animation}
-import in.dogue.antiqua.data.{Direction, CP437}
+import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.world.WorldTile
+import in.dogue.profundus.entities.{Grounded, Player}
 
 object MineralPickup {
   def create(ij:Cell, c:Color) = {
@@ -28,5 +28,5 @@ case class MineralPickup private (ij:Cell, a:Animation) {
   def onPickup(pl:Player) = {
     pl.collectMineral(this)
   }
-  def toPickup:Pickup[MineralPickup] = Pickup(ij, Grounded, _.update, _.onPickup, _.draw, this)
+  def toPickup:Pickup[MineralPickup] = Pickup.create(ij, _.update, _.onPickup, _.draw, this)
 }

@@ -4,6 +4,7 @@ import in.dogue.antiqua.Antiqua._
 import in.dogue.profundus.ui.ValueBar
 import in.dogue.antiqua.graphics.TileRenderer
 import com.deweyvm.gleany.graphics.Color
+import in.dogue.profundus.entities.pickups.FoodType
 
 object StaminaBar {
   def create(max:Int, speed:Int) = StaminaBar(max, max, speed, 0, ValueBar.create(max, Color.Green))
@@ -17,6 +18,11 @@ case class StaminaBar private (amt:Int, max:Int, regenSpeed:Int, t:Int, vb:Value
       (t+1, amt)
     }
     copy(t=newT, amt=newAmt, vb=vb.update(newAmt, max))
+  }
+
+  def eatFood(food:FoodType):StaminaBar = {
+    println("eaten")
+    this
   }
 
   def remove(i:Int) = copy(amt=amt.drop(i), vb=vb.update(amt.drop(i), max))

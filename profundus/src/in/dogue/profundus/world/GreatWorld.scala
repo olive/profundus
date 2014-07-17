@@ -11,8 +11,9 @@ import scala.util.Random
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
-import in.dogue.profundus.entities.KillZone
 import in.dogue.antiqua.data.Direction
+import in.dogue.profundus.entities.killzones.KillZone
+import in.dogue.profundus.entities.pickups.Pickup
 
 sealed trait NewSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends NewSpawn
@@ -106,9 +107,10 @@ object GreatWorld {
   private def updateCache : Update[Unit] = standard { case (gw, ()) =>
     val ppos = gw.p.pos
     val cache = gw.cache
-    val (tc, cs) = cache.checkPositions(ppos)
-    val em = gw.em.spawnCreatures(cs)
-    gw.setTc(tc.update(ppos)).setEm(em)
+    val em = gw.em
+    val (tc, spawns) = cache.checkPositions(ppos)
+    val newEm = em.addSpawns(spawns)
+    gw.setTc(tc.update(ppos)).setEm(newEm)
   }
 
   private def updateEs : Update[Unit] = { case (gw, ()) =>
@@ -193,7 +195,7 @@ object GreatWorld {
     val (cache, spawn, spawnFace) = TerrainCache.create(cols, rows, r)
     val (tc, cs) = cache.checkPositions(spawn)
     val p = Player.create(spawn, spawnFace, lo)
-    val em = EntityManager.create(r).spawnCreatures(cs)
+    val em = EntityManager.create(r).addSpawns(cs)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val gw = GreatWorld(p, em, tm, pm, tc, Seq(), Seq(), Seq())

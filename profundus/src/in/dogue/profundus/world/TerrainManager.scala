@@ -7,6 +7,7 @@ import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.Massive
 import in.dogue.profundus.particles.Particle
 import scala.Some
+import in.dogue.profundus.entities.pickups.Pickup
 
 class TerrainManager {
   private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[Pickup[_]], Player) = {

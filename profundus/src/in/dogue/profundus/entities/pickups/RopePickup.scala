@@ -1,9 +1,10 @@
-package in.dogue.profundus.entities
+package in.dogue.profundus.entities.pickups
 
 import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color
+import in.dogue.profundus.entities.{Grounded, Player}
 
 
 object RopePickup {
@@ -24,5 +25,5 @@ case class RopePickup private (ij:Cell, t:Tile) {
   def onPickup(pl:Player) = {
     pl.collectRope(this)
   }
-  def toPickup:Pickup[RopePickup] = Pickup(ij, Grounded, _.update, _.onPickup, _.draw, this)
+  def toPickup:Pickup[RopePickup] = Pickup.create(ij, _.update, _.onPickup, _.draw, this)
 }

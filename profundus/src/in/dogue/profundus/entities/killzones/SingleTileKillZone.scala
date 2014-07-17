@@ -1,4 +1,4 @@
-package in.dogue.profundus.entities
+package in.dogue.profundus.entities.killzones
 
 import in.dogue.antiqua.Antiqua._
 

@@ -3,6 +3,7 @@ package in.dogue.profundus.entities
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.mode.loadout.Loadout
+import in.dogue.profundus.entities.pickups.{RopePickup, MineralPickup}
 
 object Inventory {
   def create(lo:Loadout):Inventory = {
