@@ -136,7 +136,7 @@ object GreatWorld {
     (gw.setEm(newEm), Seq(kills.ns))
   }
 
-  private def updateDeformations :Update[Unit] = standard { case (gw, ()) =>
+  private def updateDeformations : Update[Unit] = standard { case (gw, ()) =>
     val ds = gw.ds
     val cache = gw.cache
     val seed = (cache, Seq[Pickup[_]]())
@@ -184,7 +184,7 @@ object GreatWorld {
       )
   }
 
-  private def standard[T](func:(GreatWorld, T) => GreatWorld): Update[T] = { case (gw, t) =>
+  private def standard[T](func:(GreatWorld, T) => GreatWorld) : Update[T] = { case (gw, t) =>
     (func(gw, t), Seq())
   }
 

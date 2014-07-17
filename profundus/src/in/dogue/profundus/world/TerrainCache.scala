@@ -19,8 +19,12 @@ object TerrainCache {
         Terrain.createCave _
       }
       val t = gen(i*rows, cols, rows, copy)
-      val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-      val cs = (i > 0).select(Seq(), Seq(Creature.create(x, y + i*rows)))
+
+      val made = (0 until 10) map { case _ =>
+        val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+        Creature.create(x, y + i*rows)
+      }
+      val cs = (i > 0).select(Seq(), made)
       (t, cs)
     }
     val (first,_) = gen(0, r, None)

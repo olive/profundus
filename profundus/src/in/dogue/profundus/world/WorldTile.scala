@@ -41,6 +41,14 @@ case class Empty(override val tile:Tile, override val bgSolid:Boolean) extends T
   }
 }
 
+object Shaft { def create(t:Tile) = Shaft(t) }
+case class Shaft private (override val tile:Tile) extends TileType {
+  override val bg = tile
+  override def hit = { case _ =>
+    (this, Seq(), 1, false)
+  }
+}
+
 object Rock3 { def create(t:Tile, bg:Tile) = Rock3(t, bg, 50) }
 case class Rock3(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 50

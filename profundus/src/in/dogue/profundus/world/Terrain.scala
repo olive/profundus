@@ -21,7 +21,7 @@ case class Scheme(bgMod:Random => Color,
 
 }
 
-case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, rock2:Scheme, rock3:Scheme, gem:Scheme, clay:Scheme, empty:Scheme) {
+case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:Scheme, rock2:Scheme, rock3:Scheme, gem:Scheme, clay:Scheme, shaft:Scheme, empty:Scheme) {
 
   private def emptyTile(r:Random) = {
     val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
@@ -87,9 +87,21 @@ case class TerrainScheme(sky:Double => Scheme, grass:Scheme, dirt:Scheme, rock:S
     Dirt.create(grassTile, empty)
   }
 
+  def makeShaft(r:Random) = {
+    val shaftCode = CP437.⌂
+    val shaftTile = shaft.mkTile(r, shaftCode)
+    Shaft.create(shaftTile)
+  }
+
 }
 
 object Terrain {
+
+  val shaftScheme = Scheme(
+    (r:Random) => Color.Grey.dim(12 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(9 + r.nextDouble)
+  )
+
   val dirtScheme = Scheme(
     (r:Random) => Color.Brown.dim(6 + r.nextDouble),
     (r:Random) => Color.Brown.dim(3 + r.nextDouble)
@@ -139,7 +151,7 @@ object Terrain {
     (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(3 + r.nextDouble)
   )
 
-  val scheme = TerrainScheme(skyScheme, grassScheme, dirtScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, clayScheme, emptyScheme)
+  val scheme = TerrainScheme(skyScheme, grassScheme, dirtScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, clayScheme, shaftScheme, emptyScheme)
 
   def createCave(y:Int, cols:Int, rows:Int, r:Random) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
@@ -151,7 +163,10 @@ object Terrain {
       val clay = scheme.makeClay _
       val mineral = scheme.makeMineral _
       val empty = scheme.makeEmpty(true) _
-      val state = if (d < -0.2) {
+      val shaft = scheme.makeShaft _
+      val state = if (i <= 0 || (i <= 1 && r.nextDouble < 0.6) || i >= cols - 1 || (i >= cols - 2 && r.nextDouble < 0.6)) {
+        shaft
+      } else if (d < -0.2) {
         if (r.nextDouble > 0.99) {
           if (r.nextBoolean) {
             rock3
@@ -170,6 +185,7 @@ object Terrain {
       } else {
         empty
       }
+
       WorldTile(state(r))
     }
     placeSpikes(Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
