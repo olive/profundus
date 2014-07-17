@@ -14,7 +14,7 @@ object GameMode {
     val r = new Random(0)
     val hudHeight = 5
     val gw = GreatWorld.create(worldCols, rows - hudHeight, lo, r)
-    val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.stam.vb)
+    val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.getStamBar)
     GameMode(cols, rows, gw, hud, r)
   }
 }
@@ -36,7 +36,7 @@ case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random
 
   def selfUpdate:GameMode = {
     val pl = gw.p
-    copy(gw=gw.update, hud=hud.withInventory(pl.inv).atDepth(pl.y).withStam(pl.stam.amt))
+    copy(gw=gw.update, hud=hud.withInventory(pl.inv).atDepth(pl.y).withStam(pl.getStamBar, pl.getStamIcon))
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

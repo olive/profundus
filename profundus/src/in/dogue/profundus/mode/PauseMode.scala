@@ -15,7 +15,6 @@ case class PauseMode(m:Mode[_], text:Text, t:Int) {
   def update = {
     val newPause = copy(t=t+1).toMode
     if (Controls.Pause.justPressed) {
-      println("unpause")
       m
     } else {
       newPause

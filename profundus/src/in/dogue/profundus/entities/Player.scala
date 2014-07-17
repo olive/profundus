@@ -85,6 +85,9 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = inv.hasShovelUse && hasStamina
+
+  def getStamBar = stam.vb
+  def getStamIcon = stam.buff.icon
   def pos = (x, y)
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)

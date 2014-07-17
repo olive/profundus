@@ -13,7 +13,7 @@ object ValueBar {
   }
 }
 case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
-
+  def setColor(c:Color) = copy(tFull=tFull.setFg(c), tHalf=tHalf.setFg(c))
   def isEmpty = amt == 0
 
   def update(amt:Int, max:Int) = {

@@ -16,21 +16,22 @@ object Hud {
   val ropeIcon = CP437.⌡.mkTile(Color.Black, Color.Brown)
   val fuelIcon = CP437.f.mkTile(Color.Black, Color.Red)
   def create(cols:Int, rows:Int, inv:Inventory, stam:ValueBar):Hud = {
-    val rect = Rect.createPlain(cols, rows, CP437.` `.mkTile(Color.Black, Color.White))
+    val blank = CP437.` `.mkTile(Color.Black, Color.White)
+    val rect = Rect.createPlain(cols, rows, blank)
     val tf = Profundus.tf
     val tool = HudTool.create(ValueBar.create(inv.tool.`type`.durability, Color.White), tf, inv)
-    Hud(cols, rect, inv, tool, stam, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), tf)
+    Hud(cols, rect, inv, tool, stam, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), tf)
   }
 }
 
 case class Hud private (height:Int, rect:Rect,
                         inv:Inventory,
                         tool:HudTool,
-                        stamBar:ValueBar,
+                        stamBar:ValueBar, stamIcon:Tile,
                         text:Text, depth:Text, depthAmt:Text,
                         tf:TextFactory) {
   def atDepth(i:Int) = copy(depthAmt=tf.create("%4s".format(i.toString)))
-  def withStam(s:Int) = copy(stamBar=stamBar.update(s, stamBar.max))
+  def withStam(s:ValueBar, icon:Tile) = copy(stamBar=s, stamIcon=icon)
   def withInventory(inv:Inventory) = {
     copy(inv=inv, tool = tool.withTool(inv.tool))
   }
@@ -54,7 +55,7 @@ case class Hud private (height:Int, rect:Rect,
         <+< drawDepth(1, 2)
         <+< drawInventory(28, 1)
         <+< tool.draw(13, 1)
-        <+< stamBar.draw(13, 3)
+        <+< stamBar.draw(13, 3) <+ (12, 3, stamIcon)
       )
   }
 }

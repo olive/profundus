@@ -28,7 +28,7 @@ object TerrainCache {
 
       val food=(0 until 10) map { case _ =>
         val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-        FoodPickup.create((x, y + i*rows), Toadstool).toPickup
+        FoodPickup.create((x, y + i*rows), Toadstool(r.nextInt())).toPickup
 
       }
       val cs = (i > 0).select(Seq(), Seq(CreatureSpawn(made), FoodSpawn(food)))

@@ -8,12 +8,15 @@ import in.dogue.profundus.entities.Player
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 
-sealed trait FoodType
-case object Toadstool extends FoodType
+sealed trait FoodType {
+  val seed:Int /** seed for random effects */
+}
+case class Toadstool(override val seed:Int) extends FoodType
 
 object FoodPickup {
+  val toadstool = CP437.τ.mkTile(Color.Black, Color.White)
   def create(ij:Cell, typ:FoodType) = {
-    val tile = CP437.τ.mkTile(Color.Black, Color.White)
+    val tile = toadstool
     FoodPickup(ij, tile, typ)
   }
 

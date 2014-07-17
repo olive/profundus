@@ -90,11 +90,11 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
   def collectPickups(p:Player):(Player, EntityManager) = {
     val seed = (p, List[Pickup[_]]())
     val (newPl, newGems) = picks.foldLeft(seed) { case ((pl, list), g) =>
-      if (g.getPos == p.pos) {
+      if (g.getPos == pl.pos) {
 
-        (g.collect(p), list)
+        (g.collect(pl), list)
       } else {
-        (p, g :: list)
+        (pl, g :: list)
       }
     }
     (newPl, copy(picks=newGems))
