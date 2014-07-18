@@ -23,6 +23,7 @@ object TerrainCache {
 
       val made = (0 until 10) map { case _ =>
         val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+        println((x, y + i*rows))
         Creature.create(x, y + i*rows)
       }
 

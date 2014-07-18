@@ -92,7 +92,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
     if (newTouching(Direction.Down).exists {
-      case WorldTile(Spike(_,_,dir,_)) => true
+      case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
       case a => false
 
     }) {

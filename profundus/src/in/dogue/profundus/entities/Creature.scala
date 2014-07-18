@@ -46,7 +46,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newCr = copy(i=ij.x, j=ij.y)
     if (newTouching(Direction.Down).exists {
-      case WorldTile(Spike(_,_,dir,_)) => true
+      case WorldTile(Spike(_,_,dir,_)) if false => true
       case a => false
 
     }) {

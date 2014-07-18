@@ -45,7 +45,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
   def addSpawns(spawns:Seq[WorldSpawn]) = {
     spawns.foldLeft(this) { case (man, sp) =>
       sp match {
-        case CreatureSpawn(cs) => man.spawnCreatures(cs)
+        case CreatureSpawn(cs) =>
+          man.spawnCreatures(cs)
         case FoodSpawn(fs) => man.addDrops(fs)
       }
 
@@ -61,7 +62,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
   }
 
   def doKill(kz:Seq[KillZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
-    val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} && !(c.live == Alive)}
+    val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} && (c.live == Alive)}
     val ps = dead.map {_.getDeathParticle}
     (copy(cr=newCr), ps)
   }
@@ -91,7 +92,6 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
     val seed = (p, List[Pickup[_]]())
     val (newPl, newGems) = picks.foldLeft(seed) { case ((pl, list), g) =>
       if (g.getPos == pl.pos) {
-
         (g.collect(pl), list)
       } else {
         (pl, g :: list)
@@ -109,7 +109,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
     val newCaps = caps.map {_.toMassive.update(tr)}
     val newGems = picks.map {_.toMassive.update(tr)}
     val (offscreen, onscreen) = cr.partition { c => tr.isLoaded(c.pos) }
-    val newCr = offscreen.map {_.toMassive.update(tr)} ++ onscreen
+    val newCr = onscreen.map {_.toMassive.update(tr)} ++ offscreen
     copy(caps = newCaps,
          picks = newGems,
          cr = newCr)
