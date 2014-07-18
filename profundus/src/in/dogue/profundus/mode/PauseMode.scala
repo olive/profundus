@@ -22,7 +22,7 @@ case class PauseMode(m:Mode[_], text:Text, t:Int) {
   }
   def draw(tr:TileRenderer):TileRenderer = {
     def dim(c:Cell)(t:Tile) = t.mapBg(_.dim(5)).mapFg(_.dim(5))
-    tr.withFilter(Filter(dim)) { t => t <+< m.draw } <+< text.draw(16 - text.length/2, 24)
+    tr.withFilter(dim) { t => t <+< m.draw } <+< text.draw(16 - text.length/2, 24)
   }
 
   def toMode:Mode[PauseMode] = Mode(_.update, _.draw, this)

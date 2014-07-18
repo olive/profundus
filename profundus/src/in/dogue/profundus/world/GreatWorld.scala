@@ -2,7 +2,7 @@ package in.dogue.profundus.world
 
 
 import in.dogue.profundus.particles.{ParticleManager}
-import in.dogue.antiqua.graphics.TileRenderer
+import in.dogue.antiqua.graphics.{Filter, Tile, TileRenderer}
 import in.dogue.profundus.Profundus
 import in.dogue.profundus.entities._
 import in.dogue.antiqua.Antiqua
@@ -14,6 +14,7 @@ import in.dogue.profundus.deformations.Deformation
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
+import in.dogue.profundus.lighting.LightManager
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
@@ -194,11 +195,12 @@ object GreatWorld {
     val em = EntityManager.create(r).addSpawns(cs)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
-    val gw = GreatWorld(p, em, tm, pm, tc, Seq(), Seq(), Seq())
+    val lm = LightManager.create
+    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq())
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}]) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}]) {
   import GreatWorld._
 
   def setPlayer(p:Player) = copy(p=p)
@@ -257,12 +259,21 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     val screenSize = 32
     val cols = 32*4
     val cameraX = p.x.clamp(screenSize/2, cols - screenSize/2)
-    tr.withMove(-cameraX + 16, -p.y - offset + cameraY(p.pos)) { worldPos =>
-      (worldPos <+< cache.draw(p.pos)
+
+    val newLm = em.cr.foldLeft(lm.addLight(p.pos, 5, 10)) { case (l, c) =>
+      l.addLight(c.pos, 0, 5)
+    }
+
+    val res = tr.withMove(-cameraX + 16, -p.y - offset + cameraY(p.pos)) { wp =>
+        wp.withFilter(newLm.getFilter) { t =>
+              (t <+< cache.draw(p.pos)
                 <+< em.draw
                 <+< p.draw
                 <+< pm.draw
-      )
+                )
+        }
     }
+
+    res
   }
 }
