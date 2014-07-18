@@ -14,7 +14,7 @@ import in.dogue.profundus.deformations.Deformation
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.lighting.LightManager
+import in.dogue.profundus.lighting.{LightSource, LightManager}
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
@@ -81,7 +81,7 @@ object GreatWorld {
     val em = gw.em
     val newEm = pp.toolPos match {
       case None => em
-      case Some(pos) => em.hitRopes(pos)
+      case Some(pos) => em.hitRopes(pos).hitCreatures(pos)
 
     }
     gw.setEm(newEm)
@@ -253,6 +253,16 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     math.min(res, 0)
   }
 
+  def assembleLights:Seq[LightSource] = {
+    p.toLight +: em.getLights
+  }
+
+  def getFilter = {
+    val newLm = assembleLights.foldLeft(lm) { case (l, ls) =>
+      l.addLight(ls)
+    }
+    newLm.getFilter
+  }
 
   def draw(tr:TileRenderer):TileRenderer = {
     val offset = 0//5
@@ -260,12 +270,10 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     val cols = 32*4
     val cameraX = p.x.clamp(screenSize/2, cols - screenSize/2)
 
-    val newLm = em.cr.foldLeft(lm.addLight(p.pos, 5, 10)) { case (l, c) =>
-      l.addLight(c.pos, 0, 5)
-    }
+
 
     val res = tr.withMove(-cameraX + 16, -p.y - offset + cameraY(p.pos)) { wp =>
-        wp.withFilter(newLm.getFilter) { t =>
+        wp.withFilter(getFilter) { t =>
               (t <+< cache.draw(p.pos)
                 <+< em.draw
                 <+< p.draw

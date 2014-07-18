@@ -8,9 +8,8 @@ object LightManager {
 }
 
 case class LightManager(lights:Seq[LightSource]) {
-  def addLight(ij:Cell, inner:Int, outer:Int) = {
-    val l = LightSource.createCircle(ij, inner, outer)
-    copy(lights = lights :+ l)
+  def addLight(ls:LightSource) = {
+    copy(lights = ls +: lights)
   }
   private def process: Map[Cell, Double] = {
     val map = collection.mutable.Map[Cell, Double]().withDefaultValue(1)
@@ -22,8 +21,6 @@ case class LightManager(lights:Seq[LightSource]) {
     map.toMap.withDefaultValue(1)
   }
 
-  //1 = black (= dim = 10000)
-  //0 = full color (= dim = 1)
   def getFilter:Cell => Tile => Tile = {
     val mp = process
     def dark(c:Cell)(t:Tile):Tile = {

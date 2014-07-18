@@ -7,17 +7,17 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object HealthBar {
-  def create(max:Int) = HealthBar(max, max, 0, ValueBar.create(max, Color.Red))
+  def create(max:Int) = HealthBar(max, max, max, 0, ValueBar.create(max, Color.Red))
 }
 
-case class HealthBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
+case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, vb:ValueBar) {
   def update(attr:Attributes) = {
     val (newT, newAmt) = if (attr.healthRegen > 0 && t % attr.healthRegen == 0) {
       (1, (amt + 1).clamp(0, max))
     } else {
       (t+1, amt)
     }
-    copy(t=newT, amt=newAmt, vb=vb.update(newAmt, max))
+    copy(t=newT, amt=newAmt, vb=vb.update(newAmt, origMax))
   }
 
   def setColor(c:Color) = {
@@ -26,6 +26,9 @@ case class HealthBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
 
   def remove(i:Int) = copy(amt=amt.drop(i), vb=vb.update(amt.drop(i), max))
   def removeAll = remove(amt)
+  def permaHurt(i:Int) = {
+    copy(max=math.max(max.drop(i), 1))
+  }
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     tr <+< vb.draw(i, j)
   }

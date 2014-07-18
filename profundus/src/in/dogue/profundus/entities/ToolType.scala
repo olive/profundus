@@ -16,18 +16,25 @@ case class Tool(dura:Int, `type`:ToolType) {
 }
 
 
-
-
-
 sealed trait ToolType {
+  val healthHurt:Int = 0
   val durability:Int
   val digDamage:Int
   val stamCost:Int
   val icon:TileGroup
   def toTool = Tool(durability, this)
 }
+
+case class BareHands(override val icon:TileGroup) extends ToolType {
+  override val healthHurt = 1
+  override val durability = Int.MaxValue
+  override val digDamage = 1
+  override val stamCost = 10
+
+}
+
 case object Shovel extends ToolType {
-  override val durability = 1000
+  override val durability = 10
   override val digDamage = 3
   override val stamCost = 5
   override val icon = Tile.makeGroup(Vector(

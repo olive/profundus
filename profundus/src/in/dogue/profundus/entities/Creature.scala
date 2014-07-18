@@ -9,6 +9,7 @@ import in.dogue.profundus.world.{Spike, WorldTile, TerrainCache}
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle}
 import in.dogue.profundus.entities.damagezones.{SingleTileZone, DamageZone}
+import in.dogue.profundus.lighting.LightSource
 
 object Creature {
   def create(i:Int, j:Int) = {
@@ -99,7 +100,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
     val (newState, zone) = if (!isAdjacent) {
       (Chase.create(ppos), Seq())
-    } else if (a.t % a.attackFreq == 0) {
+    } else if (a.t > 0 && a.t % a.attackFreq == 0) {
       (a.copy(t=0), Seq(SingleTileZone(ppos, 50).toZone))
     } else {
       (a.update, Seq())
@@ -155,4 +156,5 @@ case class Creature private (i:Int, j:Int, tile:Tile,
   def getDeathParticle:Particle[_] = DeathParticle.create(i, j, 60).toParticle
 
   def toMassive:Massive[Creature] = Massive(_.pos, _.move, _.setFall, fall, this)
+  def toLight:LightSource = LightSource.createCircle(pos, 0, 5, 0.5)
 }

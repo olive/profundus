@@ -42,6 +42,18 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
     copy(ropes=newRopes)
   }
 
+  def hitCreatures(pos:Cell) = {
+    val newCr = cr.map { c =>
+      if (c.pos == pos) {
+        c.kill
+      } else {
+        c
+      }
+    }
+
+    copy(cr=newCr)
+  }
+
   def addSpawns(spawns:Seq[WorldSpawn]) = {
     spawns.foldLeft(this) { case (man, sp) =>
       sp match {
@@ -115,6 +127,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
          picks = newGems,
          cr = newCr)
   }
+
+  def getLights = cr.map{_.toLight}
 
   def draw(tr:TileRenderer):TileRenderer = {
     (tr <++< caps.map {_.draw _}

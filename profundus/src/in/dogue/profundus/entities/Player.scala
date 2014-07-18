@@ -14,6 +14,8 @@ import in.dogue.profundus.entities.pickups._
 import in.dogue.profundus.entities.pickups.Herb
 import in.dogue.profundus.world.WorldTile
 import scala.util.Random
+import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.ui.HudTool
 
 
 object PlayerLog {
@@ -70,6 +72,7 @@ object Player {
            false, false, false, false,
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
+           PlayerLight.create(LightSource.createCircle(ij, 5, 10, 1)),
            0)
   }
 }
@@ -81,6 +84,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory, log:PlayerLog,
                            fall:FallState, state:LivingState, justKilled:Boolean,
+                           light:PlayerLight,
                            moveT:Int) {
 
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
@@ -98,7 +102,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
   def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
-  def canUseTool = inv.hasShovelUse && hasStamina
+  def canUseTool = hasStamina
 
   def getStamBar = stam.vb
   def getHealthBar = health.vb
@@ -124,16 +128,18 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
   def hitTool(dmg:Int, broken:Boolean) = {
     val prevDur = inv.tool.dura
-    val newInv = inv.useTool(dmg)
-    val newLog = if (newInv.tool.dura == 0 && prevDur > 0) {
-      log.breakTool
-    } else {
-      log
+    val newInv1 = inv.useTool(dmg)
+    val (newLog, newInv) = if (newInv1.tool.dura == 0 && prevDur > 0) {
+      (log.breakTool, newInv1.setTool(BareHands(HudTool.shovelBroken).toTool))
+    } else  {
+      (log, newInv1)
     }
+    val newHealth = health.permaHurt(newInv.tool.`type`.healthHurt)
+
     val newLog2 = broken.select(newLog, newLog.digTile)
     val stamDmg = (dmg==0).select(inv.tool.`type`.stamCost, 0)
     val newStam = stam.remove(stamDmg)
-    copy(log=newLog2, inv=newInv, stam=newStam)
+    copy(log=newLog2, inv=newInv, stam=newStam, health=newHealth)
   }
 
   def chooseFace(dx:Int, dy:Int):Direction = {
@@ -187,7 +193,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     log=log.setDepth(pos.y).incrTime,
                     attr=newAttr,
                     stam=stam.update(newAttr),
-                    health=health.update(newAttr))
+                    health=health.update(newAttr),
+                    light=light.update)
     if (justKilled) {
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {
@@ -233,4 +240,5 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
 
   def toMassive:Massive[Player] = Massive(_.pos, _.move, _.setFallState, fall, this)
+  def toLight:LightSource = light.get(pos)
 }

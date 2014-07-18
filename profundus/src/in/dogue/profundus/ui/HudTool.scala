@@ -28,11 +28,7 @@ case class HudTool private (bar:ValueBar, tf:TextFactory, icon:TileGroup) {
   def withTool(tool:Tool) = {
     val d = tool.dura
     val max = tool.`type`.durability
-    val newIcon = if (bar.isEmpty) {
-      HudTool.shovelBroken
-    } else {
-      tool.`type`.icon
-    }
+    val newIcon =  tool.`type`.icon
 
     copy(bar=bar.update(d, max), icon=newIcon)
   }
