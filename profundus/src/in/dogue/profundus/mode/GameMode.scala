@@ -12,7 +12,7 @@ object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
     val worldCols = cols*4
     val r = new Random(0)
-    val hudHeight = 5
+    val hudHeight = 6
     val gw = GreatWorld.create(worldCols, rows - hudHeight, lo, r)
     val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.getStamBar)
     GameMode(cols, rows, gw, hud, r)
