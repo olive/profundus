@@ -116,7 +116,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
       log
     }
     val newLog2 = broken.select(newLog, newLog.digTile)
-    val newStam = stam.remove(inv.tool.`type`.stamCost)
+    val stamDmg = (dmg==0).select(inv.tool.`type`.stamCost, 0)
+    val newStam = stam.remove(stamDmg)
     copy(log=newLog2, inv=newInv, stam=newStam)
   }
 

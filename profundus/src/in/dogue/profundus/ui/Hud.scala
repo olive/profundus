@@ -9,6 +9,7 @@ import Antiqua._
 import in.dogue.profundus.entities.{Capsule, Inventory}
 import in.dogue.antiqua.graphics.Text
 import in.dogue.profundus.Profundus
+import scala.util.Random
 
 
 object Hud {
@@ -16,8 +17,15 @@ object Hud {
   val ropeIcon = CP437.⌡.mkTile(Color.Black, Color.Brown)
   val fuelIcon = CP437.f.mkTile(Color.Black, Color.Red)
   def create(cols:Int, rows:Int, inv:Inventory, stam:ValueBar):Hud = {
+    val r = new Random(3)
+    def mk(r:Random) = {
+      val code = Vector(CP437.`:`, CP437.`;`).randomR(r)
+      val bg = Color.Brown.dim(6 + r.nextDouble)
+      val fg = Color.Brown.dim(3 + r.nextDouble)
+      code.mkTile(bg, fg)
+    }
     val blank = CP437.` `.mkTile(Color.Black, Color.White)
-    val rect = Rect.createPlain(cols, rows, blank)
+    val rect = Rect.createTextured(cols, rows, mk, r)
     val tf = Profundus.tf
     val tool = HudTool.create(ValueBar.create(inv.tool.`type`.durability, Color.White), tf, inv)
     Hud(cols, rect, inv, tool, stam, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), tf)

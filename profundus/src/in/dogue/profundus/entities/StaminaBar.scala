@@ -29,7 +29,8 @@ case class StaminaBar private (amt:Int, max:Int, regenSpeed:Int, t:Int, vb:Value
   def eatFood(t:FoodType) = {
     t match {
       case Toadstool(seed) =>
-        val b = ToadstoolBuff(regenSpeed, 1 + new Random(seed).nextInt(2*regenSpeed), 0)
+        val speed = 1 + new Random(seed).nextInt(2*regenSpeed)
+        val b = ToadstoolBuff(regenSpeed, speed, 0)
         copy(buff=b)
     }
   }
