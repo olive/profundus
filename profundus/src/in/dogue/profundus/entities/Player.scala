@@ -107,7 +107,9 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def getStamBar = stam.vb
   def getHealthBar = health.vb
   def getBuffIcon = buff.icon
+  def getItems = attr.getItems
   def pos = (x, y)
+  def hasLongArms = attr.hasLongArms
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
     if (newTouching(Direction.Down).exists {
@@ -205,7 +207,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def setFallState(s:FallState) = {
     val newPl = copy(fall=s)
     (fall, s) match {
-      case (Falling(_, num), Grounded) if num > 20 =>
+      case (Falling(_, num), Grounded) if num > attr.fallDistance =>
         newPl.kill
       case _ => newPl
     }
@@ -213,7 +215,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def damage(dmg:Int):Player = {
     val newHealth = health.remove(dmg)
-    println(newHealth.amt)
     val f = if (newHealth.amt <= 0) {
       (p:Player) => p.kill
     } else {

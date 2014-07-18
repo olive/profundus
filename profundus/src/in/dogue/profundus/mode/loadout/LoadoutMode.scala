@@ -12,7 +12,7 @@ import scala.util.Random
 import in.dogue.antiqua.graphics.Text
 import in.dogue.profundus.world.{Difficulty, Easy, Normal, Hard}
 import in.dogue.profundus.Profundus
-import in.dogue.profundus.mode.{Mode, GameMode, CircleTransition}
+import in.dogue.profundus.mode.{StoryMode, Mode, GameMode, CircleTransition}
 
 object LoadoutMode {
   val topp = 16
@@ -44,7 +44,7 @@ object LoadoutMode {
       "forgotten.",
       "",
       "But if the stories",
-      "are true..."
+      "are true...▀"
     )
     import LoadoutSection.{create => cr}
     val desc =  cr(cols, topp, 0, 0, lines, tf, (2,2))
@@ -70,8 +70,9 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
     }
   }
   def update = {
-
-    if (Controls.Space.justPressed) {
+    if (Controls.Story.justPressed) {
+      CircleTransition.create(cols, rows, this.toMode, StoryMode.create(cols, rows, getLoadout).toMode).toMode
+    } else if (Controls.Space.justPressed) {
       CircleTransition.create(cols, rows, this.toMode, GameMode.create(cols, rows, getLoadout).toMode).toMode
     } else {
       val (newS, newP) = sliders(ptr).update(points)

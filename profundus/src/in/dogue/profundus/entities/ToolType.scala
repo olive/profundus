@@ -34,7 +34,7 @@ case class BareHands(override val icon:TileGroup) extends ToolType {
 }
 
 case object Shovel extends ToolType {
-  override val durability = 10
+  override val durability = 1000
   override val digDamage = 3
   override val stamCost = 5
   override val icon = Tile.makeGroup(Vector(

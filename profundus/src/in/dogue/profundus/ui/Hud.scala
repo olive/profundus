@@ -6,7 +6,7 @@ import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.graphics.Tile
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.{Capsule, Inventory}
+import in.dogue.profundus.entities.{Item, Capsule, Inventory}
 import in.dogue.antiqua.graphics.Text
 import in.dogue.profundus.Profundus
 import scala.util.Random
@@ -29,7 +29,7 @@ object Hud {
     val tf = Profundus.tf
 
     val tool = HudTool.create(ValueBar.create(inv.tool.`type`.durability, Color.White), tf, inv)
-    Hud(cols, rect, inv, tool, stam, health, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), tf)
+    Hud(cols, rect, inv, tool, stam, health, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), Seq(), tf)
   }
 }
 
@@ -39,11 +39,13 @@ case class Hud private (height:Int, rect:Rect,
                         stamBar:ValueBar, healthBar:ValueBar,
                         buffIcon:Tile,
                         text:Text, depth:Text, depthAmt:Text,
+                        items:Seq[Item],
                         tf:TextFactory) {
   def atDepth(i:Int) = copy(depthAmt=tf.create("%4s".format(i.toString)))
   def withStam(s:ValueBar) = copy(stamBar=s)
   def withBuff(b:Tile) = copy(buffIcon=b)
   def withHealth(s:ValueBar) = copy(healthBar=s)
+  def withItems(is:Seq[Item]) = copy(items=is)
   def withInventory(inv:Inventory) = {
     copy(inv=inv, tool = tool.withTool(inv.tool))
   }
@@ -61,6 +63,12 @@ case class Hud private (height:Int, rect:Rect,
     tr <+< depth.draw(i, j) <+< depthAmt.draw(i+7, j)
   }
 
+  private def drawItems(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
+    tr <++ items.zipWithIndex.map { case (item, k) =>
+      (i + k, j, item.icon)
+    }
+  }
+
   def draw(tr:TileRenderer):TileRenderer = {
     (tr <+< rect.draw(0,0)
         <+< text.draw(1, 1)
@@ -69,6 +77,7 @@ case class Hud private (height:Int, rect:Rect,
         <+< tool.draw(13, 1)
         <+< stamBar.draw(13, 3) <+ (12, 3, buffIcon)
         <+< healthBar.draw(13, 4)
+        <+< drawItems(1, 4)
       )
   }
 }

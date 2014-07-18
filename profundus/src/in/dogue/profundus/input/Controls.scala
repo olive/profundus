@@ -7,14 +7,15 @@ import scala.collection.mutable.ArrayBuffer
 
 object Controls {
   val All = ArrayBuffer[Control[Boolean]]()
-  val Left = makeKb(Input.Keys.A)
-  val Right = makeKb(Input.Keys.S)
-  val Up = makeKb(Input.Keys.W)
-  val Down = makeKb(Input.Keys.R)
+  val Left = makeKb(Input.Keys.LEFT)
+  val Right = makeKb(Input.Keys.RIGHT)
+  val Up = makeKb(Input.Keys.UP)
+  val Down = makeKb(Input.Keys.DOWN)
+  val Story = makeKb(Input.Keys.S)
   val Space = makeKb(Input.Keys.SPACE)
-  val Action = makeKb(Input.Keys.N)
-  val Capsule = makeKb(Input.Keys.E)
-  val Rope = makeKb(Input.Keys.I)
+  val Action = makeKb(Input.Keys.C)
+  val Capsule = makeKb(Input.Keys.X)
+  val Rope = makeKb(Input.Keys.Z)
   val Pause = makeKb(Input.Keys.P)
   val Escape = makeKb(Input.Keys.ESCAPE)
 

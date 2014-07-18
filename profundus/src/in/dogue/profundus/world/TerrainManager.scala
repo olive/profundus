@@ -37,8 +37,33 @@ class TerrainManager {
         val newPos = pl.pos --> Right --> Up
         pl.move(newPos, Right, tc.getTouching(newPos))
       } else {
-        pl
+        if (pl.hasLongArms) {
+          updateLongClimb(tc, pl)
+        } else {
+          pl
+
+        }
       }
+    } else {
+      pl
+    }
+  }
+
+  private def updateLongClimb(tc:TerrainCache, pl:Player):Player = {
+    import Direction._
+    if (       pl.face == Left
+            && tc.isSolid(pl.pos --> Left)
+            && tc.isSolid(pl.pos --> Left --> Up)
+            && !tc.isSolid(pl.pos --> Left --> Up --> Up)) {
+      val newPos = pl.pos --> Left --> Up --> Up
+      pl.move(newPos, Left, tc.getTouching(newPos))
+    } else if (pl.face == Right
+            && tc.isSolid(pl.pos --> Right)
+            && tc.isSolid(pl.pos --> Right --> Up)
+            && !tc.isSolid(pl.pos --> Right --> Up --> Up)) {
+      val newPos = pl.pos --> Right --> Up --> Up
+      pl.move(newPos, Right, tc.getTouching(newPos))
+
     } else {
       pl
     }

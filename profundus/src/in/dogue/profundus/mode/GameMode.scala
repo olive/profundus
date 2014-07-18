@@ -41,6 +41,7 @@ case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random
                     .withStam(pl.getStamBar)
                     .withHealth(pl.getHealthBar)
                     .withBuff(pl.getBuffIcon)
+                    .withItems(pl.getItems)
     copy(gw=gw.update, hud=newHud)
   }
 
