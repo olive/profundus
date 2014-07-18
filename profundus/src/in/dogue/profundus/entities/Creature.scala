@@ -20,6 +20,13 @@ object Creature {
 sealed trait CreatureState {
   val isWander = false
 }
+
+object Attack { def create(ppos:Cell) = Attack(ppos, 0) }
+case class Attack(ppos:Cell, t:Int) extends CreatureState {
+  val attackFreq = 15
+  def update = copy(t=t+1)
+}
+
 object Chase { def create(ppos:Cell) = Chase(ppos, 0) }
 case class Chase private (ppos:Cell, t:Int) extends CreatureState {
   def update(ppos:Cell) = copy(ppos=ppos, t=t+1)
@@ -68,17 +75,19 @@ case class Creature private (i:Int, j:Int, tile:Tile,
   private def updateChase(c:Chase, cache:TerrainCache, ppos:Cell) = {
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
-    val dx = math.signum(ppos.x - i)
-    val dy = math.signum(ppos.y - j)
-    val moved = pos |+| ((dx, dy))
-    val seen = copy(tile=CP437.b.mkTile(Color.Black, Color.Yellow))
-    val newC = c.update(ppos)
     if (isAdjacent) {
-      (newC, seen, Seq(SingleTileKillZone(ppos).toKillZone))
-    } else if (moved != ppos && newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
-      (newC, copy(i=i+dx, j=j+dy), Seq())
+      (Attack.create(ppos), this, Seq())
     } else {
-      (newC, seen, Seq())
+      val dx = math.signum(ppos.x - i)
+      val dy = math.signum(ppos.y - j)
+      val moved = pos |+| ((dx, dy))
+      val seen = copy(tile=CP437.b.mkTile(Color.Black, Color.Yellow))
+      val newC = c.update(ppos)
+      if (moved != ppos && newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
+        (newC, copy(i=i+dx, j=j+dy), Seq())
+      } else {
+        (newC, seen, Seq())
+      }
     }
   }
 
@@ -91,6 +100,19 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (state, this, Seq())
   }
 
+  private def updateAttack(a:Attack, ppos:Cell) = {
+    val dd = ppos |-| pos
+    val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
+    val (newState, zone) = if (!isAdjacent) {
+      (Chase.create(ppos), Seq())
+    } else if (a.t % a.attackFreq == 0) {
+      (a.copy(t=0), Seq(SingleTileKillZone(ppos).toKillZone))
+    } else {
+      (a.update, Seq())
+    }
+    (newState, this, zone)
+  }
+
   private def updatePlayerAlive(cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[KillZone[_]]) = {
     val hasLos = cache.hasLineOfSight((i, j), ppos)
     val ns = state match {
@@ -100,12 +122,14 @@ case class Creature private (i:Int, j:Int, tile:Tile,
       case a => a
     }
     val (newState, newSelf, attacks) = ns match {
+      case a@Attack(p, t) => updateAttack(a, ppos)
       case c@Chase(p, t) => updateChase(c, cache, ppos)
       case l@LostSight(p, t) => updateLost(l)
       case w@Wander(t) => updateWander(w, cache, r)
     }
     (newSelf.copy(state = newState), attacks)
   }
+
   private def updateAlive(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[KillZone[_]]) = {
     pState match {
       case Alive => updatePlayerAlive(cache, ppos, r)

@@ -15,16 +15,16 @@ import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.killzones.KillZone
 import in.dogue.profundus.entities.pickups.Pickup
 
-sealed trait NewSpawn
-case class NewParticles(s:Seq[Particle[_]]) extends NewSpawn
-case class NewKillZones(s:Seq[KillZone[_]]) extends NewSpawn
-case class NewDeformations(s:Seq[Deformation[_]]) extends NewSpawn
+sealed trait GlobalSpawn
+case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
+case class NewKillZones(s:Seq[KillZone[_]]) extends GlobalSpawn
+case class NewDeformations(s:Seq[Deformation[_]]) extends GlobalSpawn
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
     *           otherwise it should be extracted anew from the GreatWorld instance
     */
-  type Update[T] = (GreatWorld, T) => (GreatWorld, Seq[NewSpawn])
+  type Update[T] = (GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])
 
 
   private def updateClimbRope : Update[Unit] = standard { case (gw, ()) =>
@@ -230,13 +230,13 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   }
 
-  private def insertSpawns(seq:Seq[NewSpawn]) = {
+  private def insertSpawns(seq:Seq[GlobalSpawn]) = {
     seq.foldLeft(this) { case (gw, ns) =>
       gw.insertSpawn(ns)
     }
   }
 
-  private def insertSpawn(ns:NewSpawn) = {
+  private def insertSpawn(ns:GlobalSpawn) = {
     ns match {
       case NewParticles(s) => copy(pm=pm++s)
       case NewKillZones(s) => copy(kz=kz++s)

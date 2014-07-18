@@ -245,7 +245,7 @@ object Terrain {
         case Up => CP437.▲
       }
       val empty = emptyScheme.getBg(r)
-      val tile: Tile = code.mkTile(empty, Color.White)
+      val tile: Tile = code.mkTile(empty, Color.Brown)
       val emptyTile = CP437.` `.mkTile(empty, empty)
       WorldTile(Spike.create(tile, emptyTile, d))
     }
