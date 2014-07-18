@@ -10,8 +10,10 @@ import Antiqua._
 import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.world.{Spike, WorldTile}
 import in.dogue.profundus.mode.loadout.Loadout
-import in.dogue.profundus.Game
-import in.dogue.profundus.entities.pickups.{FoodType, RopePickup, MineralPickup}
+import in.dogue.profundus.entities.pickups._
+import in.dogue.profundus.entities.pickups.Herb
+import in.dogue.profundus.world.WorldTile
+import scala.util.Random
 
 
 object PlayerLog {
@@ -62,7 +64,8 @@ object Player {
     val i = ij.x
     val j = ij.y
     Player(i, j - 1, i, j, face,
-           StaminaBar.create(100, 5),
+           Attributes.create, NoBuff,
+           StaminaBar.create(100), HealthBar.create(100),
            shovel, getLive,
            false, false, false, false,
            Inventory.create(lo), PlayerLog.create(lo),
@@ -72,7 +75,8 @@ object Player {
 }
 
 case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
-                           stam:StaminaBar,
+                           attr:Attributes, buff:Buff,
+                           stam:StaminaBar, health:HealthBar,
                            shovel:ToolSprite, t:Direction => Tile,
                            isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
                            inv:Inventory, log:PlayerLog,
@@ -81,13 +85,24 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
   def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
-  def collectFood(typ:FoodType) = copy(stam=stam.eatFood(typ), log=log.eatFood(typ))
+  def collectFood(typ:FoodType) = {
+    val buff = typ match {
+      case Toadstool(seed) =>
+        val regen = 1 + new Random(seed).nextInt(Attributes.default.stamRegen*2)
+        ToadstoolBuff(regen, 0)
+      case Herb(seed) =>
+        val regen = 1 + new Random(seed).nextInt(Attributes.default.healthRegen*2)
+        HerbBuff(regen, 0)
+    }
+    copy(log=log.eatFood(typ), buff = buff)
+  }
   def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = inv.hasShovelUse && hasStamina
 
   def getStamBar = stam.vb
-  def getStamIcon = stam.buff.icon
+  def getHealthBar = health.vb
+  def getBuffIcon = buff.icon
   def pos = (x, y)
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
@@ -170,7 +185,9 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     isBombing=Controls.Capsule.justPressed,
                     isRoping=Controls.Rope.justPressed,
                     log=log.setDepth(pos.y).incrTime,
-                    stam=stam.update)
+                    attr=buff.process(attr),
+                    stam=stam.update(attr),
+                    health=health.update(attr))
     if (justKilled) {
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {

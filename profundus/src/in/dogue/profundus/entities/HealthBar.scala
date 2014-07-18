@@ -1,19 +1,18 @@
 package in.dogue.profundus.entities
 
-import in.dogue.antiqua.Antiqua._
 import in.dogue.profundus.ui.ValueBar
-import in.dogue.antiqua.graphics.TileRenderer
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.entities.pickups.{Herb, Toadstool, FoodType}
-import scala.util.Random
+import in.dogue.antiqua.graphics.TileRenderer
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
-object StaminaBar {
-  def create(max:Int) = StaminaBar(max, max, 0, ValueBar.create(max, Color.Green))
+object HealthBar {
+  def create(max:Int) = HealthBar(max, max, 0, ValueBar.create(max, Color.Red))
 }
 
-case class StaminaBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
+case class HealthBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
   def update(attr:Attributes) = {
-    val (newT, newAmt) = if (t % attr.stamRegen == 0) {
+    val (newT, newAmt) = if (t % attr.healthRegen == 0) {
       (1, (amt + 1).clamp(0, max))
     } else {
       (t+1, amt)

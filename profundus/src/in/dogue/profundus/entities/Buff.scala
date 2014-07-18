@@ -8,16 +8,14 @@ import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 
-sealed trait StaminaBuff {
+sealed trait Buff {
   val duration:Int
-
   val icon:Tile = CP437.` `.mkTile(Color.Black, Color.White)
   def isDone:Boolean
-  def update:StaminaBuff
-  def process(bar:StaminaBar):StaminaBar
+  def update:Buff
+  def process(bar:Attributes):Attributes
 }
-case class ToadstoolBuff(oldRegen:Int, regenRate:Int, t:Int) extends StaminaBuff {
-  val color = Color.Tan
+case class ToadstoolBuff(regenRate:Int, t:Int) extends Buff {
   override val icon = FoodPickup.toadstool
   override val duration = 60*60*5
   override def isDone = t > duration
@@ -25,22 +23,38 @@ case class ToadstoolBuff(oldRegen:Int, regenRate:Int, t:Int) extends StaminaBuff
     if (!isDone) {
       copy(t = t + 1)
     } else {
-      //not here
-      NoBuff(oldRegen)
+      NoBuff
     }
   }
-  //never called
-  override def process(bar:StaminaBar) = {
-    bar.copy(regenSpeed = regenRate).setColor(color)
+
+  override def process(attr:Attributes) = {
+    attr.copy(stamRegen=regenRate)
   }
 
 }
 
-case class NoBuff(regenRate:Int) extends StaminaBuff {
+case class HerbBuff(regenRate:Int, t:Int) extends Buff {
+  override val icon = FoodPickup.herb
+  override val duration = 60*60*5
+  override def isDone = t > duration
+  override def update = {
+    if (!isDone) {
+      copy(t = t + 1)
+    } else {
+      NoBuff
+    }
+  }
+
+  override def process(attr:Attributes) = {
+    attr.copy(healthRegen=regenRate)
+  }
+}
+
+case object NoBuff extends Buff {
   override val duration = 0
   override def isDone = false
   override def update = this
-  //not here
-  override def process(bar:StaminaBar) = bar.copy(regenSpeed = regenRate).setColor(Color.Green)
+
+  override def process(attr:Attributes) = Attributes.default
 }
 
