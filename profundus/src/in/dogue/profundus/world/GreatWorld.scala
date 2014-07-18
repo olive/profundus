@@ -12,12 +12,12 @@ import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.killzones.KillZone
+import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
-case class NewKillZones(s:Seq[KillZone[_]]) extends GlobalSpawn
+case class NewDamageZones(s:Seq[DamageZone[_]]) extends GlobalSpawn
 case class NewDeformations(s:Seq[Deformation[_]]) extends GlobalSpawn
 object GreatWorld {
 
@@ -159,13 +159,9 @@ object GreatWorld {
     val pp = gw.p
     val em = gw.em
     val kz = gw.kz
-    val pl = if (kz.exists{ _.contains(pp.pos)}) {
-      pp.kill
-    } else{
-      pp
-    }
+    val hurtPl = DamageZone.process(kz, pp, pp.damage, pp.pos)
     val (newEm, ps) = em.doKill(kz)
-    gw.setEm(newEm).addPs(ps).setPlayer(pl)
+    gw.setEm(newEm).addPs(ps).setPlayer(hurtPl)
   }
 
 
@@ -202,7 +198,7 @@ object GreatWorld {
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, cache:TerrainCache, kz:Seq[KillZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}]) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}]) {
   import GreatWorld._
 
   def setPlayer(p:Player) = copy(p=p)
@@ -210,7 +206,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setTm(tm:TerrainManager) = copy(mgr=tm)
   def setPm(pm:ParticleManager) = copy(pm = pm)
   def setTc(tc:TerrainCache) = copy(cache=tc)
-  def setKz(kz:Seq[KillZone[_]]) = copy(kz=kz)
+  def setKz(kz:Seq[DamageZone[_]]) = copy(kz=kz)
   def setDs(ds:Seq[Deformation[_]]) = copy(ds=ds)
   def addPs(s:Seq[Particle[_]]) = copy(pm=pm++s)
 
@@ -239,7 +235,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   private def insertSpawn(ns:GlobalSpawn) = {
     ns match {
       case NewParticles(s) => copy(pm=pm++s)
-      case NewKillZones(s) => copy(kz=kz++s)
+      case NewDamageZones(s) => copy(kz=kz++s)
       case NewDeformations(s) => copy(ds=ds++s)
     }
   }

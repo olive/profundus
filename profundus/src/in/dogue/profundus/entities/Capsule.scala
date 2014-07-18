@@ -8,7 +8,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
 import in.dogue.profundus.world.WorldTile
-import in.dogue.profundus.entities.killzones.{KillZone, ExplosionKillZone}
+import in.dogue.profundus.entities.damagezones.{DamageZone, ExplosionZone}
 
 object Capsule {
   val stick = CP437.║.mkTile(Color.Black, Color.Red.dim(2))
@@ -69,13 +69,13 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
     ExplosionParticle.create(i, j, 0, 8, 3).toParticle
   }
 
-  private def makeKillZone = {
-    ExplosionKillZone.create(i, j, 8, 3).toKillZone
+  private def makeZone = {
+    ExplosionZone.create(i, j, 8, 3).toZone
   }
 
 
-  def getExplode:(Deformation[_], Seq[Particle[_]], KillZone[_]) = {
-    (makeDeformation, Seq(makeParticle), makeKillZone)
+  def getExplode:(Deformation[_], Seq[Particle[_]], DamageZone[_]) = {
+    (makeDeformation, Seq(makeParticle), makeZone)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

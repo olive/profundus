@@ -13,8 +13,19 @@ sealed trait Buff {
   val icon:Tile = CP437.` `.mkTile(Color.Black, Color.White)
   def isDone:Boolean
   def update:Buff
-  def process(bar:Attributes):Attributes
+  def process(attr:Attributes):Attributes
 }
+
+case object DeadBuff extends Buff {
+  override val duration = Int.MaxValue
+  override val icon = CP437.☻.mkTile(Color.Black, Color.Red)
+  override def update = this
+  override def isDone = false
+  override def process(attr:Attributes) = {
+    attr.copy(healthRegen = 0, stamRegen = 0)
+  }
+}
+
 case class ToadstoolBuff(regenRate:Int, t:Int) extends Buff {
   override val icon = FoodPickup.toadstool
   override val duration = 60*60*5

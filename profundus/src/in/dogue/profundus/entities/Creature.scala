@@ -8,7 +8,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.world.{Spike, WorldTile, TerrainCache}
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle}
-import in.dogue.profundus.entities.killzones.{SingleTileKillZone, KillZone}
+import in.dogue.profundus.entities.damagezones.{SingleTileZone, DamageZone}
 
 object Creature {
   def create(i:Int, j:Int) = {
@@ -52,14 +52,15 @@ case class Creature private (i:Int, j:Int, tile:Tile,
       case a => false
 
     }) {
-      newCr.copy(live=Dead)
+      newCr.kill
     } else {
       newCr
     }
   }
   def setFall(f:FallState) = copy(fall=f)
 
-
+  def damage(dmg:Int) = kill
+  def kill = copy(live=Dead)
   private def updateWander(w:Wander, c:TerrainCache, r:Random) = {
     val self = if (w.t % 60 == 0) {
       val dir = Vector(Direction.Left, Direction.Right).randomR(r)
@@ -99,7 +100,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     val (newState, zone) = if (!isAdjacent) {
       (Chase.create(ppos), Seq())
     } else if (a.t % a.attackFreq == 0) {
-      (a.copy(t=0), Seq(SingleTileKillZone(ppos).toKillZone))
+      (a.copy(t=0), Seq(SingleTileZone(ppos, 50).toZone))
     } else {
       (a.update, Seq())
     }
@@ -115,7 +116,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (state, this, Seq())
   }
 
-  private def updatePlayerAlive(cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[KillZone[_]]) = {
+  private def updatePlayerAlive(cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[DamageZone[_]]) = {
     val hasLos = cache.hasLineOfSight((i, j), ppos)
     val ns = state match {
       case c@Chase(p, _) if !hasLos => LostSight.create(p)
@@ -132,7 +133,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (newSelf.copy(state = newState), attacks)
   }
 
-  private def updateAlive(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[KillZone[_]]) = {
+  private def updateAlive(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[DamageZone[_]]) = {
     pState match {
       case Alive => updatePlayerAlive(cache, ppos, r)
       case Dead if !state.isWander => (copy(state=Wander.create), Seq())
@@ -140,7 +141,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     }
   }
 
-  def update(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[KillZone[_]]) = {
+  def update(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[DamageZone[_]]) = {
     live match {
       case Alive => updateAlive(cache, ppos, pState, r)
       case Dead => (this, Seq())

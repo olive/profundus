@@ -6,8 +6,8 @@ import in.dogue.profundus.deformations.Deformation
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
 import sun.io.CharToByteCp437
-import in.dogue.profundus.world.{NewDeformations, NewKillZones, NewParticles}
-import in.dogue.profundus.entities.killzones.KillZone
+import in.dogue.profundus.world.{NewDeformations, NewDamageZones, NewParticles}
+import in.dogue.profundus.entities.damagezones.DamageZone
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle[_]]) {
@@ -15,10 +15,10 @@ object Profundus {
   }
   implicit def particles2NewSpawn(s:Seq[Particle[_]]) = new AugNewParticles(s)
 
-  class AugNewKillZones(s:Seq[KillZone[_]]) {
-    def ns = NewKillZones(s)
+  class AugNewDamageZones(s:Seq[DamageZone[_]]) {
+    def ns = NewDamageZones(s)
   }
-  implicit def killZones2NewSpawn(s:Seq[KillZone[_]]) = new AugNewKillZones(s)
+  implicit def damageZones2NewSpawn(s:Seq[DamageZone[_]]) = new AugNewDamageZones(s)
   class AugNewDeformations(s:Seq[Deformation[_]]) {
     def ns = NewDeformations(s)
   }

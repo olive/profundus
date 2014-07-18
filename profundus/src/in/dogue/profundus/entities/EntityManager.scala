@@ -8,7 +8,7 @@ import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.world.{WorldSpawn, FoodSpawn, CreatureSpawn, TerrainCache}
 import scala.util.Random
-import in.dogue.profundus.entities.killzones.KillZone
+import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 
 object EntityManager {
@@ -20,7 +20,7 @@ object EntityManager {
 }
 
 case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq[Pickup[_]], ropes:Seq[Rope], r:Random) {
-  def update(tc:TerrainCache):(Seq[Deformation[_]], Seq[KillZone[_]], Seq[Particle[_]], EntityManager) = {
+  def update(tc:TerrainCache):(Seq[Deformation[_]], Seq[DamageZone[_]], Seq[Particle[_]], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
     val (explosions, particles, kz) = done.map{_.getExplode}.unzip3
@@ -61,8 +61,9 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
     (pl, this)
   }
 
-  def doKill(kz:Seq[KillZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
-    val (newCr, dead) = cr.partition { c => !kz.exists { _.contains(c.pos)} && (c.live == Alive)}
+  def doKill(kz:Seq[DamageZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
+    val applied = cr.map { c => DamageZone.process(kz, c, c.damage, c.pos)}
+    val (newCr, dead) = applied.partition { c => (c.live == Alive)}
     val ps = dead.map {_.getDeathParticle}
     (copy(cr=newCr), ps)
   }
@@ -100,7 +101,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
     (newPl, copy(picks=newGems))
   }
 
-  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[KillZone[_]]) = {
+  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[DamageZone[_]]) = {
     val (newCr, attacks) = cr.map { _.update(w, ppos, pState, r) }.unzip
     (copy(cr=newCr), attacks.flatten)
   }
@@ -108,7 +109,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Creature], picks:Seq
   def doGravity(tr:TerrainCache) = {
     val newCaps = caps.map {_.toMassive.update(tr)}
     val newGems = picks.map {_.toMassive.update(tr)}
-    val (offscreen, onscreen) = cr.partition { c => tr.isLoaded(c.pos) }
+    val (onscreen, offscreen) = cr.partition { c => tr.isLoaded(c.pos) }
     val newCr = onscreen.map {_.toMassive.update(tr)} ++ offscreen
     copy(caps = newCaps,
          picks = newGems,

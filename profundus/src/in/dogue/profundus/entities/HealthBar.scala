@@ -12,7 +12,7 @@ object HealthBar {
 
 case class HealthBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
   def update(attr:Attributes) = {
-    val (newT, newAmt) = if (t % attr.healthRegen == 0) {
+    val (newT, newAmt) = if (attr.healthRegen > 0 && t % attr.healthRegen == 0) {
       (1, (amt + 1).clamp(0, max))
     } else {
       (t+1, amt)
@@ -25,7 +25,7 @@ case class HealthBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
   }
 
   def remove(i:Int) = copy(amt=amt.drop(i), vb=vb.update(amt.drop(i), max))
-
+  def removeAll = remove(amt)
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     tr <+< vb.draw(i, j)
   }

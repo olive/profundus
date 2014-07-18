@@ -179,15 +179,15 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def update = {
-
+    val newAttr = buff.process(attr)
     val newP = copy(isShovelling=Controls.Space.justPressed && canUseTool,
                     isClimbing=Controls.Action.justPressed,
                     isBombing=Controls.Capsule.justPressed,
                     isRoping=Controls.Rope.justPressed,
                     log=log.setDepth(pos.y).incrTime,
-                    attr=buff.process(attr),
-                    stam=stam.update(attr),
-                    health=health.update(attr))
+                    attr=newAttr,
+                    stam=stam.update(newAttr),
+                    health=health.update(newAttr))
     if (justKilled) {
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {
@@ -204,8 +204,20 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     }
   }
 
+  def damage(dmg:Int):Player = {
+    val newHealth = health.remove(dmg)
+    println(newHealth.amt)
+    val f = if (newHealth.amt <= 0) {
+      (p:Player) => p.kill
+    } else {
+      id[Player] _
+    }
+
+    f(this).copy(health=newHealth)
+  }
+
   def kill:Player = {
-    copy(state=Dead, face = Direction.Down, t=Player.getDead, justKilled=state != Dead)
+    copy(state=Dead, health=health.removeAll, face = Direction.Down, t=Player.getDead, justKilled=state != Dead, buff=DeadBuff)
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
