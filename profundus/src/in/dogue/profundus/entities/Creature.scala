@@ -19,12 +19,14 @@ object Creature {
 
 sealed trait CreatureState {
   val isWander = false
+  val isAttack = false
 }
 
 object Attack { def create(ppos:Cell) = Attack(ppos, 0) }
 case class Attack(ppos:Cell, t:Int) extends CreatureState {
   val attackFreq = 15
   def update = copy(t=t+1)
+  override val isAttack = true
 }
 
 object Chase { def create(ppos:Cell) = Chase(ppos, 0) }
@@ -46,7 +48,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     val newCr = copy(i=ij.x, j=ij.y)
     if (newTouching(Direction.Down).exists {
-      case WorldTile(Spike(_,_,dir,_)) if false => true
+      case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
       case a => false
 
     }) {
@@ -91,15 +93,6 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     }
   }
 
-  private def updateLost(l:LostSight) = {
-    val state = if (l.isDone) {
-      Wander.create
-    } else {
-      l.copy(t=l.t+1)
-    }
-    (state, this, Seq())
-  }
-
   private def updateAttack(a:Attack, ppos:Cell) = {
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
@@ -113,12 +106,21 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (newState, this, zone)
   }
 
+  private def updateLost(l:LostSight) = {
+    val state = if (l.isDone) {
+      Wander.create
+    } else {
+      l.copy(t=l.t+1)
+    }
+    (state, this, Seq())
+  }
+
   private def updatePlayerAlive(cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[KillZone[_]]) = {
     val hasLos = cache.hasLineOfSight((i, j), ppos)
     val ns = state match {
       case c@Chase(p, _) if !hasLos => LostSight.create(p)
       case c@Chase(p, _) if hasLos => c
-      case a if hasLos => Chase.create(ppos)
+      case a if hasLos && !a.isAttack => Chase.create(ppos)
       case a => a
     }
     val (newState, newSelf, attacks) = ns match {
