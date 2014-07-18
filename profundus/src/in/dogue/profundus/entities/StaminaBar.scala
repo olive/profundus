@@ -4,7 +4,7 @@ import in.dogue.antiqua.Antiqua._
 import in.dogue.profundus.ui.ValueBar
 import in.dogue.antiqua.graphics.TileRenderer
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.entities.pickups.{Toadstool, FoodType}
+import in.dogue.profundus.entities.pickups.{Herb, Toadstool, FoodType}
 import scala.util.Random
 
 object StaminaBar {
@@ -32,6 +32,7 @@ case class StaminaBar private (amt:Int, max:Int, regenSpeed:Int, t:Int, vb:Value
         val speed = 1 + new Random(seed).nextInt(2*regenSpeed)
         val b = ToadstoolBuff(regenSpeed, speed, 0)
         copy(buff=b)
+      case Herb(seed) => this
     }
   }
 

@@ -7,7 +7,7 @@ import Antiqua._
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.Creature
 import in.dogue.antiqua.geometry.Line
-import in.dogue.profundus.entities.pickups.{Toadstool, FoodPickup, Pickup}
+import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 
 
 object TerrainCache {
@@ -28,7 +28,7 @@ object TerrainCache {
 
       val food=(0 until 10) map { case _ =>
         val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-        FoodPickup.create((x, y + i*rows), Toadstool(r.nextInt())).toPickup
+        FoodPickup.create((x, y + i*rows), FoodType.random(r)).toPickup
 
       }
       val cs = (i > 0).select(Seq(), Seq(CreatureSpawn(made), FoodSpawn(food)))
@@ -44,16 +44,16 @@ case class TerrainCache private (cols:Int, rows:Int,
                                  mkNext:(Int, Random, Option[Terrain]) => (Terrain, Seq[WorldSpawn]),
                                  r:Random) {
   def isSolid(ij:Cell):Boolean = {
-    get(ij).isSolid(convert(ij))
+    get(ij).map{_.isSolid(convert(ij))}.getOrElse(true)
   }
 
   def isBackgroundSolid(ij:Cell):Boolean = {
-    get(ij).isBackgroundSolid(convert(ij))
+    get(ij).map{_.isBackgroundSolid(convert(ij))}.getOrElse(true)
   }
 
   def isGrounded(ij:Cell):Boolean = {
     val down = ij --> Direction.Down
-    get(down).isSolid(convert(down))
+    get(down).map{_.isSolid(convert(down))}.getOrElse(true)
   }
 
   def isLoaded(ij:Cell):Boolean = {
@@ -66,7 +66,15 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   def getTouching(ij:Cell):Direction => Option[WorldTile] = {
-    def g(p:Cell) = ((get(p).tiles.getOption _).tupled(convert(p)).filter { !_.isWalkable }).onlyIf(isLoaded(p)).flatten
+    def g(p:Cell) = {
+      val terrain = get(p)
+      terrain.map { t =>
+        val converted = convert(p)
+        val opt = t.tiles.getOption(converted.x, converted.y)
+        opt.filter{ !_.isWalkable }.onlyIf(isLoaded(p)).flatten
+
+      }.getOrElse(None)
+    }
     import Direction._
     def touching(d:Direction) = d match {
       case Down => g(ij +| 1)
@@ -137,8 +145,8 @@ case class TerrainCache private (cols:Int, rows:Int,
     copy(tMap=newTMap)
   }
 
-  private def get(ij:Cell):Terrain = {
-    tMap(getIndex(ij))
+  private def get(ij:Cell):Option[Terrain] = {
+    tMap.get(getIndex(ij))
 
 
   }
