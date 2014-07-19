@@ -10,7 +10,7 @@ import in.dogue.profundus.ui.{StoryButton, LoadoutButton, Slider, Hud}
 import in.dogue.profundus.entities._
 import scala.util.Random
 import in.dogue.antiqua.graphics.Text
-import in.dogue.profundus.Profundus
+import in.dogue.profundus.{Game, Profundus}
 import in.dogue.profundus.mode.{StoryMode, Mode, GameMode, CircleTransition}
 import in.dogue.profundus.procgen.PlayerInfo
 
@@ -77,8 +77,8 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
       val f = () => StoryMode.create(cols, rows, getLoadout).toMode
       CircleTransition.create(cols, rows, this.toMode, f, None).toMode
     } else if (Controls.Space.justPressed) {
-      val seed = 0
-      val f = () => GameMode.create(cols, rows, getLoadout, 0).toMode
+      val seed = if (Game.debug) 0 else Random.nextInt()
+      val f = () => GameMode.create(cols, rows, getLoadout, seed).toMode
       CircleTransition.create(cols, rows, this.toMode, f, Some(seed)).toMode
     } else {
       val (newMode, newS, newP) = sliders(ptr).update(this.toMode, points)

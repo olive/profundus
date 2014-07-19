@@ -4,7 +4,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object Attributes {
-  def create = Attributes(5, 5, 0, Seq(LongArms, Trampoline))
+  def create = Attributes(5, 5, 0, Seq())
   val default = create
 }
 case class Attributes(stamRegen:Int, healthRegen:Int, toolRegen:Int, items:Seq[Item]) {
