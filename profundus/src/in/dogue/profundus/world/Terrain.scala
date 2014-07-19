@@ -11,6 +11,7 @@ import in.dogue.antiqua.geometry.{Circle, Line}
 import in.dogue.profundus.doodads.{Doodad, Moon}
 import in.dogue.profundus.entities.pickups.Pickup
 import com.deweyvm.gleany.data.Recti
+import in.dogue.profundus.lighting.LightSource
 
 
 object Terrain {
@@ -166,8 +167,12 @@ object Terrain {
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:Cell, spawnFace:Direction) {
-  def update = copy(doodads=doodads.map{_.update})
+case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSome {type T}], spawn:Cell, spawnFace:Direction) {
+  def update = {
+    val ds = doodads.map{_.update}
+    val lights = doodads.map{_.getLight}
+    (copy(doodads=ds), lights)
+  }
   def isSolid(s:Cell):Boolean = {
     val t = (tiles.getOption _).tupled(s)
     !t.exists{_.state.isWalkable}

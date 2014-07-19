@@ -6,16 +6,22 @@ import scala.util.Random
 
 object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, t:Array2d[WorldTile], r:Random) = {
-    val creatures = (0 until 10) map { case _ =>
-      val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-      Creature.create(x, y + i*rows)
-    }
-    val casques = (0 until 10) map { case _ =>
-      val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-      Casque.create((x, y + i*rows), r)
+    if (i <= 0) {
+      (Seq(), Seq())
+    } else {
+      val creatures = (0 until 10) map {
+        case _ =>
+          val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+          Creature.create(x, y + i * rows)
+      }
+      val casques = (0 until 10) map {
+        case _ =>
+          val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+          Casque.create((x, y + i * rows), r)
 
+      }
+      (creatures, casques)
     }
-    (creatures, casques)
   }
   val dummy = EntityGenerator(dummyFunc)
 }

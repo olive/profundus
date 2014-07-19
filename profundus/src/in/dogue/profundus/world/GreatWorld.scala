@@ -112,7 +112,10 @@ object GreatWorld {
     val em = gw.em
     val (tc, spawns) = cache.checkPositions(ppos)
     val newEm = em.addSpawns(spawns)
-    gw.setTc(tc.update(ppos)).setEm(newEm)
+    val (newTc, newLights) = tc.update(ppos)
+    val lm = gw.lm
+
+    gw.setTc(newTc).setEm(newEm).setLm(lm.addLights(newLights))
   }
 
   private def updateEs : Update[Unit] = { case (gw, ()) =>
@@ -215,6 +218,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   def setPlayer(pl:Player) = copy(p=pl)
   def setEm(em:EntityManager) = copy(em=em)
+  def setLm(l:LightManager) = copy(lm=l)
   def setTm(tm:TerrainManager) = copy(mgr=tm)
   def setPm(pm:ParticleManager) = copy(pm = pm)
   def setTc(tc:TerrainCache) = copy(cache=tc)
@@ -225,7 +229,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def update:GreatWorld = {
     updates.foldLeft(this) { case (w, (t, up)) =>
       w.doUpdate(t, up)
-    }
+    }.copy(lm=LightManager.create)
   }
 
   def +#+[T](t:T, up:GreatWorld.Update[T]) = copy(updates=updates :+ ((t, up)))
@@ -264,32 +268,33 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   }
 
   def assembleLights:Seq[LightSource] = {
-    p.toLight +: em.getLights
+    Seq(p.toLight)/* +: em.getLights*/
   }
 
-  def getFilter = {
+  def getFilter(cxy:Cell) = {
     val newLm = assembleLights.foldLeft(lm) { case (l, ls) =>
       l.addLight(ls)
     }
-    newLm.getFilter
+    println(newLm.lights.length)
+    newLm.getFilter(cxy)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    val offset = 0//5
     val screenSize = 32
     val cols = 32*4
     val cameraX = p.x.clamp(screenSize/2, cols - screenSize/2)
+    val cx = -cameraX + 16
+    val cy = -p.y + cameraY(p.pos)
 
 
-
-    val res = tr.withMove(-cameraX + 16, -p.y - offset + cameraY(p.pos)) { wp =>
-        //wp.withFilter(getFilter) { wp =>
+    val res = tr.withMove(cx, cy) { wp =>
+        wp.withFilter(getFilter((wp.originX, wp.originY))) { wp =>
               (wp <+< cache.draw(p.pos)
                 <+< em.draw
                 <+< p.draw
                 <+< pm.draw
                 )
-        //}
+        }
     }
 
     res

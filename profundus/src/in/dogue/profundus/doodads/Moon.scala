@@ -5,6 +5,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.lighting.LightSource
 
 object Moon {
   def create(x:Int, y:Int, r:Int) = {
@@ -16,13 +17,16 @@ object Moon {
       }
 
     }
-    Moon(x, y, r, draws.flatten, 0)
+    val light = LightSource.createCircle((x,y), 10, 10, 0.5)
+    Moon(x, y, r, light, draws.flatten, 0)
   }
 }
 
-case class Moon private (i:Int, j:Int, r:Int, tg:TileGroup, t:Int) {
+case class Moon private (i:Int, j:Int, r:Int, light:LightSource, tg:TileGroup, t:Int) {
 
   def update = copy(t=t+1)
+
+  def getLight:Option[LightSource] = light.some
 
   def drawBright(tr:TileRenderer):TileRenderer = {
     val max = r*4
@@ -46,5 +50,5 @@ case class Moon private (i:Int, j:Int, r:Int, tg:TileGroup, t:Int) {
     tr <++ (tg |+| (i, j)) <+< drawBright
   }
 
-  def toDoodad:Doodad[Moon] = Doodad(_.update, _.draw, this)
+  def toDoodad:Doodad[Moon] = Doodad(_.update, _.draw, _.getLight, this)
 }

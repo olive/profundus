@@ -8,36 +8,14 @@ import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.{Casque, Creature}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
+import in.dogue.profundus.lighting.LightSource
 
 
 object TerrainCache {
   def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
-   /* def gen(i:Int, r:Random, prev:Option[Terrain]) = {
-      val gen = if (i <= 0) {
-        Terrain.createSky _
-      } else {
-        Terrain.createCave _
-      }
-      val t = gen(i*rows, cols, rows, copy)
-
-      val made = (0 until 10) map { case _ =>
-        val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-        Creature.create(x, y + i*rows)
-      }
-
-      val food=(0 until 10) map { case _ =>
-        val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-        FoodPickup.create((x, y + i*rows), FoodType.random(r)).toPickup
-
-      }
-
-      val cs = (i > 0).select(Seq(), Seq(CasqueSpawn(casques), CreatureSpawn(made), PickupSpawn(food)))
-      (t, cs)
-    }*/
     val biome = Biome.createDummy
-    val (biomep, first, spawns): (Biome, Terrain, Seq[WorldSpawn]) = biome.generate(cols, rows, 0, copy)
-    //val (first,_) = gen(0, r, None)
+    val (biomep, first, _): (Biome, Terrain, Seq[WorldSpawn]) = biome.generate(cols, rows, 0, copy)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
     (cache, first.spawn, first.spawnFace)
   }
@@ -142,11 +120,13 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   }
 
-  def update(ij:Cell):TerrainCache = {
-    val newTMap = Seq(getIndex(ij)-1, getIndex(ij), getIndex(ij)+1).foldLeft(tMap) { case (acc, i) =>
-      acc.updated(i, acc(i).update)
+  def update(ij:Cell):(TerrainCache, Seq[LightSource]) = {
+    val seed = (tMap, Seq[LightSource]())
+    val (newTMap, newLights) = Seq(getIndex(ij)-1, getIndex(ij), getIndex(ij)+1).foldLeft(seed) { case ((acc, lights), i) =>
+      val (updated, ls) = acc(i).update
+      (acc.updated(i, updated), lights ++ ls.flatten)
     }
-    copy(tMap=newTMap)
+    (copy(tMap=newTMap), newLights)
   }
 
   private def get(ij:Cell):Option[Terrain] = {

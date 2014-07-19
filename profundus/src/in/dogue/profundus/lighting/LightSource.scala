@@ -19,11 +19,11 @@ object LightSource {
       intensity*dim
 
     }
-    LightSource(pos, 1, Circle.fill(0, 0, outerR, light))
+    LightSource(pos, outerR, 1, Circle.fill(0, 0, outerR, light))
   }
 }
 
-case class LightSource private (pos:Cell, flicker:Double, private val cells:Seq[(Cell, Double)]) {
+case class LightSource private (pos:Cell, radius:Double, flicker:Double, private val cells:Seq[(Cell, Double)]) {
   def fill:Seq[(Cell, Double)] = {
     (cells |+| pos).smap { _ * flicker}
   }

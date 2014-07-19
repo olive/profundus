@@ -6,6 +6,7 @@
       <root id="archive" name="profundus.jar">
         <element id="module-output" name="profundus" />
         <element id="module-output" name="gleany" />
+        <element id="module-output" name="antiqua" />
         <element id="extracted-dir" path="$PROJECT_DIR$/../gleany/gleany/libs/gdx.jar" path-in-jar="/" />
         <element id="extracted-dir" path="$PROJECT_DIR$/../gleany/gleany/libs/gdx-natives.jar" path-in-jar="/" />
         <element id="extracted-dir" path="$PROJECT_DIR$/../gleany/gleany/libs/gdx-sources.jar" path-in-jar="/" />
@@ -21,12 +22,12 @@
         <element id="extracted-dir" path="$PROJECT_DIR$/../gleany/gleany/libs/gdx-controllers-desktop-natives.jar" path-in-jar="/" />
         <element id="extracted-dir" path="$PROJECT_DIR$/../gleany/gleany/libs/gdx-controllers-desktop-sources.jar" path-in-jar="/" />
         <element id="extracted-dir" path="$PROJECT_DIR$/../../dogue/dogue-common/libs/scopt_2.10-3.2.0.jar" path-in-jar="/" />
-        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-compiler.jar" path-in-jar="/" />
-        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-library.jar" path-in-jar="/" />
-        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-reflect.jar" path-in-jar="/" />
-        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-actors.jar" path-in-jar="/" />
-        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-swing.jar" path-in-jar="/" />
         <element id="extracted-dir" path="$PROJECT_DIR$/../../dogue/dogue-common/libs/scalacheck_2.10-1.11.3.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-actors.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-library.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-swing.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-reflect.jar" path-in-jar="/" />
+        <element id="extracted-dir" path="C:/Program Files (x86)/scala/lib/scala-compiler.jar" path-in-jar="/" />
       </root>
     </artifact>
   </component>

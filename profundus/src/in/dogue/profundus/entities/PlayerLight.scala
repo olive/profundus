@@ -13,5 +13,8 @@ case class PlayerLight(ls:LightSource, t:Int) {
     import scala.math._
     (abs(sin(sin(sin(sin(t/5.0) + t/50.0) + t/500.0) + t/5000.0)) + 5)/6
   }
-  def get(pos:Cell) = ls.copy(pos=pos, flicker=getFlicker)
+  def get(pos:Cell) = {
+    println("Pos" + pos)
+    ls.copy(pos=pos, flicker=getFlicker)
+  }
 }
