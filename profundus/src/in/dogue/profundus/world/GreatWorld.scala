@@ -271,8 +271,8 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
 
     val res = tr.withMove(-cameraX + 16, -p.y - offset + cameraY(p.pos)) { wp =>
-        wp.withFilter(getFilter) { t =>
-              (t <+< cache.draw(p.pos)
+        wp.withFilter(getFilter) { wp =>
+              (wp <+< cache.draw(p.pos)
                 <+< em.draw
                 <+< p.draw
                 <+< pm.draw

@@ -35,8 +35,8 @@ object ResultMode {
       mk("Pounds earth moved: " + pl.tilesDug) |+| (1, 13),
       mk("Lived for         : " + pl.timeSpent) |+| (1, 14),
       mk("Depth reached     : " + pl.deepest) |+| (1, 15),
-      mk("You will be remembered") |+| (4,41),
-      mk("      as a Fool.") |+| (4,42)
+      mk("It is the end for you.") |+| (4,41),
+      mk("Your memory will fade.") |+| (4,42)
     )
 
     ResultMode(cols, rows, pl, rect, b, draws.flatten)

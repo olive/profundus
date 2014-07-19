@@ -90,6 +90,20 @@ case class TerrainScheme(dirt:Scheme, rock:Scheme, rock2:Scheme, rock3:Scheme, g
     Shaft.create(shaftTile)
   }
 
+  def makeSpike(d:Direction)(r:Random) = {
+    import Direction._
+    val code = d match {
+      case Left => CP437.◄
+      case Right => CP437.►
+      case Down => CP437.▼
+      case Up => CP437.▲
+    }
+    val empty = this.empty.getBg(r)
+    val tile: Tile = makeDirt(r).tile.setCode(code).setBg(empty)
+    val emptyTile = CP437.` `.mkTile(empty, empty)
+    Spike.create(tile, emptyTile, d)
+  }
+
 }
 
 
@@ -197,7 +211,8 @@ object Terrain {
       val state = gen.mkTile(i, j, y, cols, rows, d, r)
       WorldTile(state(r))
     }
-    placeSpikes(sche, Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
+    val spike = placeSpikes(sche, Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
+    placeShaft(cols, rows, 10, 30, spike, sche, r)
   }
 
   def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
@@ -261,19 +276,7 @@ object Terrain {
 
   def placeSpikes(scheme:TerrainScheme, terrain:Terrain, r:Random):Terrain = {
     def get(ij:Cell):Boolean = terrain.tiles.getOption(ij.x, ij.y).exists{_.isWalkable}
-    def mkSpike(d:Direction, r:Random):WorldTile = {
-      import Direction._
-      val code = d match {
-        case Left => CP437.◄
-        case Right => CP437.►
-        case Down => CP437.▼
-        case Up => CP437.▲
-      }
-      val empty = scheme.empty.getBg(r)
-      val tile: Tile = scheme.makeDirt(r).tile.setCode(code).setBg(empty)
-      val emptyTile = CP437.` `.mkTile(empty, empty)
-      WorldTile(Spike.create(tile, emptyTile, d))
-    }
+
     val ts = terrain.tiles.map { case (i, j, t) =>
       val p = (i, j)
       val left = get(p |- 1)
@@ -282,9 +285,9 @@ object Terrain {
       val up = get(p -| 1)
       if (r.nextDouble > 0.9) {
         if (down && !up && t.isWalkable) {
-          mkSpike(Direction.Down, r)
+          WorldTile(scheme.makeSpike(Direction.Down)(r))
         } else if (up && !down && t.isWalkable) {
-          mkSpike(Direction.Up, r)
+          WorldTile(scheme.makeSpike(Direction.Up)(r))
         } else {
           t
         }
@@ -295,6 +298,28 @@ object Terrain {
     }
 
     terrain.copy(tiles=ts)
+  }
+
+  def placeShaft(cols:Int, rows:Int, width:Int, height:Int, terrain:Terrain, scheme:TerrainScheme, r:Random):Terrain = {
+    val x = r.nextInt(cols - width)
+    val y = r.nextInt(rows - height)
+    val shaftStart = y + r.nextInt(rows/4)
+    val newTiles = terrain.tiles.map { case (i, j, t) =>
+      val inShaft = x > i && x < i + width
+      val tt = if ((i == x || i  + width - 1== x) && j > shaftStart) {
+        scheme.makeShaft(r).some
+      } else if (inShaft && j == y + height) {
+        scheme.makeRock(r).some
+      } else if (inShaft && j  == y+ height - 1) {
+        scheme.makeSpike(Direction.Up)(r).some
+      } else if (inShaft) {
+        scheme.makeEmpty(r).some
+      } else {
+        None
+      }
+      tt.map(WorldTile.apply).getOrElse(t)
+    }
+    terrain.copy(tiles=newTiles)
   }
 
 
