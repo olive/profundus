@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.antiqua.graphics.TileRenderer
+import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import in.dogue.antiqua.data.{Direction,CP437, Array2d}
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
@@ -10,101 +10,18 @@ import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.antiqua.geometry.{Circle, Line}
 import in.dogue.profundus.doodads.{Doodad, Moon}
 import in.dogue.profundus.entities.pickups.Pickup
+import com.deweyvm.gleany.data.Recti
 
 
 object Terrain {
 
-  def upper(scheme:TerrainScheme)(i:Int, j:Int, y:Int, cols:Int, rows:Int, d:Double, r:Random) = {
-    val func = if (i <= 0 || (i <= 1 && r.nextDouble < 0.6) || i >= cols - 1 || (i >= cols - 2 && r.nextDouble < 0.6)) {
-      scheme.makeShaft _
-    } else if (d < -0.2) {
-      if (r.nextDouble > 0.99) {
-        if (r.nextBoolean) {
-          scheme.makeRock3 _
-        } else {
-          scheme.makeMineral _
-        }
-      } else if (d < -0.6) {
-        scheme.makeRock2 _
-      } else if (d < -0.4){
-        scheme.makeRock _
-      } else {
-        scheme.makeClay _
-      }
-    } else if (d < 0.0) {
-      scheme.makeDirt _
-    } else {
-      scheme.makeEmpty _
-    }
-    func
-  }
-
-
-  val shaftScheme = Scheme(
-    (r:Random) => Color.Grey.dim(12 + r.nextDouble),
-    (r:Random) => Color.Grey.dim(9 + r.nextDouble)
-  )
-
-  val dirtScheme = Scheme(
-    (r:Random) => Color.Brown.dim(6 + r.nextDouble),
-    (r:Random) => Color.Brown.dim(3 + r.nextDouble)
-  )
-
-  val emptyScheme = Scheme(
-    (r:Random) => Color.Tan.dim(2 + r.nextDouble),
-    (r:Random) => Color.Tan.dim(1 + r.nextDouble)
-  )
-  val rockScheme = Scheme(
-    (r:Random) => Color.Grey.dim(6 + r.nextDouble),
-    (r:Random) => Color.Grey.dim(3 + r.nextDouble)
-  )
-
-
-  val rock2Scheme = Scheme(
-    (r:Random) => Color.Grey.dim(10 + r.nextDouble),
-    (r:Random) => Color.Grey.dim(6 + r.nextDouble)
-  )
-
-  val rock3Scheme = Scheme(
-    (r:Random) => Color.Green.dim(6 + r.nextDouble),
-    (r:Random) => Color.Green.dim(3 + r.nextDouble)
-  )
-
-  val grassScheme = Scheme(
-    (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),
-    (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(1 + r.nextDouble)
-  )
-
-  def skyScheme(dim:Double) = Scheme(
-    (r:Random) => Color.DarkBlue.dim(1/dim),
-    (r:Random) => Color.White
-  )
-
-  val gemScheme = Scheme(
-    (r:Random) => Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r),
-    (r:Random) => Color.Grey.dim(3 + r.nextDouble)
-  )
-
-  def r2(r:Random) = {
-    val x = r.nextDouble
-    (1 - x)*(1 - x)
-  }
-  val clayScheme = Scheme(
-    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(6 + r.nextDouble),
-    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(3 + r.nextDouble)
-  )
-
-  val scheme = TerrainScheme(dirtScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, clayScheme, shaftScheme, emptyScheme)
-
   def createCave(y:Int, cols:Int, rows:Int, r:Random) = {
     val mix = ((y/rows.toDouble - 1)/50).clamp(0, 0.5)
-    val sche = scheme.map(c => c.mix(Color.Blue, mix))
-    val gen = {
-      TerrainGenerator(sche, upper(sche))
-    }
+    val sche = TerrainScheme.dummy.map(c => c.mix(Color.Blue, mix))
+    val gen = TerrainGenerator.dummy(sche)
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val tiles = noise.map { case (i, j, d) =>
-      val state = gen.mkTile(i, j, y, cols, rows, d, r)
+      val state = gen.mkTile(sche, i, j, y, cols, rows, d, r)
       WorldTile(state(r))
     }
     val spike = placeSpikes(sche, Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
@@ -112,12 +29,38 @@ object Terrain {
     val height = 10
     val xx = r.nextInt(cols - width)
     val yy = r.nextInt(rows - height)
-    val shaft = SpikePit(xx, yy, width, height).toFeature(cols, rows, sche)
-    shaft.transform(spike, r)
+    val shaft = SpikePit(xx, yy, width, height).toFeature(cols, rows)
+    val (newTiles, ds) = shaft.transform(cols, rows, y, sche, spike.tiles, r)
+    spike.copy(tiles=newTiles, doodads = spike.doodads ++ ds)
   }
 
-  def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
+  def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
+
+  def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
+
+    def skyScheme(dim:Double) = Scheme(
+      (r:Random) => Color.DarkBlue.dim(1/dim),
+      (r:Random) => Color.White
+    )
+    def makeSky(dim:Double)(r:Random) = {
+      val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
+      val night = skyScheme(dim).mkTile(r, skyCode)
+      Empty(night, false)
+    }
+
+    val tiles = noise.map { case (i, j, d) =>
+      val dim = (j + y*rows) / (cols*2).toDouble
+      val night = makeSky(dim) _
+
+      WorldTile(night(r))
+    }
+
+    (tiles, Seq())
+  }
+
+
+  def makeLines(cols:Int, rows:Int, r:Random) = {
     val circle = Circle((cols/2, rows/2), rows/4)
     val pi = Math.PI
     val base = pi/8
@@ -133,7 +76,24 @@ object Terrain {
     val finalX = 4 + r.nextInt(cols-8)
     val l5 = Line.bresenham(lower.x, lower.y, finalX, rows)
     val l6 = Line.bresenham(lower.x+1, lower.y, finalX+1, rows)
-    val lines = Vector(l1, l2, l3, l4, l5, l6)
+    val lines: Vector[Seq[(Int, Int)]] = Vector(l1, l2, l3, l4, l5, l6)
+    ((l2(0).x, l2(0).y), face, lines, circle)
+  }
+
+  def createMouth(lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
+    val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
+
+
+    val scheme = TerrainScheme.dummy
+    val grassScheme = Scheme(
+      (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),
+      (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(1 + r.nextDouble)
+    )
+
+    def skyScheme(dim:Double) = Scheme(
+      (r:Random) => Color.DarkBlue.dim(1/dim),
+      (r:Random) => Color.White
+    )
     def makeSky(dim:Double)(r:Random) = {
       val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
       val night = skyScheme(dim).mkTile(r, skyCode)
@@ -172,7 +132,7 @@ object Terrain {
       WorldTile(state(r))
     }
     val moon = Moon.create(3*cols/4-5, -5, 4)
-    Terrain(y, tiles, Seq(moon.toDoodad), (l2(0).x, l2(0).y), face)
+    (tiles, Seq(moon.toDoodad))
   }
 
   def placeSpikes(scheme:TerrainScheme, terrain:Terrain, r:Random):Terrain = {
@@ -206,7 +166,7 @@ object Terrain {
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain private (y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:Cell, spawnFace:Direction) {
+case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[_]], spawn:Cell, spawnFace:Direction) {
   def update = copy(doodads=doodads.map{_.update})
   def isSolid(s:Cell):Boolean = {
     val t = (tiles.getOption _).tupled(s)

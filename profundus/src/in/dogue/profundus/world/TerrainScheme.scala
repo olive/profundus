@@ -7,16 +7,72 @@ import in.dogue.antiqua.graphics.Tile
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 
-case class TerrainScheme(dirt:Scheme, rock:Scheme, rock2:Scheme, rock3:Scheme, gem:Scheme, clay:Scheme, shaft:Scheme, empty:Scheme) {
+object TerrainScheme {
+  val shaftScheme = Scheme(
+    (r:Random) => Color.Grey.dim(12 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(9 + r.nextDouble)
+  )
+
+  val dirtScheme = Scheme(
+    (r:Random) => Color.Brown.dim(6 + r.nextDouble),
+    (r:Random) => Color.Brown.dim(3 + r.nextDouble)
+  )
+
+  val emptyScheme = Scheme(
+    (r:Random) => Color.Tan.dim(2 + r.nextDouble),
+    (r:Random) => Color.Tan.dim(1 + r.nextDouble)
+  )
+  val rockScheme = Scheme(
+    (r:Random) => Color.Grey.dim(6 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(3 + r.nextDouble)
+  )
+
+
+  val rock2Scheme = Scheme(
+    (r:Random) => Color.Grey.dim(10 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(6 + r.nextDouble)
+  )
+
+  val rock3Scheme = Scheme(
+    (r:Random) => Color.Green.dim(6 + r.nextDouble),
+    (r:Random) => Color.Green.dim(3 + r.nextDouble)
+  )
+
+
+
+  val gemScheme = Scheme(
+    (r:Random) => Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r),
+    (r:Random) => Color.Grey.dim(3 + r.nextDouble)
+  )
+
+  def r2(r:Random) = {
+    val x = r.nextDouble
+    (1 - x)*(1 - x)
+  }
+  val clayScheme = Scheme(
+    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(6 + r.nextDouble),
+    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(3 + r.nextDouble)
+  )
+  val dummy = TerrainScheme(dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
+}
+
+case class TerrainScheme(dirt:Scheme,
+                         clay:Scheme,
+                         rock:Scheme,
+                         rock2:Scheme,
+                         rock3:Scheme,
+                         gem:Scheme,
+                         shaft:Scheme,
+                         empty:Scheme) {
   def map(f:Color => Color) = copy(
-    dirt.map(f),
-    rock.map(f),
-    rock2.map(f),
-    rock3.map(f),
-    gem.map(f),
-    clay.map(f),
-    shaft.map(f),
-    empty.map(f)
+    dirt=dirt.map(f),
+    clay=clay.map(f),
+    rock=rock.map(f),
+    rock2=rock2.map(f),
+    rock3=rock3.map(f),
+    gem=gem.map(f),
+    shaft=shaft.map(f),
+    empty=empty.map(f)
   )
   def emptyTile(r:Random) = {
     val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)

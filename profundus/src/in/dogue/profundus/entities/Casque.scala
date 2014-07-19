@@ -39,11 +39,11 @@ case class Casque private (ij:Cell, tg:TileGroup, health:Int, t:Int, live:Living
       Seq()
     }
     val (newLive, pickups) = if (health <= 0){
-      (Dead, Seq(ItemPickup(ij, Trampoline).toPickup).ws)
+      (Dead, Seq(ItemPickup(ij, Trampoline).toPickup))
     } else {
-      (live, Seq().ws)
+      (live, Seq())
     }
-    (copy(t=t+1, live=newLive), spawns, Seq(pickups))
+    (copy(t=t+1, live=newLive), spawns, Seq(pickups.ws))
   }
 
   def getDeathParticle:Particle[_] = DeathParticle.create(ij.x, ij.y, 60).toParticle

@@ -5,8 +5,8 @@ import java.util.concurrent.{Executors, Callable, TimeUnit}
 import in.dogue.profundus.input.Controls
 object Game {
   var t = 0
-  val debug = false
-  val version = "Version 0.0.1, July 19, 2014"
+  val debug = true
+  val version = "Version 0.0.11"
 }
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {
   private lazy val engine = new Engine()

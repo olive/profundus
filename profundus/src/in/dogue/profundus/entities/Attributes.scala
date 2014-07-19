@@ -11,7 +11,7 @@ case class Attributes(stamRegen:Int, healthRegen:Int, toolRegen:Int, items:Seq[I
   def hasLongArms = items.contains(LongArms)
   def hasTrampoline = items.contains(Trampoline)
 
-  def fallDistance = hasTrampoline.select(6, 12)
+  def fallDistance = hasTrampoline.select(60, 12)
   def getItems = items
   def collectItem(it:Item) = copy(items = it +: items)
 }

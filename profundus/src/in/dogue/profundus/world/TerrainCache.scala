@@ -13,7 +13,7 @@ import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pic
 object TerrainCache {
   def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
-    def gen(i:Int, r:Random, prev:Option[Terrain]) = {
+   /* def gen(i:Int, r:Random, prev:Option[Terrain]) = {
       val gen = if (i <= 0) {
         Terrain.createSky _
       } else {
@@ -31,22 +31,20 @@ object TerrainCache {
         FoodPickup.create((x, y + i*rows), FoodType.random(r)).toPickup
 
       }
-      val casques = (0 until 10) map { case _ =>
-        val (x, y) = (r.nextInt(cols), r.nextInt(rows))
-        Casque.create((x, y + i*rows), r)
 
-      }
       val cs = (i > 0).select(Seq(), Seq(CasqueSpawn(casques), CreatureSpawn(made), PickupSpawn(food)))
       (t, cs)
-    }
-    val (first,_) = gen(0, r, None)
-    val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, gen, r)
+    }*/
+    val biome = Biome.createDummy
+    val (biomep, first, spawns): (Biome, Terrain, Seq[WorldSpawn]) = biome.generate(cols, rows, 0, copy)
+    //val (first,_) = gen(0, r, None)
+    val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
     (cache, first.spawn, first.spawnFace)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,
                                  tMap:Map[Int, Terrain], max:Int, min:Int,
-                                 mkNext:(Int, Random, Option[Terrain]) => (Terrain, Seq[WorldSpawn]),
+                                 biome:Biome,
                                  r:Random) {
   def isSolid(ij:Cell):Boolean = {
     get(ij).map{_.isSolid(convert(ij))}.getOrElse(true)
@@ -120,27 +118,28 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   //fixme -- code clones
   private def check(i:Int):(TerrainCache, Seq[WorldSpawn]) = {
-    val (newMap, newMin, newMax, cs) = if (i > max) {
-      val seed = (tMap, Seq[WorldSpawn]())
-      val (mm, cs) = ((max+1) to i).foldLeft(seed) { case ((map, cs), k) =>
-        val prev = map(k-1)
-        val (next, moreCs) = mkNext(k, r, prev.some)
-        (map.updated(k, next), moreCs ++ cs)
+    val range = {
+      if (i > max) {
+        (max+1) to i
+      } else if (i < min){
+        (min - 1) to (i, -1)
+      } else {
+        Seq()
       }
-      (mm, min, i, cs)
-    } else if (i < min) {
-      val seed = (tMap, Seq[WorldSpawn]())
-      val (mm, cs) = ((min - 1) to (i, -1)).foldLeft(seed) { case ((map, cs), k) =>
-        val prev = map(k+1)
-        val (next, moreCs)  = mkNext(k, r, prev.some)
-        (map.updated(k, next), moreCs ++ cs)
-      }
-      (mm, i, max, cs)
-    } else {
-      (tMap, min, max, Seq())
     }
-    val newTc = copy(tMap=newMap, min=newMin, max=newMax)
-    (newTc, cs)
+
+    val (newBiome, newMap, newMin, newMax, ws) = {
+      val seed = (biome, tMap, Seq[WorldSpawn]())
+      val (b, mm, cs) = range.foldLeft(seed) { case ((bm, map, ws), k) =>
+        val (newBiome, next, moreWs) = bm.generate(cols, rows, k, r)
+        (newBiome, map.updated(k, next), moreWs ++ ws)
+      }
+      (b, mm, math.min(min, i), math.max(max, i), cs)
+    }
+
+    val newTc = copy(biome = newBiome, tMap=newMap, min=newMin, max=newMax)
+    (newTc, ws)
+
   }
 
   def update(ij:Cell):TerrainCache = {
