@@ -7,16 +7,18 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.graphics.Color
 import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.mode.loadout.Loadout
+import in.dogue.profundus.mode.loadout.{LoadoutUpdate, LoadoutStay, LoadoutMode, Loadout}
+import in.dogue.profundus.mode.Mode
 
 object Slider {
   def create(i:Int, j:Int,
              icon:TileGroup, values:Int=>TileGroup,
              fillIn:Int => Loadout => Loadout,
+             width:Int,
              max:Int, value:Int, cost:Int, incr:Int) = {
     val up = CP437.▲.mkTile(Color.Black, Color.White)
     val down = CP437.▼.mkTile(Color.Black, Color.White)
-    Slider(i, j, icon, values, fillIn, up, down, max, value, cost, incr)
+    Slider(i, j, icon, values, fillIn, up, down, width, max, value, cost, incr)
   }
 }
 
@@ -24,13 +26,15 @@ case class Slider private (i:Int, j:Int,
                            icon:TileGroup, values:Int=>TileGroup,
                            private val fillIn:Int => Loadout => Loadout,
                            up:Tile, down:Tile,
+                           width:Int,
                            max:Int, value:Int, cost:Int, incr:Int) {
-  def update(rem:Int):(Slider, Int) = {
-    Controls.AxisY.zip(15,3) match {
+  def update(m:Mode[_], rem:Int):(LoadoutUpdate, Slider, Int) = {
+    val (slide, remaining) = Controls.AxisY.zip(15,3) match {
       case -1 if rem >= cost && value < max => (copy(value=value+incr), rem-cost)
       case 1 if value >= 1 => (copy(value=value.drop(incr)), rem+cost)
       case _ => (this, rem)
     }
+    (LoadoutStay, slide, remaining)
   }
 
 
@@ -43,7 +47,7 @@ case class Slider private (i:Int, j:Int,
       val tf = TileFactory(Color.Black, Color.White)
       val i0 = i - (icon.length > 0).select(0, 1)
       (tr <| (i0, j, tf(CP437.`[`))
-          <| (i + rect.width + 1, j, tf(CP437.`]`))
+          <| (i + width + 1, j, tf(CP437.`]`))
         )
     }
   }
@@ -52,17 +56,19 @@ case class Slider private (i:Int, j:Int,
     def f(t:Tile) = if (!selected) t.setFg(Color.DarkGrey) else t
     val upDraw = (i+x, j - 1, f(up)).onlyIf(rem >= cost)
     val downDraw =  (i+x, j + 1, f(down)).onlyIf(value >= 1)
-    tr <+? upDraw <+? downDraw
+    tr <|? upDraw <|? downDraw
   }
 
   def draw(selected:Boolean, rem:Int)(tr:TileRenderer):TileRenderer = {
     val spr = values(value)
     val span = spr.getSpan
     val center = span.center
-    (tr <++ (icon |+| (i, j))
+    (tr <|| (icon |+| (i, j))
         <+< drawArrows(selected, rem, center.x+1)
-        <++ (spr |+| (i+1, j))
+        <|| (spr |+| (i+1, j))
         <+< drawSelection(selected, span)
       )
   }
+
+  def toLoadoutButton:LoadoutButton[Slider] = LoadoutButton(_.update, _.doFill, _.draw, this)
 }

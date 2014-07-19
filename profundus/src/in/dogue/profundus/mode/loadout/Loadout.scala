@@ -4,7 +4,8 @@ import in.dogue.profundus.Profundus
 import in.dogue.profundus.entities._
 import in.dogue.antiqua.graphics.{Tile, TextFactory}
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.ui.{HudTool, Hud, Slider}
+import in.dogue.profundus.ui.{LoadoutButton, HudTool, Hud, Slider}
+import in.dogue.antiqua.data.CP437
 
 object Loadout {
   val tf = Profundus.tf
@@ -32,7 +33,7 @@ object Loadout {
   }
 
   def drawNumber(tf:TextFactory)(v:Int):TileGroup = {
-    tf.create("%3s".format(v.toString)).toTileGroup
+    tf.create("%3s".format(v.toString)).filterToTileGroup(CP437.notBlank)
   }
   def drawTool(v:Int) = {
     indexToTool(v).icon
@@ -48,12 +49,12 @@ object Loadout {
   }
 
   def makeSimpleSlider(i:Int, j:Int, icon:Tile, fillIn:Int => Loadout => Loadout, cost:Int, incr:Int)(value:Int) = {
-    val slider = Slider.create(i, j, Seq((0,0,icon)), Loadout.drawNumber(tf), fillIn, Int.MaxValue, value, cost, incr)
+    val slider = Slider.create(i, j, Seq((0,0,icon)), Loadout.drawNumber(tf), fillIn, 3, Int.MaxValue, value, cost, incr).toLoadoutButton
     val newRem = value*cost
     (newRem, slider)
   }
 
-  def makeSliders(rem:Int, lo:Loadout):(Int, Vector[Slider]) = {
+  def makeSliders(rem:Int, lo:Loadout):(Int, Vector[LoadoutButton[Slider]]) = {
     val x0 = 4
     val x1 = x0 + 6
     val y0 = 11 + LoadoutMode.topp
@@ -65,10 +66,10 @@ object Loadout {
     (rem - (r1 + r2 + r3 + r4), Vector(cap, rope, gem, fuel))
   }
 
-  def makeTool(rem:Int, lo:Loadout):(Int, Slider) = {
+  def makeTool(rem:Int, lo:Loadout):(Int, LoadoutButton[Slider]) = {
     val v = toolToIndex(lo.`type`)
     val minus = v*toolCost
-    val s = Slider.create(22, 13 + LoadoutMode.topp, Seq(), drawTool, fillTool, 3, 0, toolCost, 1)
+    val s = Slider.create(22, 13 + LoadoutMode.topp, Seq(), drawTool, fillTool, 4, 3, 0, toolCost, 1).toLoadoutButton
     (rem - minus, s)
   }
 }
