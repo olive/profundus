@@ -74,9 +74,12 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
   }
   def update = {
     if (Controls.Story.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, () => StoryMode.create(cols, rows, getLoadout).toMode).toMode
+      val f = () => StoryMode.create(cols, rows, getLoadout).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, None).toMode
     } else if (Controls.Space.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, () => GameMode.create(cols, rows, getLoadout).toMode).toMode
+      val seed = 0
+      val f = () => GameMode.create(cols, rows, getLoadout, 0).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, Some(seed)).toMode
     } else {
       val (newMode, newS, newP) = sliders(ptr).update(this.toMode, points)
       newMode match {
@@ -90,9 +93,10 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
   }
 
   private def getLoadout = {
-    sliders.foldLeft(Loadout.default) { case (lo, sl) =>
+    val loadout = sliders.foldLeft(Loadout.default) { case (lo, sl) =>
       sl.doFill(lo)
     }
+    loadout.copy(name=pi.title)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

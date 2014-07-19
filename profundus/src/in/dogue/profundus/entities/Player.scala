@@ -20,12 +20,12 @@ import in.dogue.profundus.ui.HudTool
 
 object PlayerLog {
   def create(lo:Loadout) = {
-    PlayerLog(lo, "name", "title", "killedby", 0, 0, lo.gems, 0, 0, 0, 0, 0, 0, Vector())
+    PlayerLog(lo, lo.name, "killedby", 0, 0, lo.gems, 0, 0, 0, 0, 0, 0, Vector())
   }
 
 }
 
-case class PlayerLog(lo:Loadout, name:String, title:String, killedBy:String, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
+case class PlayerLog(lo:Loadout, title:String, killedBy:String, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
   def digTile = copy(tilesDug=tilesDug+1)
   def useBomb = copy(bombsUsed = bombsUsed + 1)
   def useRope = copy(ropesUsed = ropesUsed + 1)
@@ -36,6 +36,13 @@ case class PlayerLog(lo:Loadout, name:String, title:String, killedBy:String, bom
   def setDepth(d:Int) = copy(deepest = math.max(d, deepest))
   def eatFood(food:FoodType) = copy(foodEaten=foodEaten :+ food)
   def incrTime = copy(timeSpent = timeSpent + 1)
+
+  def timeString = {
+    val mins = timeSpent/(60*60)
+    val secs = timeSpent % (60*60)
+    val frames = timeSpent % 60
+    "%s:%02d.%02d".format(mins, secs, (frames/60.0).toInt)
+  }
 }
 
 
@@ -184,7 +191,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def instDir = {
     val dx = Controls.AxisX.isPressed
     val dy = Controls.AxisY.isPressed
-    (dx !=0 || dy != 0).select(face, chooseFace(dx, dy))
+    (dx != 0 || dy != 0).select(face, chooseFace(dx, dy))
   }
 
   def update = {
@@ -198,11 +205,12 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     stam=stam.update(newAttr),
                     health=health.update(newAttr),
                     light=light.update)
-    if (justKilled) {
+    val (jkP, ps) = if (justKilled) {
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {
       (newP, Seq())
     }
+    (jkP, ps)
   }
 
   def setFallState(s:FallState) = {
@@ -226,7 +234,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def kill:Player = {
-    copy(state=Dead, health=health.removeAll, face = Direction.Down, t=Player.getDead, justKilled=state != Dead, buff=DeadBuff)
+    copy(state=Dead, health=health.removeAll, face=Direction.Down, t=Player.getDead, justKilled=state!=Dead, buff=DeadBuff)
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {

@@ -30,7 +30,8 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect, title:T
 
   def update:Mode[_] = {
     if (Controls.Space.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, () => LoadoutMode.create(cols, rows, None).toMode).toMode
+      val f = () => LoadoutMode.create(cols, rows, None).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, None).toMode
     } else {
       this.toMode
     }

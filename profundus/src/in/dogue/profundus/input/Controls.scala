@@ -15,6 +15,7 @@ object Controls {
   val Space = makeKb(Input.Keys.SPACE)
   val Action = makeKb(Input.Keys.C)
   val Capsule = makeKb(Input.Keys.X)
+  val Kill = makeKb(Input.Keys.K)
   val Rope = makeKb(Input.Keys.Z)
   val Pause = makeKb(Input.Keys.P)
   val Escape = makeKb(Input.Keys.ESCAPE)

@@ -15,7 +15,7 @@ case class StoryButton(cols:Int, rows:Int, ij:Cell, text:Text) {
     if (Controls.Action.justPressed) {
       def mkTransition(lo:Loadout) = {
         val story = () => StoryMode.create(cols, rows, lo).toMode
-        CircleTransition.create(cols, rows, m, story).toMode
+        CircleTransition.create(cols, rows, m, story, None).toMode
       }
 
       (LoadoutMove(mkTransition), this, rem)

@@ -9,9 +9,9 @@ import in.dogue.profundus.world.GreatWorld
 import in.dogue.profundus.input.Controls
 
 object GameMode {
-  def create(cols:Int, rows:Int, lo:Loadout) = {
+  def create(cols:Int, rows:Int, lo:Loadout, seed:Int) = {
     val worldCols = cols*4
-    val r = new Random(0)
+    val r = new Random(seed)
     val hudHeight = 6
     val gw = GreatWorld.create(worldCols, rows - hudHeight, lo, r)
     val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.getStamBar, gw.p.getHealthBar)
@@ -25,13 +25,11 @@ case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random
     if (Controls.Pause.justPressed) {
       PauseMode.create(this.toMode).toMode
     } else {
-      val updated = selfUpdate
-      updated.gw.p.state match {
-        case Dead => DeadMode.create(cols, rows, this, updated.gw.p.log).toMode
-        case Alive => updated.toMode
+      gw.p.state match {
+        case Dead => DeadMode.create(cols, rows, this, gw.p.log).toMode
+        case Alive => selfUpdate.toMode
       }
     }
-
   }
 
   def selfUpdate:GameMode = {

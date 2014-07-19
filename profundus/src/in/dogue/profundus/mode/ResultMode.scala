@@ -23,20 +23,22 @@ object ResultMode {
     val rect = Rect.createTextured(cols, rows, f, r)
     val b = Profundus.border(cols, rows)
     def mk(s:String) = Profundus.tf.create(s).toTileGroup
+    val x0 = 2
+    val y0 = 2
     val draws = Seq(
-      mk("Name: " + pl.name) |+| (1,1),
-      mk("Loadout: Feisty") |+| (1,3),
-      mk("Killed by: Demons") |+| (1, 5),
-      mk("Ropes used        : " + pl.ropesUsed) |+| (1, 7),
-      mk("Capsules used     : " + pl.bombsUsed) |+| (1, 8),
-      mk("Fuel used         : " + pl.fuelUsed) |+| (1, 9),
-      mk("Minerals traded   : " + pl.gemsSpent) |+| (1, 10),
-      mk("Minerals got      : " + pl.gemsCollected) |+| (1, 11),
-      mk("Pounds earth moved: " + pl.tilesDug) |+| (1, 13),
-      mk("Lived for         : " + pl.timeSpent) |+| (1, 14),
-      mk("Depth reached     : " + pl.deepest) |+| (1, 15),
-      mk("It is the end for you.") |+| (4,41),
-      mk("Your memory will fade.") |+| (4,42)
+      mk("Name: " + pl.lo.name) |+| (x0,y0),
+      mk("Loadout: Feisty") |+| (x0,y0+2),
+      mk("Killed by: Demons") |+| (x0, y0+4),
+      mk("Ropes used        : " + pl.ropesUsed) |+| (x0, y0+6),
+      mk("Capsules used     : " + pl.bombsUsed) |+| (x0, y0+7),
+      mk("Fuel used         : " + pl.fuelUsed) |+| (x0, y0+8),
+      mk("Minerals traded   : " + pl.gemsSpent) |+| (x0, y0+9),
+      mk("Minerals got      : " + pl.gemsCollected) |+| (x0, y0+10),
+      mk("Pounds earth moved: " + pl.tilesDug) |+| (x0, y0+12),
+      mk("Lived for         : " + pl.timeString) |+| (x0, y0+13),
+      mk("Depth reached     : " + pl.deepest) |+| (x0, y0+14),
+      mk("This is the end for you.") |+| (4,41),
+      mk("Your memory will fade.") |+| (5,42)
     )
 
     ResultMode(cols, rows, pl, rect, b, draws.flatten)
@@ -47,7 +49,8 @@ case class ResultMode private (cols:Int, rows:Int, pl:PlayerLog, r:Rect, b:Borde
 
   def update = {
     if (Controls.Space.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, () => LoadoutMode.create(cols, rows, pl.lo.some).toMode).toMode
+      val f = () => LoadoutMode.create(cols, rows, pl.lo.some).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, None).toMode
     } else {
       this.toMode
     }

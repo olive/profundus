@@ -15,6 +15,7 @@ import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.lighting.{LightSource, LightManager}
+import in.dogue.profundus.input.Controls
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
@@ -163,6 +164,16 @@ object GreatWorld {
     gw.setEm(newEm).addPs(ps).setPlayer(hurtPl)
   }
 
+  private def playerKillSelf : Update[Unit] = standard { case (gw, ()) =>
+    val pp = gw.p
+    if (Controls.Kill.justPressed) {
+      gw.setPlayer(pp.kill)
+    } else {
+      gw
+    }
+
+  }
+
 
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
@@ -178,6 +189,7 @@ object GreatWorld {
         #+ updateDeformations
         #+ updateParticles
         #+ killEntities
+        #+ playerKillSelf
       )
   }
 
@@ -201,7 +213,7 @@ object GreatWorld {
 case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}]) {
   import GreatWorld._
 
-  def setPlayer(p:Player) = copy(p=p)
+  def setPlayer(pl:Player) = copy(p=pl)
   def setEm(em:EntityManager) = copy(em=em)
   def setTm(tm:TerrainManager) = copy(mgr=tm)
   def setPm(pm:ParticleManager) = copy(pm = pm)

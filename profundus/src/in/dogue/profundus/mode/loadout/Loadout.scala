@@ -15,7 +15,7 @@ object Loadout {
   val diffCost = 10
   val gemCost = 1
   val fuelCost = 2
-  val default = Loadout(20,3,3,0,Shovel)
+  val default = Loadout(20,3,3,0,Shovel, "Debug")
   private def indexToTool(v:Int) = v match {
     case 0 => Shovel
     case 1 => Mallet
@@ -74,4 +74,4 @@ object Loadout {
   }
 }
 
-case class Loadout(fuel:Int, ropes:Int, bombs:Int, gems:Int, `type`:ToolType)
+case class Loadout(fuel:Int, ropes:Int, bombs:Int, gems:Int, `type`:ToolType, name:String)
