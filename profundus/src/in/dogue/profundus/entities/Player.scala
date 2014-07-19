@@ -41,7 +41,7 @@ case class PlayerLog(lo:Loadout, title:String, killedBy:String, bombsUsed:Int, r
     val mins = timeSpent/(60*60)
     val secs = timeSpent % (60*60)
     val frames = timeSpent % 60
-    "%s:%02d.%02d".format(mins, secs, (frames/60.0).toInt)
+    "%s:%02d.%02d".format(mins, (secs/60.0).toInt, ((frames/60.0) * 100).toInt)
   }
 }
 

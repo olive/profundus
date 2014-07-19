@@ -1,119 +1,16 @@
 package in.dogue.profundus.world
 
-import in.dogue.antiqua.graphics.{Tile, TileRenderer}
-import in.dogue.antiqua.data.{Direction, Code, CP437, Array2d}
+import in.dogue.antiqua.graphics.TileRenderer
+import in.dogue.antiqua.data.{Direction,CP437, Array2d}
 import scala.util.Random
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.procgen.PerlinNoise
-import in.dogue.antiqua.geometry.{Circle, Line, Ellipse}
-import com.deweyvm.gleany.data.Point2d
+import in.dogue.antiqua.geometry.{Circle, Line}
 import in.dogue.profundus.doodads.{Doodad, Moon}
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.world.TerrainGenerate.Generate
 
-
-case class Scheme(bgMod:Random => Color,
-                  fgMod:Random => Color) {
-  def getBg(r:Random) = bgMod(r)
-  def getFg(r:Random) = fgMod(r)
-  def mkTile(r:Random, c:Code) = c.mkTile(getBg(r), getFg(r))
-  def map(f:Color => Color) = {
-    def bgModp(r:Random) = f(bgMod(r))
-    def fgModp(r:Random) = f(fgMod(r))
-    Scheme(bgModp, fgModp)
-  }
-}
-
-case class TerrainScheme(dirt:Scheme, rock:Scheme, rock2:Scheme, rock3:Scheme, gem:Scheme, clay:Scheme, shaft:Scheme, empty:Scheme) {
-  def map(f:Color => Color) = copy(
-    dirt.map(f),
-    rock.map(f),
-    rock2.map(f),
-    rock3.map(f),
-    gem.map(f),
-    clay.map(f),
-    shaft.map(f),
-    empty.map(f)
-  )
-  def emptyTile(r:Random) = {
-    val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
-    empty.mkTile(r, bgCode)
-  }
-
-  def makeEmpty(r:Random) = {
-    val empty = emptyTile(r)
-    Empty(empty, true)
-  }
-
-  def makeClay(r:Random) = {
-    val clayTile = clay.mkTile(r, CP437.-)
-    val empty = emptyTile(r)
-    Clay.create(clayTile, empty)
-  }
-
-  def makeRock3(r:Random) = {
-    val rockTile = rock3.mkTile(r, CP437.`#`)
-    val empty = emptyTile(r)
-    Rock3.create(rockTile, empty)
-  }
-
-  def makeRock2(r:Random) = {
-    val rockTile = rock2.mkTile(r, CP437.≡)
-    val empty = emptyTile(r)
-    Rock2.create(rockTile, empty)
-  }
-
-  def makeRock(r:Random) = {
-    val rockTile = rock.mkTile(r, CP437.`=`)
-    val empty = emptyTile(r)
-    Rock.create(rockTile, empty)
-  }
-
-  def makeDirt(r:Random) = {
-    val dirtTile = dirt.mkTile(r, CP437.█)
-    val empty = emptyTile(r)
-    Dirt.create(dirtTile, empty)
-
-  }
-
-  def makeMineral(r:Random) = {
-    val mineralTile = gem.mkTile(r, CP437.◘)
-    val empty = emptyTile(r)
-    Mineral.create(mineralTile, empty, mineralTile.bgColor)
-  }
-
-  def makeShaft(r:Random) = {
-    val shaftCode = CP437.⌂
-    val shaftTile = shaft.mkTile(r, shaftCode)
-    Shaft.create(shaftTile)
-  }
-
-  def makeSpike(d:Direction)(r:Random) = {
-    import Direction._
-    val code = d match {
-      case Left => CP437.◄
-      case Right => CP437.►
-      case Down => CP437.▼
-      case Up => CP437.▲
-    }
-    val empty = this.empty.getBg(r)
-    val tile: Tile = makeDirt(r).tile.setCode(code).setBg(empty)
-    val emptyTile = CP437.` `.mkTile(empty, empty)
-    Spike.create(tile, emptyTile, d)
-  }
-
-}
-
-
-object TerrainGenerate {
-  type Generate = (Int,Int,Int,Int,Int,Double,Random) => (Random => TileType)
-}
-case class TerrainGenerator(scheme:TerrainScheme, mkTile:TerrainGenerate.Generate) {
-  def generate(i:Int, j:Int, y:Int, cols:Int, rows:Int, d:Double, r:Random) =
-    mkTile(i, j, y, cols, rows, d, r)
-}
 
 object Terrain {
 
@@ -203,7 +100,6 @@ object Terrain {
     val mix = ((y/rows.toDouble - 1)/50).clamp(0, 0.5)
     val sche = scheme.map(c => c.mix(Color.Blue, mix))
     val gen = {
-
       TerrainGenerator(sche, upper(sche))
     }
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
@@ -212,7 +108,12 @@ object Terrain {
       WorldTile(state(r))
     }
     val spike = placeSpikes(sche, Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
-    placeShaft(cols, rows, 10, 30, spike, sche, r)
+    val width = 5
+    val height = 10
+    val xx = r.nextInt(cols - width)
+    val yy = r.nextInt(rows - height)
+    val shaft = SpikePit(xx, yy, width, height).toFeature(cols, rows, sche)
+    shaft.transform(spike, r)
   }
 
   def createSky(y:Int, cols:Int, rows:Int, r:Random):Terrain = {
@@ -271,7 +172,7 @@ object Terrain {
       WorldTile(state(r))
     }
     val moon = Moon.create(3*cols/4-5, -5, 4)
-    Terrain(y, tiles, Seq(moon.toDoodad), (l1(0).x, l1(0).y), face)
+    Terrain(y, tiles, Seq(moon.toDoodad), (l2(0).x, l2(0).y), face)
   }
 
   def placeSpikes(scheme:TerrainScheme, terrain:Terrain, r:Random):Terrain = {
@@ -300,27 +201,7 @@ object Terrain {
     terrain.copy(tiles=ts)
   }
 
-  def placeShaft(cols:Int, rows:Int, width:Int, height:Int, terrain:Terrain, scheme:TerrainScheme, r:Random):Terrain = {
-    val x = r.nextInt(cols - width)
-    val y = r.nextInt(rows - height)
-    val shaftStart = y + r.nextInt(rows/4)
-    val newTiles = terrain.tiles.map { case (i, j, t) =>
-      val inShaft = x > i && x < i + width
-      val tt = if ((i == x || i  + width - 1== x) && j > shaftStart) {
-        scheme.makeShaft(r).some
-      } else if (inShaft && j == y + height) {
-        scheme.makeRock(r).some
-      } else if (inShaft && j  == y+ height - 1) {
-        scheme.makeSpike(Direction.Up)(r).some
-      } else if (inShaft) {
-        scheme.makeEmpty(r).some
-      } else {
-        None
-      }
-      tt.map(WorldTile.apply).getOrElse(t)
-    }
-    terrain.copy(tiles=newTiles)
-  }
+
 
 
 }
