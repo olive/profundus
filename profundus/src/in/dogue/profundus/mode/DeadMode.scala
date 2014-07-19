@@ -14,7 +14,7 @@ case class DeadMode private (cols:Int, rows:Int, mode:GameMode, log:PlayerLog) {
 
   def update = {
     if (Controls.Space.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, ResultMode.create(cols, rows, log).toMode).toMode
+      CircleTransition.create(cols, rows, this.toMode, () => ResultMode.create(cols, rows, log).toMode).toMode
     } else {
       copy(mode = mode.selfUpdate).toMode
     }

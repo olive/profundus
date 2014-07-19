@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.Creature
+import in.dogue.profundus.entities.{Casque, Creature}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 
@@ -31,7 +31,12 @@ object TerrainCache {
         FoodPickup.create((x, y + i*rows), FoodType.random(r)).toPickup
 
       }
-      val cs = (i > 0).select(Seq(), Seq(CreatureSpawn(made), FoodSpawn(food)))
+      val casques = (0 until 10) map { case _ =>
+        val (x, y) = (r.nextInt(cols), r.nextInt(rows))
+        Casque.create((x, y + i*rows), r)
+
+      }
+      val cs = (i > 0).select(Seq(), Seq(CasqueSpawn(casques), CreatureSpawn(made), PickupSpawn(food)))
       (t, cs)
     }
     val (first,_) = gen(0, r, None)

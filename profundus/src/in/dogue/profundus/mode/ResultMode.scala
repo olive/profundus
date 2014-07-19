@@ -47,7 +47,7 @@ case class ResultMode private (cols:Int, rows:Int, pl:PlayerLog, r:Rect, b:Borde
 
   def update = {
     if (Controls.Space.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, LoadoutMode.create(cols, rows, pl.lo.some).toMode).toMode
+      CircleTransition.create(cols, rows, this.toMode, () => LoadoutMode.create(cols, rows, pl.lo.some).toMode).toMode
     } else {
       this.toMode
     }

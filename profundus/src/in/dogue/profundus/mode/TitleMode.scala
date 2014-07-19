@@ -30,14 +30,14 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect, title:T
 
   def update:Mode[_] = {
     if (Controls.Space.justPressed) {
-      CircleTransition.create(cols, rows, this.toMode, LoadoutMode.create(cols, rows, None).toMode).toMode
+      CircleTransition.create(cols, rows, this.toMode, () => LoadoutMode.create(cols, rows, None).toMode).toMode
     } else {
       this.toMode
     }
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+< r.draw(0,0) <+< border.draw(0, 0) <++ (title |+| (9,7))
+    tr <+< r.draw(0,0) <+< border.draw(0, 0) <++ (title |+| (9,7+8))
   }
 
   def toMode = Mode[TitleMode](_.update, _.draw, this)

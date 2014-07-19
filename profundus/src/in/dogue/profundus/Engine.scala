@@ -11,7 +11,7 @@ import in.dogue.profundus.mode.loadout.{LoadoutMode, Loadout}
 class Engine {
   val rows = 32 + 16
   val cols = 32
-  val m = LoadoutMode.create(cols, rows, None)//GameMode.create(cols, rows, Loadout.default)//TitleMode.create(32, 32)//ResultMode.create(cols, rows, PlayerLog.create(Loadout.default))//StoryMode.create(cols, rows, Loadout.default)//
+  val m = LoadoutMode.create(cols, rows, None)//TitleMode.create(cols, rows)//GameMode.create(cols, rows, Loadout.default)//ResultMode.create(cols, rows, PlayerLog.create(Loadout.default))//StoryMode.create(cols, rows, Loadout.default)//
   var mode:Mode[_] = m.toMode
   val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("16x16"))
   val r = new Renderer(cols*16, rows*16, 1, ts)

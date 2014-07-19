@@ -81,7 +81,7 @@ object GreatWorld {
     val em = gw.em
     val newEm = pp.toolPos match {
       case None => em
-      case Some(pos) => em.hitRopes(pos).hitCreatures(pos)
+      case Some(pos) => em.hitRopes(pos).hitCreatures(pos, pp.inv.tool.`type`.digDamage/*fixme*/)
 
     }
     gw.setEm(newEm)
@@ -115,9 +115,7 @@ object GreatWorld {
   }
 
   private def updateEs : Update[Unit] = { case (gw, ()) =>
-    import Profundus._
-    val (updates, kills, particles, newEm) = gw.em.update(gw.cache)
-    val ns  = Seq(particles.ns, updates.ns, kills.ns)
+    val (ns, newEm) = gw.em.update(gw.cache)
     (gw.setEm(newEm), ns)
   }
 
@@ -236,7 +234,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   private def insertSpawn(ns:GlobalSpawn) = {
     ns match {
-      case NewParticles(s) => copy(pm=pm++s)
+      case NewParticles(s) => addPs(s)
       case NewDamageZones(s) => copy(kz=kz++s)
       case NewDeformations(s) => copy(ds=ds++s)
     }

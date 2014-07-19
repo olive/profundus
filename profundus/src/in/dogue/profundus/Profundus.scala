@@ -6,8 +6,9 @@ import in.dogue.profundus.deformations.Deformation
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
 import sun.io.CharToByteCp437
-import in.dogue.profundus.world.{NewDeformations, NewDamageZones, NewParticles}
+import in.dogue.profundus.world.{PickupSpawn, NewDeformations, NewDamageZones, NewParticles}
 import in.dogue.profundus.entities.damagezones.DamageZone
+import in.dogue.profundus.entities.pickups.Pickup
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle[_]]) {
@@ -23,6 +24,11 @@ object Profundus {
     def ns = NewDeformations(s)
   }
   implicit def deformations2NewSpawn(s:Seq[Deformation[_]]) = new AugNewDeformations(s)
+
+  class AugPickupSpawn(s:Seq[Pickup[_]]) {
+    def ws = PickupSpawn(s)
+  }
+  implicit def pickup2PickupSpawn(s:Seq[Pickup[_]])  = new AugPickupSpawn(s)
 
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _

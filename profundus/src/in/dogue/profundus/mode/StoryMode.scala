@@ -21,14 +21,14 @@ object StoryMode {
     val boxes = all.split("@")
 
     val lines = boxes//box1, box2, box3, box4, box5)
-    def getMode():Mode[_] = LoadoutMode.create(cols, rows, lo.some).toMode
+    def getMode():() => Mode[_] = () => LoadoutMode.create(cols, rows, lo.some).toMode
     val mb = MessageBox.create(Profundus.tf, lines, getMode)
     val rect = Rect.createPlain(cols, rows, CP437.`#`.mkTile(Color.Brown.dim(10), Color.Black))
     val arrow = CP437.►.mkTile(Color.Black, Color.White)
     StoryMode(cols, rows, rect, lo, arrow, mb, 0)
   }
 }
-case class StoryMode private (cols:Int, rows:Int, b:Rect, lo:Loadout, arrow:Tile, mb:MessageBox[Mode[_]], t:Int) {
+case class StoryMode private (cols:Int, rows:Int, b:Rect, lo:Loadout, arrow:Tile, mb:MessageBox[() => Mode[_]], t:Int) {
   def update:Mode[_] = mb.update match {
     case MessageBoxContinue(mb) => copy(mb=mb, t=t+1).toMode
     case MessageBoxComplete(mode) =>

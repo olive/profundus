@@ -1,22 +1,57 @@
 package in.dogue.profundus.mode
 
-import in.dogue.antiqua.graphics.{Tile, TileRenderer}
+import in.dogue.antiqua.graphics.{Text, Tile, TileRenderer}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.graphics.Color
+import in.dogue.antiqua.data.Future
+import in.dogue.profundus.Profundus
 
 object CircleTransition {
-  def create(cols:Int, rows:Int, old:Mode[_], `new`:Mode[_]) = {
-    CircleTransition(cols, rows, old, `new`, 0, 30)
+  def create(cols:Int, rows:Int, old:Mode[_], `new`:() => Mode[_]) = {
+    val tf = Profundus.tf
+    CircleTransition(cols, rows, old, new Future(`new`), tf.create("LOADING"), 30, CircleIn(0))
   }
 }
 
-case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Mode[_], t:Int, max:Int) {
+
+
+sealed trait CircleState {
+  def getT:Int
+}
+case class CircleIn(t:Int) extends CircleState { override def getT = t }
+case class WaitLoad(t:Int, wlt:Int) extends CircleState { override def getT = t }
+case class CircleOut(t:Int) extends CircleState { override def getT = t }
+case class CircleDone(max:Int) extends CircleState { override def getT = max }
+
+case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Future[Mode[_]], text:Text, max:Int, state:CircleState) {
   def update = {
-    if (t > max) {
-      `new`
-    } else {
-      copy(t=t+1).toMode
+    val newState: CircleState = state match {
+      case CircleIn(t) => if (t > max/2) {
+        WaitLoad(t+1, 0)
+      } else {
+        CircleIn(t + 1)
+      }
+      case WaitLoad(t, wlt) =>
+        `new`.update match {
+          case Some(m) => CircleOut(t)
+          case None => WaitLoad(t, wlt+1)
+        }
+      case CircleOut(t) => if (t > max) {
+        CircleDone(max)
+      } else {
+        CircleOut(t+1)
+      }
+      case c@CircleDone(_) => c
+    }
+    val newThis = copy(state=newState).toMode
+    newState match {
+      case CircleDone(_) =>
+        `new`.update match {
+          case Some(m) => m
+          case None => newThis
+        }
+      case a => newThis
     }
   }
 
@@ -24,6 +59,7 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Mode
     val half = max/2
     val col2 = cols/2.sqrt
     def f(tile:Tile) = tile.setBg(Color.Black).setFg(Color.Black)
+    val t = state.getT
     val tt = if (t < half) {
       half - t
     } else {
@@ -45,11 +81,16 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Mode
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+< (if (t < max/2) {
-      old.draw
-    } else {
-      `new`.draw
-    }) <+< drawCover
+    def drawNew = `new`.update.map {_.draw _}.getOrElse(id[TileRenderer] _)
+    tr <+< (state match {
+      case CircleIn(_) => old.draw
+      case WaitLoad(_,_) => id[TileRenderer]
+      case CircleOut(_) => drawNew
+      case CircleDone(_) => drawNew
+    }) <+< drawCover <+< (state match {
+      case WaitLoad(_,wlt) if wlt > 3 => text.draw(10,10)
+      case a => id[TileRenderer]
+    })
   }
 
   def toMode:Mode[CircleTransition] = Mode(_.update, _.draw, this)

@@ -7,8 +7,9 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
-import in.dogue.profundus.world.WorldTile
+import in.dogue.profundus.world.{GlobalSpawn, WorldTile}
 import in.dogue.profundus.entities.damagezones.{DamageZone, ExplosionZone}
+import in.dogue.profundus.Profundus
 
 object Capsule {
   val stick = CP437.║.mkTile(Color.Black, Color.Red.dim(2))
@@ -74,8 +75,11 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
 
-  def getExplode:(Deformation[_], Seq[Particle[_]], DamageZone[_]) = {
-    (makeDeformation, Seq(makeParticle), makeZone)
+  def getExplode:Seq[GlobalSpawn] = {
+    import Profundus._
+    Seq(Seq(makeDeformation).ns,
+        Seq(makeParticle).ns,
+        Seq(makeZone).ns)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
