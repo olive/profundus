@@ -8,9 +8,11 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object TerrainScheme {
-  val shaftScheme = Scheme(
-    (r:Random) => Color.Grey.dim(12 + r.nextDouble),
-    (r:Random) => Color.Grey.dim(9 + r.nextDouble)
+
+
+  val emptyScheme = Scheme(
+    (r:Random) => Color.Tan.dim(2 + r.nextDouble),
+    (r:Random) => Color.Tan.dim(1 + r.nextDouble)
   )
 
   val dirtScheme = Scheme(
@@ -18,15 +20,18 @@ object TerrainScheme {
     (r:Random) => Color.Brown.dim(3 + r.nextDouble)
   )
 
-  val emptyScheme = Scheme(
-    (r:Random) => Color.Tan.dim(2 + r.nextDouble),
-    (r:Random) => Color.Tan.dim(1 + r.nextDouble)
-  )
+  val clayScheme = {
+    def r2(r:Random) = (1 - r.nextDouble).sq
+    Scheme(
+      (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(6 + r.nextDouble),
+      (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(3 + r.nextDouble)
+    )
+  }
+
   val rockScheme = Scheme(
     (r:Random) => Color.Grey.dim(6 + r.nextDouble),
     (r:Random) => Color.Grey.dim(3 + r.nextDouble)
   )
-
 
   val rock2Scheme = Scheme(
     (r:Random) => Color.Grey.dim(10 + r.nextDouble),
@@ -38,21 +43,17 @@ object TerrainScheme {
     (r:Random) => Color.Green.dim(3 + r.nextDouble)
   )
 
-
+  val shaftScheme = Scheme(
+    (r:Random) => Color.Grey.dim(12 + r.nextDouble),
+    (r:Random) => Color.Grey.dim(9 + r.nextDouble)
+  )
 
   val gemScheme = Scheme(
     (r:Random) => Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r),
     (r:Random) => Color.Grey.dim(3 + r.nextDouble)
   )
 
-  def r2(r:Random) = {
-    val x = r.nextDouble
-    (1 - x)*(1 - x)
-  }
-  val clayScheme = Scheme(
-    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(6 + r.nextDouble),
-    (r:Random) => Color.Red.mix(Color.Brown, r2(r)).dim(3 + r.nextDouble)
-  )
+
   val dummy = TerrainScheme(dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
 }
 

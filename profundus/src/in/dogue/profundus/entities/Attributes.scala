@@ -6,8 +6,9 @@ import in.dogue.profundus.Game
 
 object Attributes {
   def create = {
-    val items = if (Game.flyMode) Seq(Wings) else Seq()
-    Attributes(5, 5, 0, items)
+    val fly = if (Game.flyMode) Seq(Wings) else Seq()
+    val halo = if (Game.invMode) Seq(Halo) else Seq()
+    Attributes(5, 5, 0, fly ++ halo)
   }
   val default = create
 }
@@ -15,6 +16,7 @@ case class Attributes(stamRegen:Int, healthRegen:Int, toolRegen:Int, items:Seq[I
   def hasLongArms = items.contains(LongArms)
   def hasTrampoline = items.contains(Trampoline)
   def hasWings = items.contains(Wings)
+  def hasHalo = items.contains(Halo)
   def fallDistance = hasTrampoline.select(60, 12)
   def getItems = items
   def collectItem(it:Item) = copy(items = it +: items)

@@ -235,7 +235,17 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def kill:Player = {
-    copy(state=Dead, health=health.removeAll, face=Direction.Down, t=Player.getDead, justKilled=state!=Dead, buff=DeadBuff)
+    if (attr.hasHalo) {
+      this
+    } else {
+      copy(state=Dead,
+           health=health.removeAll,
+           face=Direction.Down,
+           t=Player.getDead,
+           justKilled=state!=Dead,
+           buff=DeadBuff)
+    }
+
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {

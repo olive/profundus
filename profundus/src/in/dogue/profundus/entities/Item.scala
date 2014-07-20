@@ -19,3 +19,7 @@ case object Trampoline extends Item {
 case object Wings extends Item {
   override val icon = CP437.∞.mkTile(Color.Black, Color.White)
 }
+
+case object Halo extends Item {
+  override val icon = CP437.°.mkTile(Color.Black, Color.Yellow)
+}
