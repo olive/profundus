@@ -292,10 +292,10 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     val res = tr.withMove(cx, cy) { wp =>
         wp.withFilter(getFilter((wp.originX, wp.originY))) { wp =>
               (wp <+< cache.draw(p.pos)
-                <+< em.draw
-                <+< p.draw
-                <+< pm.draw
-                )
+                  <+< em.draw
+                  <+< p.draw
+                  <+< pm.draw
+              )
         }
     }
 

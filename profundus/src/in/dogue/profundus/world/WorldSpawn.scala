@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.profundus.entities.{Entity, Casque, Creature}
+import in.dogue.profundus.entities.{Entity, Casque, Lurker}
 import in.dogue.profundus.entities.pickups.{FoodPickup, Pickup}
 import in.dogue.profundus.doodads.Doodad
 

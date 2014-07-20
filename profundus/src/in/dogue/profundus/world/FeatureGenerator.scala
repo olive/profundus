@@ -4,6 +4,7 @@ import scala.util.Random
 import in.dogue.antiqua.data.{Array2d, Direction}
 import in.dogue.antiqua.Antiqua._
 import com.deweyvm.gleany.data.Recti
+import in.dogue.profundus.world.features.{Mineshaft, SpikePit}
 
 object FeatureGenerator {
 
@@ -41,7 +42,7 @@ object FeatureGenerator {
   }
 
   private def makePits(num:Int, cols:Int, rows:Int)(ts:TerrainScheme, r:Random) = {
-    val width = 5
+    val width = 13
     val height = 10
     (0 until num) map { case i =>
       val xx = r.nextInt(cols - width)
@@ -50,16 +51,25 @@ object FeatureGenerator {
     }
 
   }
+
+  private def makeShafts(num:Int, cols:Int, rows:Int)(ts:TerrainScheme, r:Random) = {
+    val width = 9
+    val height = 32
+    (0 until num) map { case i =>
+      val xx = r.nextInt(cols - width)
+      val yy = r.nextInt(rows - height)
+      Mineshaft(xx, yy, width, height).toFeature(cols, rows)
+    }
+  }
   def simple(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random) = {
     val pits = makePits(3, cols, rows)(ts, r)
     val spikes = makeSpikes(1000, cols, rows)(ts, r)
-    pits ++ spikes
+    val shafts = makeShafts(2, cols, rows)(ts, r)
+    pits ++ spikes ++ shafts
   }
 
   val dummy = FeatureGenerator(simple)
 
 }
 
-case class FeatureGenerator(f:(Int, Int, Int, TerrainScheme, Random) => Seq[Feature]) {
-
-}
+case class FeatureGenerator(f:(Int, Int, Int, TerrainScheme, Random) => Seq[Feature])

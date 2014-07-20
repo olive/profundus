@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.{Casque, Creature}
+import in.dogue.profundus.entities.{Casque, Lurker}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 import in.dogue.profundus.lighting.LightSource

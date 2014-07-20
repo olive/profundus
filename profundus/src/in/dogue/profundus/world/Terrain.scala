@@ -12,6 +12,7 @@ import in.dogue.profundus.doodads.{Doodad, Moon}
 import in.dogue.profundus.entities.pickups.Pickup
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.world.features.SpikePit
 
 
 object Terrain {

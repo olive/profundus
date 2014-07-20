@@ -49,7 +49,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
   def hitCreatures(pos:Cell, dmg:Int) = {
     val newCr = cr.map { c =>
       if (c.pos == pos) {
-        c.kill
+        c.damage(dmg)
       } else {
         c
       }

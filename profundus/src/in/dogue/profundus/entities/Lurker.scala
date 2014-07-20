@@ -14,42 +14,47 @@ import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.world.WorldTile
 import in.dogue.profundus.entities.damagezones.SingleTileZone
 import in.dogue.profundus.Profundus
+import in.dogue.profundus.entities.LurkerState.Wander
 
-object Creature {
+object Lurker {
   def create(ij:Cell) = {
     val tile = CP437.a.mkTile(Color.Black, Color.Yellow)
-    Creature(tile, Alive, Wander.create).toEntity(ij)
+    Lurker(tile, Alive, Wander.create).toEntity(ij)
   }
 }
 
-sealed trait CreatureState {
+object LurkerState {
+  object Attack { def create(ppos:Cell) = Attack(ppos, 0) }
+  case class Attack(ppos:Cell, t:Int) extends LurkerState {
+    val attackFreq = 10
+    def update = copy(t=t+1)
+    override val isAttack = true
+  }
+
+  object Chase { def create(ppos:Cell) = Chase(ppos, 0) }
+  case class Chase private (ppos:Cell, t:Int) extends LurkerState {
+    def update(ppos:Cell) = copy(ppos=ppos, t=t+1)
+  }
+  object LostSight { def create(ppos:Cell) = LostSight(ppos, 0) }
+  case class LostSight private (ppos:Cell, t:Int) extends LurkerState {
+    def isDone = t > 120
+  }
+  object Wander { def create = Wander(0) }
+  case class Wander private (t:Int) extends LurkerState {
+    override val isWander = true
+  }
+}
+
+sealed trait LurkerState {
   val isWander = false
   val isAttack = false
 }
 
-object Attack { def create(ppos:Cell) = Attack(ppos, 0) }
-case class Attack(ppos:Cell, t:Int) extends CreatureState {
-  val attackFreq = 10
-  def update = copy(t=t+1)
-  override val isAttack = true
-}
 
-object Chase { def create(ppos:Cell) = Chase(ppos, 0) }
-case class Chase private (ppos:Cell, t:Int) extends CreatureState {
-  def update(ppos:Cell) = copy(ppos=ppos, t=t+1)
-}
-object LostSight { def create(ppos:Cell) = LostSight(ppos, 0) }
-case class LostSight private (ppos:Cell, t:Int) extends CreatureState {
-  def isDone = t > 120
-}
-object Wander { def create = Wander(0) }
-case class Wander private (t:Int) extends CreatureState {
-  override val isWander = true
-}
 
-case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
-
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Creature = {
+case class Lurker private (tile:Tile, live:LivingState, state:LurkerState) {
+  import LurkerState._
+  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Lurker = {
     if (newTouching(Direction.Down).exists {
       case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
       case a => false
@@ -85,7 +90,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
     val isIn = dd == ((0,0))
-    if (isIn) {
+    val (self, newPos) = if (isIn) {
         val newPos = if (!cache.isSolid(pos --> Direction.Left)) {
           pos |- 1
         } else if (!cache.isSolid(pos --> Direction.Right)) {
@@ -93,21 +98,21 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
         } else {
           pos
         }
-      (c.update(ppos), newPos, this, Seq())
+      (c.update(ppos), newPos)
     } else if (isAdjacent) {
-      (Attack.create(ppos), pos, this, Seq())
+      (Attack.create(ppos), pos)
     } else {
       val dx = math.signum(ppos.x - i)
       val dy = math.signum(ppos.y - j)
       val moved = pos |+| ((dx, dy))
-      val seen = copy(tile=CP437.b.mkTile(Color.Black, Color.Yellow))
       val newC = c.update(ppos)
       if (moved != ppos && newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
-        (newC, moved, this, Seq())
+        (newC, moved)
       } else {
-        (newC, pos, seen, Seq())
+        (newC, pos)
       }
     }
+    (self, newPos, this, Seq())
   }
 
   private def updateAttack(pos:Cell, a:Attack, ppos:Cell) = {
@@ -133,7 +138,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
   }
 
 
-  private def updatePlayerAlive(pos:Cell, cache:TerrainCache, ppos:Cell, r:Random):(Creature, Cell, Seq[GlobalSpawn]) = {
+  private def updatePlayerAlive(pos:Cell, cache:TerrainCache, ppos:Cell, r:Random):(Lurker, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val hasLos = cache.hasLineOfSight(pos, ppos)
     val ns = state match {
@@ -151,7 +156,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     (newSelf.copy(state = newState), newPos, Seq(attacks.gs))
   }
 
-  private def updateAlive(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Cell, Seq[GlobalSpawn]) = {
+  private def updateAlive(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Lurker, Cell, Seq[GlobalSpawn]) = {
     pState match {
       case Alive => updatePlayerAlive(pos, cache, ppos, r)
       case Dead if !state.isWander => (copy(state=Wander.create), pos, Seq())
@@ -159,7 +164,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     }
   }
 
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Lurker, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     live match {
       case Alive =>
         val (cre, newPos, glob) = updateAlive(pos, cache, ppos, pState, r)
@@ -176,7 +181,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
 
   def getLight(ij:Cell):Seq[LightSource] = Seq(LightSource.createCircle(ij, 0, 5, 0.5))
 
-  def toEntity(ij:Cell):Entity[Creature] = {
+  def toEntity(ij:Cell):Entity[Lurker] = {
     Entity(ij, Grounded, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLiving, _.draw, this)
   }
 }

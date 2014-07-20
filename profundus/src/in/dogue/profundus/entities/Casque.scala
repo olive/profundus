@@ -32,7 +32,7 @@ object Casque {
 case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, live:LivingState) {
   import Profundus._
 
-  def beHit(dmg:Int) = copy(health=health.drop(dmg))
+  def damage(dmg:Int) = copy(health=health.drop(dmg))
   def getLive = live
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Casque = {
     this
@@ -65,6 +65,6 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
   def getLight(ij:Cell) = Seq(light.copy(pos=ij))
 
   def toEntity(ij:Cell):Entity[Casque] = {
-    Entity(ij, Floating, _.update, _.move, _.beHit, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
+    Entity(ij, Floating, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
   }
 }
