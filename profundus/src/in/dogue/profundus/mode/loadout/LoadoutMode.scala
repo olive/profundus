@@ -13,6 +13,7 @@ import in.dogue.antiqua.graphics.Text
 import in.dogue.profundus.{Game, Profundus}
 import in.dogue.profundus.mode.{StoryMode, Mode, GameMode, CircleTransition}
 import in.dogue.profundus.procgen.PlayerInfo
+import in.dogue.profundus.audio.SoundManager
 
 object LoadoutMode {
   val topp = 15
@@ -66,9 +67,14 @@ case class LoadoutMove(nm:Loadout => Mode[_]) extends LoadoutUpdate
 case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:IndexedSeq[LoadoutButton[_]], ptr:Int, ptText:Text, points:Int, r:Rect, pi:PlayerInfo, los:Seq[LoadoutSection]) {
 
   private def move:LoadoutMode = {
+    def play() = SoundManager.blap.play()
     Controls.AxisX.zip(15,5) match {
-      case 1 if ptr < sliders.length - 1 => copy(ptr=ptr+1)
-      case -1 if ptr > 0 => copy(ptr = ptr.drop1)
+      case 1 if ptr < sliders.length - 1 =>
+        play()
+        copy(ptr=ptr+1)
+      case -1 if ptr > 0 =>
+        play()
+        copy(ptr = ptr.drop1)
       case _ => this
     }
   }

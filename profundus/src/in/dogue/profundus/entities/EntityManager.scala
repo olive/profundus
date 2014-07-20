@@ -14,6 +14,7 @@ import in.dogue.profundus.world.EntitySpawn
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.world.PickupSpawn
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.audio.SoundManager
 
 object EntityManager {
 
@@ -27,6 +28,9 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
   def update(tc:TerrainCache):(Seq[GlobalSpawn], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
+    if (done.length > 0) {
+      SoundManager.boom.play()
+    }
     val explode = done.map{_.getExplode}.flatten
     val (newRopes, pickups) = ropes.map{_.update(tc)}.unzip
     val newEm = copy(caps=notDone,
@@ -92,6 +96,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
   }
 
   def spawnCapsule(ij:Cell) = {
+    SoundManager.shhh.play()
     val c = Capsule.create(ij.x, ij.y)
     copy(caps=caps :+ c)
   }

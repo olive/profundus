@@ -7,6 +7,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.{FutureError, FutureFinished, FutureComputing, Future}
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.utils.FormatExc
+import in.dogue.profundus.audio.SoundManager
 
 object CircleTransition {
   def create(cols:Int, rows:Int, old:Mode[_], `new`:() => Mode[_], seed:Option[Int]) = {
@@ -28,11 +29,15 @@ case class CircleFail(msg:TileGroup) extends CircleState { override def getT = 0
 case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Future[Mode[_]], text:Text, max:Int, state:CircleState, seed:Option[Int]) {
   def update = {
     val newState: CircleState = state match {
-      case CircleIn(t) => if (t > max/2) {
-        WaitLoad(t+1, 0)
-      } else {
-        CircleIn(t + 1)
-      }
+      case CircleIn(t) =>
+        if (t == 0) {
+          SoundManager.wipe.play()
+        }
+        if (t > max/2) {
+          WaitLoad(t+1, 0)
+        } else {
+          CircleIn(t + 1)
+        }
       case WaitLoad(t, wlt) =>
         `new`.update match {
           case FutureFinished(_) => CircleOut(t)

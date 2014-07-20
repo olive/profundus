@@ -9,6 +9,7 @@ import com.deweyvm.gleany.graphics.Color
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.mode.loadout.{LoadoutUpdate, LoadoutStay, LoadoutMode, Loadout}
 import in.dogue.profundus.mode.Mode
+import in.dogue.profundus.audio.SoundManager
 
 object Slider {
   def create(i:Int, j:Int,
@@ -30,9 +31,14 @@ case class Slider private (i:Int, j:Int,
                            max:Int, value:Int, cost:Int, incr:Int) {
   val realCost = cost*incr
   def update(m:Mode[_], rem:Int):(LoadoutUpdate, Slider, Int) = {
+    def play() = SoundManager.clack.play()
     val (slide, remaining) = Controls.AxisY.zip(15,3) match {
-      case -1 if rem >= realCost && value < max => (copy(value=value+incr), rem-realCost)
-      case 1 if value >= 1 => (copy(value=value.drop(incr)), rem+realCost)
+      case -1 if rem >= realCost && value < max =>
+        play()
+        (copy(value=value+incr), rem-realCost)
+      case 1 if value >= 1 =>
+        play()
+        (copy(value=value.drop(incr)), rem+realCost)
       case _ => (this, rem)
     }
     (LoadoutStay, slide, remaining)

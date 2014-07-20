@@ -16,6 +16,7 @@ import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.lighting.{LightSource, LightManager}
 import in.dogue.profundus.input.Controls
+import in.dogue.profundus.audio.SoundManager
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
@@ -50,15 +51,16 @@ object GreatWorld {
     val em = gw.em
     val tc = gw.cache
     val doNothing = (em, pp)
-    val (newEm, newP) = if (pp.isBombing && pp.inv.hasBomb) {
+    val (newEm, newP) = if (pp.ctrl.isBombing && pp.inv.hasBomb) {
       val capPos = pp.pos --> pp.face
       if (!tc.isSolid(capPos)) {
         (em.spawnCapsule(capPos), pp.spendBomb)
       } else {
         doNothing
       }
-    } else if (pp.isRoping && pp.inv.hasRope) {
+    } else if (pp.ctrl.isRoping && pp.inv.hasRope) {
       val state = if (pp.face.isVertical && !tc.isSolid(pp.pos --> Direction.Up)) {
+        SoundManager.`throw`.play()
         Rope.create(FlyUp.create(pp.pos)).some
       } else if (!tc.isSolid(pp.pos --> pp.face)){
         Rope.create(DropDown.create(pp.pos --> pp.face)).some

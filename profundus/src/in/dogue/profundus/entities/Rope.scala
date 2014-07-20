@@ -8,6 +8,7 @@ import Antiqua._
 import in.dogue.profundus.world.TerrainCache
 import in.dogue.antiqua.algebra.Monoid
 import in.dogue.profundus.entities.pickups.{Pickup, RopePickup}
+import in.dogue.profundus.audio.SoundManager
 
 sealed trait RopeState {
   val throwHeight = 6
@@ -24,7 +25,12 @@ case class FlyUp private (private val src:Cell, len:Int, t:Int) extends RopeStat
   def top = src -| len
 }
 
-object DropDown { def create(top:Cell) = DropDown(top, 0, 0) }
+object DropDown {
+  def create(top:Cell) = {
+    SoundManager.stuck.play()
+    DropDown(top, 0, 0)
+  }
+}
 case class DropDown private (private val top:Cell, len:Int, t:Int) extends RopeState {
   def incrLen = copy(len=len+1, t=0)
   def x = top.x

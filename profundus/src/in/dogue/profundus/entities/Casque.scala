@@ -16,6 +16,7 @@ import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.world.WorldTile
 import in.dogue.profundus.entities.pickups.ItemPickup
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.audio.SoundManager
 
 object Casque {
   val attackTime = 10*60
@@ -42,6 +43,7 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
 
   def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Casque, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     val spawns = if (t > 0 && t % Casque.attackTime == 0) {
+      SoundManager.pop.play()
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3).toZone
       Seq(Seq(ps).gs, Seq(ex).gs)

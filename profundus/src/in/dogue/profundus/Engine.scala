@@ -6,7 +6,7 @@ import in.dogue.profundus.mode._
 import in.dogue.profundus.input.Controls
 import in.dogue.profundus.mode.Mode
 import in.dogue.antiqua.graphics.Tileset
-import in.dogue.profundus.mode.loadout.Loadout
+import in.dogue.profundus.mode.loadout.{LoadoutMode, Loadout}
 import scala.util.Random
 
 class Engine {
@@ -14,7 +14,7 @@ class Engine {
   val cols = 32
   val m = {
     if (Game.debug) {
-      val x = GameMode.create(cols, rows, Loadout.default, Game.getSeed)//TitleMode.create(cols, rows)//LoadoutMode.create(cols, rows, None)//ResultMode.create(cols, rows, PlayerLog.create(Loadout.default))//StoryMode.create(cols, rows, Loadout.default)//
+      val x = LoadoutMode.create(cols, rows, None)//GameMode.create(cols, rows, Loadout.default, Game.getSeed)//TitleMode.create(cols, rows)//ResultMode.create(cols, rows, PlayerLog.create(Loadout.default))//StoryMode.create(cols, rows, Loadout.default)//
       x.toMode
     } else {
       TitleMode.create(cols, rows).toMode

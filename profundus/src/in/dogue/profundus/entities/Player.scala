@@ -16,6 +16,8 @@ import in.dogue.profundus.world.WorldTile
 import scala.util.Random
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.ui.HudTool
+import in.dogue.profundus.audio.SoundManager
+import in.dogue.profundus.Game
 
 
 object PlayerLog {
@@ -76,11 +78,11 @@ object Player {
            Attributes.create, NoBuff,
            StaminaBar.create(100), HealthBar.create(100),
            shovel, getLive,
-           false, false, false, false,
+           ControlState(false, false, false, false),
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
            PlayerLight.create(LightSource.createCircle(ij, 5, 10, 1)),
-           0)
+           0, new StepMachine)
   }
 }
 
@@ -88,11 +90,11 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            attr:Attributes, buff:Buff,
                            stam:StaminaBar, health:HealthBar,
                            shovel:ToolSprite, t:Direction => Tile,
-                           isShovelling:Boolean, isClimbing:Boolean, isBombing:Boolean, isRoping:Boolean,
+                           ctrl:ControlState,
                            inv:Inventory, log:PlayerLog,
                            fall:FallState, state:LivingState, justKilled:Boolean,
                            light:PlayerLight,
-                           moveT:Int) {
+                           moveT:Int, stepMachine:StepMachine) {
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
   def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
   def collectFood(typ:FoodType) = {
@@ -107,9 +109,10 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     copy(log=log.eatFood(typ), buff = buff)
   }
   def collectItem(it:Item) = {
+    SoundManager.item.play()
     copy(attr=attr.collectItem(it))
   }
-  def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
+  def toolPos = (ctrl.isShovelling && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = hasStamina
 
@@ -120,6 +123,9 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def pos = (x, y)
   def hasLongArms = attr.hasLongArms
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
+    if ((from == Direction.Left || from == Direction.Right) && newTouching(Direction.Down).exists {!_.isWalkable}) {
+      stepMachine.increment()
+    }
     val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
     if (newTouching(Direction.Down).exists {
       case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
@@ -138,6 +144,11 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
   def hitTool(dmg:Int, broken:Boolean) = {
+    if (dmg > 0) {
+      SoundManager.dig.play()
+    } else {
+      SoundManager.swish.play()
+    }
     val prevDur = inv.tool.dura
     val newInv1 = inv.useTool(dmg)
     val (newLog, newInv) = if (newInv1.tool.dura == 0 && prevDur > 0) {
@@ -197,10 +208,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
   def update = {
     val newAttr = buff.process(attr)
-    val newP = copy(isShovelling=Controls.Space.justPressed && canUseTool,
-                    isClimbing=Controls.Action.justPressed,
-                    isBombing=Controls.Capsule.justPressed,
-                    isRoping=Controls.Rope.justPressed,
+    val newP = copy(ctrl=ctrl.update(canUseTool),
                     log=log.setDepth(pos.y).incrTime,
                     attr=newAttr,
                     stam=stam.update(newAttr),
@@ -208,6 +216,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     light=light.update,
                     fall=if(attr.hasWings)Floating else fall)
     val (jkP, ps) = if (justKilled) {
+      SoundManager.dead.play()
       (newP.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
     } else {
       (newP, Seq())
@@ -218,8 +227,16 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def setFallState(s:FallState) = {
     val newPl = copy(fall=s)
     (fall, s) match {
-      case (Falling(_, num), Grounded) if num > attr.fallDistance =>
-        newPl.kill
+      case (Falling(_, num), Grounded)  =>
+        if (num > 1) {
+          SoundManager.land.play()
+        }
+        if (num > attr.fallDistance) {
+          newPl.kill
+        } else {
+          newPl
+        }
+
       case _ => newPl
     }
   }
@@ -250,7 +267,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
-    isShovelling.select(
+    ctrl.isShovelling.select(
       tr,
       tr <+< shovel.draw(face)(x, y)
     )

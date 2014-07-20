@@ -6,12 +6,17 @@ import in.dogue.antiqua.graphics.{Text, TextFactory, TileRenderer}
 import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.audio.SoundManager
 
 object MessageBox {
   def create[T](tf:TextFactory, boxes:Seq[String], onFinish: () => T) = {
     val seq = boxes.map { s =>
       val lines = tf.textLines(s)
-      def mkLine(l:Text) = TextLine.create(l, () => (), c => c == CP437.` `.toCode)
+      def play() {
+        SoundManager.blip.stop()
+        SoundManager.blip.play()
+      }
+      def mkLine(l:Text) = TextLine.create(l, play, c => c != CP437.` `.toCode)
       val textLines = lines.map(mkLine)
       TextBox.create(textLines.toVector)
     }

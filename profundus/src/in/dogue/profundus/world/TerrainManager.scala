@@ -25,7 +25,7 @@ class TerrainManager {
 
   private def updateClimb(tc:TerrainCache, pl:Player):Player = {
     import Direction._
-    if (pl.isClimbing && Vector(Left, Right).contains(pl.face)) {
+    if (pl.ctrl.isClimbing && Vector(Left, Right).contains(pl.face)) {
       if (       pl.face == Left
               && tc.isSolid(pl.pos --> Left)
               && !tc.isSolid(pl.pos --> Left --> Up)) {
