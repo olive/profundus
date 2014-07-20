@@ -66,6 +66,9 @@ case object NoBuff extends Buff {
   override def isDone = false
   override def update = this
 
-  override def process(attr:Attributes) = Attributes.default
+  override def process(attr:Attributes) = {
+    val default = Attributes.default
+    attr.copy(healthRegen = default.healthRegen, stamRegen = default.stamRegen, toolRegen = default.toolRegen)
+  }
 }
 

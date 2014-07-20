@@ -93,7 +93,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            fall:FallState, state:LivingState, justKilled:Boolean,
                            light:PlayerLight,
                            moveT:Int) {
-
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
   def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
   def collectFood(typ:FoodType) = {
@@ -108,7 +107,6 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     copy(log=log.eatFood(typ), buff = buff)
   }
   def collectItem(it:Item) = {
-    println("collected")
     copy(attr=attr.collectItem(it))
   }
   def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)

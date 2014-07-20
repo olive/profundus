@@ -106,14 +106,14 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
 
   def collectPickups(p:Player):(Player, EntityManager) = {
     val seed = (p, List[Pickup[_]]())
-    val (newPl, newGems) = picks.foldLeft(seed) { case ((pl, list), g) =>
-      if (g.getPos == pl.pos) {
-        (g.collect(pl), list)
+    val (newPl, newPicks) = picks.foldLeft(seed) { case ((pl, list), pick) =>
+      if (pick.getPos == pl.pos) {
+        (pick.collect(pl), list)
       } else {
-        (pl, g :: list)
+        (pl, pick :: list)
       }
     }
-    (newPl, copy(picks=newGems))
+    (newPl, copy(picks=newPicks))
   }
 
   def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
