@@ -40,6 +40,11 @@ object LightSource {
   def createAnnulus(center:Cell, innerR:Int, outerR:Int, dim:Double): LightSource = {
     createCircle(center, innerR, outerR, dim)
   }
+
+  def flicker(t:Int) = {
+    import scala.math._
+    (abs(sin(sin(sin(sin(t/5.0) + t/50.0) + t/500.0) + t/5000.0)) + 5)/6
+  }
 }
 
 case class LightSource private (pos:Cell, flicker:Double, private val cells:Seq[(Cell, Double)], onScreen: ((Int,Int), Recti) => Boolean) {

@@ -8,7 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.antiqua.geometry.{Circle, Line}
-import in.dogue.profundus.doodads.{Doodad, Moon}
+import in.dogue.profundus.doodads.{Campfire, Doodad, Moon}
 import in.dogue.profundus.entities.pickups.Pickup
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.lighting.LightSource
@@ -16,25 +16,6 @@ import in.dogue.profundus.world.features.SpikePit
 
 
 object Terrain {
-
-  def createCave(y:Int, cols:Int, rows:Int, r:Random) = {
-    val mix = ((y/rows.toDouble - 1)/50).clamp(0, 0.5)
-    val sche = TerrainScheme.dummy.map(c => c.mix(Color.Blue, mix))
-    val gen = TerrainGenerator.dummy(sche)
-    val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
-    val tiles = noise.map { case (i, j, d) =>
-      val state = gen.mkTile(sche, i, j, y, cols, rows, d, r)
-      WorldTile(state(r))
-    }
-    val spike = placeSpikes(sche, Terrain(y, tiles, Seq(), (0,0), Direction.Down), r)
-    val width = 5
-    val height = 10
-    val xx = r.nextInt(cols - width)
-    val yy = r.nextInt(rows - height)
-    val shaft = SpikePit(xx, yy, width, height).toFeature(cols, rows)
-    val (newTiles, ds) = shaft.transform(cols, rows, y, sche, spike.tiles, r)
-    spike.copy(tiles=newTiles, doodads = spike.doodads ++ ds)
-  }
 
   def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
 
@@ -82,7 +63,8 @@ object Terrain {
     ((l2(0).x, l2(0).y), face, lines, circle)
   }
 
-  def createMouth(lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
+  def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
+      : (Array2d[WorldTile], Seq[Doodad[_]]) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
 
 
@@ -134,36 +116,10 @@ object Terrain {
       WorldTile(state(r))
     }
     val moon = Moon.create(cols, rows, 3*cols/4-5, -5, 4)
-    (tiles, Seq(moon.toDoodad))
+    val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
+    val campfire = Campfire.create((campX, rows/2))
+    (tiles, Seq(moon.toDoodad, campfire.toDoodad))
   }
-
-  def placeSpikes(scheme:TerrainScheme, terrain:Terrain, r:Random):Terrain = {
-    def get(ij:Cell):Boolean = terrain.tiles.getOption(ij.x, ij.y).exists{_.isWalkable}
-
-    val ts = terrain.tiles.map { case (i, j, t) =>
-      val p = (i, j)
-      val left = get(p |- 1)
-      val right = get(p |+ 1)
-      val down = get(p +| 1)
-      val up = get(p -| 1)
-      if (r.nextDouble > 0.9) {
-        if (down && !up && t.isWalkable) {
-          WorldTile(scheme.makeSpike(Direction.Down)(r))
-        } else if (up && !down && t.isWalkable) {
-          WorldTile(scheme.makeSpike(Direction.Up)(r))
-        } else {
-          t
-        }
-
-      } else {
-        t
-      }
-    }
-
-    terrain.copy(tiles=ts)
-  }
-
-
 
 
 }

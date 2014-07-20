@@ -25,7 +25,7 @@ case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:
       ((0,0), Direction.Down, Seq(Terrain.skyFeature(cols, rows)))
     } else if (y == 0) {
       val (spawn, face, lines, circle) = Terrain.makeLines(cols, rows, r)//createMouth
-      val f = Feature(Recti(0,0,cols,rows), Terrain.createMouth(lines, circle))
+      val f = Feature(Recti(0,0,cols,rows), Terrain.createMouth(face, lines, circle))
       (spawn, face, Seq(f))
     } else {
       ((0,0), Direction.Down, fg.f(cols, rows, y, ts, r))
