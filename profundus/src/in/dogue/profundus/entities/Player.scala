@@ -241,8 +241,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     }
   }
 
-  def damage(dmg:Int):Player = {
-    val newHealth = health.remove(dmg)
+  def damage(dmg:Damage):Player = {
+    val newHealth = health.remove(dmg.amount)
     val f = if (newHealth.amt <= 0) {
       (p:Player) => p.kill
     } else {

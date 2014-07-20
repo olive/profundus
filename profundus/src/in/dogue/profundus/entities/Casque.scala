@@ -33,7 +33,14 @@ object Casque {
 case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, live:LivingState) {
   import Profundus._
 
-  def damage(dmg:Int) = copy(health=health.drop(dmg))
+  def damage(dmg:Damage) = {
+    if (dmg.source == DamageType.Obelisk) {
+      this
+    } else {
+      copy(health=health.drop(dmg.amount))
+    }
+
+  }
   def getLive = live
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Casque = {
     this
@@ -45,7 +52,7 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
     val spawns = if (t > 0 && t % Casque.attackTime == 0) {
       SoundManager.pop.play()
       val ps = RingParticle.create(pos, 8, 3).toParticle
-      val ex = ExplosionZone.create(pos, 8, 3).toZone
+      val ex = ExplosionZone.create(pos, 8, 3, DamageType.Obelisk).toZone
       Seq(Seq(ps).gs, Seq(ex).gs)
     } else {
       Seq()

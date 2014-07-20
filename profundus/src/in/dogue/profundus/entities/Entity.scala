@@ -12,7 +12,7 @@ case class Entity[T](ij:Cell,
                      fall:FallState,
                      up: T => (Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]),
                      mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T,
-                     dmg: T => Int => T,
+                     dmg: T => Damage => T,
                      doKill: T => T,
                      deathPart:T => Cell => Particle[_],
                      light: T => Cell => Seq[LightSource],
@@ -31,7 +31,7 @@ case class Entity[T](ij:Cell,
     copy(ij=to, self=mv(self)(to, dir, newSolid))
   }
 
-  def damage(amt:Int) = copy(self=dmg(self)(amt))
+  def damage(d:Damage) = copy(self=dmg(self)(d))
 
   def kill = copy(self=doKill(self))
 

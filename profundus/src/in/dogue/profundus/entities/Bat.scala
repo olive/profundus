@@ -37,7 +37,7 @@ object Bat {
 }
 
 case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int, t:Int) {
-  def damage(dmg:Int) = copy(health=health.drop(dmg))
+  def damage(dmg:Damage) = copy(health=health.drop(dmg.amount))
   def getLive = live
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Bat = {
     this
@@ -68,7 +68,7 @@ case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int
       pos
     }
     val attack = if (isAdjacent && t % 15 == 0) {
-      Seq(SingleTileZone(ppos, 75).toZone)
+      Seq(SingleTileZone(ppos, 75, DamageType.Creature).toZone)
     } else {
       Seq()
     }

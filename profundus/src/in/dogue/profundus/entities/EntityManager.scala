@@ -50,7 +50,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     copy(ropes=newRopes)
   }
 
-  def hitCreatures(pos:Cell, dmg:Int) = {
+  def hitCreatures(pos:Cell, dmg:Damage) = {
     val newCr = cr.map { c =>
       if (c.pos == pos) {
         c.damage(dmg)

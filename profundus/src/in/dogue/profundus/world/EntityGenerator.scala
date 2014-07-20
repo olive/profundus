@@ -22,7 +22,7 @@ object EntityGenerator {
           None
         }
       }.flatten
-      val casques = (0 until 10).map { _ =>
+      val casques = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         if (!isSolid(pos)) {
           Casque.create(pos +| (i * rows), r).some

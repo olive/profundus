@@ -84,7 +84,9 @@ object GreatWorld {
     val em = gw.em
     val newEm = pp.toolPos match {
       case None => em
-      case Some(pos) => em.hitRopes(pos).hitCreatures(pos, pp.inv.tool.`type`.digDamage/*fixme*/)
+      case Some(pos) =>
+        val dmg = Damage(pp.inv.tool.`type`.digDamage, DamageType.Player)
+        em.hitRopes(pos).hitCreatures(pos, dmg/*fixme*/)
 
     }
     gw.setEm(newEm)

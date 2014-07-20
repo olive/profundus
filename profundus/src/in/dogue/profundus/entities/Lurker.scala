@@ -68,7 +68,7 @@ case class Lurker private (tile:Tile, live:LivingState, state:LurkerState) {
 
   def getLiving = live
 
-  def damage(dmg:Int) = kill
+  def damage(dmg:Damage) = kill
   def kill = copy(live=Dead)
   private def updateWander(pos:Cell, w:Wander, c:TerrainCache, r:Random) = {
     val self = if (w.t % 60 == 0) {
@@ -121,7 +121,7 @@ case class Lurker private (tile:Tile, live:LivingState, state:LurkerState) {
     val (newState, zone) = if (!isAdjacent) {
       (Chase.create(ppos), Seq())
     } else if (a.t > 0 && a.t % a.attackFreq == 0) {
-      (a.copy(t=0), Seq(SingleTileZone(ppos, 75).toZone))
+      (a.copy(t=0), Seq(SingleTileZone(ppos, 75, DamageType.Creature).toZone))
     } else {
       (a.update, Seq())
     }

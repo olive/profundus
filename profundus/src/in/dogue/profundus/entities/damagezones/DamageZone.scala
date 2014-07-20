@@ -1,22 +1,23 @@
 package in.dogue.profundus.entities.damagezones
 
 import in.dogue.antiqua.Antiqua._
+import in.dogue.profundus.entities.{DamageType, Damage}
 
 
 object DamageZone {
   def create[T](up:T => T,
                 isDone:T => Boolean,
-                damagePerTick:T => Int,
+                damagePerTick:T => Damage,
                 tickFreq:T => Int,
                 cnts:T => Cell => Boolean,
                 self:T) = {
     DamageZone(up, isDone, damagePerTick, tickFreq, cnts, self, 0)
   }
 
-  def process[T](kz:Seq[DamageZone[_]], t:T, apply:Int => T, pos:Cell):T = {
+  def process[T](kz:Seq[DamageZone[_]], t:T, apply:Damage => T, pos:Cell):T = {
     kz.foldLeft(t) { case (tt, z) =>
       if (z.contains(pos)) {
-        apply(z.getDamage)
+        z.getDamage.map { d => apply(d) }.getOrElse(tt)
       } else {
         tt
       }
@@ -25,7 +26,7 @@ object DamageZone {
 }
 case class DamageZone[T] private (up:T => T,
                                   isDone:T => Boolean,
-                                  damagePerTick:T => Int,
+                                  damagePerTick:T => Damage,
                                   tickFreq:T => Int,
                                   cnts:T => Cell => Boolean,
                                   self:T,
@@ -39,9 +40,9 @@ case class DamageZone[T] private (up:T => T,
   def getDamage = {
     val freq = tickFreq(self)
     if (freq <= 1 || (t > 0 && t % tickFreq(self) == 0)) {
-      damagePerTick(self)
+      damagePerTick(self).some
     } else {
-      0
+      None
     }
   }
 

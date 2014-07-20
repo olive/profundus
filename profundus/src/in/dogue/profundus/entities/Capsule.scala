@@ -71,7 +71,7 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
   private def makeZone = {
-    ExplosionZone.create((i, j), 8, 3).toZone
+    ExplosionZone.create((i, j), 8, 3, DamageType.Environment).toZone
   }
 
 
