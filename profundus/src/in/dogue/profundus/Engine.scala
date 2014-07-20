@@ -12,8 +12,15 @@ import scala.util.Random
 class Engine {
   val rows = 32 + 16
   val cols = 32
-  val m = GameMode.create(cols, rows, Loadout.default, Random.nextInt())//TitleMode.create(cols, rows)//LoadoutMode.create(cols, rows, None)//ResultMode.create(cols, rows, PlayerLog.create(Loadout.default))//StoryMode.create(cols, rows, Loadout.default)//
-  var mode:Mode[_] = m.toMode
+  val m = {
+    if (Game.debug) {
+      val x = GameMode.create(cols, rows, Loadout.default, Random.nextInt())//TitleMode.create(cols, rows)//LoadoutMode.create(cols, rows, None)//ResultMode.create(cols, rows, PlayerLog.create(Loadout.default))//StoryMode.create(cols, rows, Loadout.default)//
+      x.toMode
+    } else {
+      TitleMode.create(cols, rows).toMode
+    }
+  }
+  var mode:Mode[_] = m
   val ts = new Tileset(16, 16, 16, 16, AssetLoader.loadTexture("16x16"))
   val r = new Renderer(cols*16, rows*16, 1, ts)
 

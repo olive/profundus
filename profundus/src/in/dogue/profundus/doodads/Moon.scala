@@ -8,7 +8,7 @@ import Antiqua._
 import in.dogue.profundus.lighting.LightSource
 
 object Moon {
-  def create(x:Int, y:Int, r:Int) = {
+  def create(cols:Int, rows:Int, x:Int, y:Int, r:Int) = {
     val draws = for (i <- 0 to r*2; j <- 0 to r*2) yield {
       if (scala.math.hypot(r - i, r - j) < r) {
         (i, j,  CP437.█.mkTile(Color.Black, Color.White)).some
@@ -17,7 +17,7 @@ object Moon {
       }
 
     }
-    val light = LightSource.createCircle((x,y), 10, 10, 0.5)
+    val light = LightSource.createRect((0, 0), cols, rows, 0.5)
     Moon(x, y, r, light, draws.flatten, 0)
   }
 }

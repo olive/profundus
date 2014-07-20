@@ -204,7 +204,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     attr=newAttr,
                     stam=stam.update(newAttr),
                     health=health.update(newAttr),
-                    light=light.update)
+                    light=light.update,
+                    fall=if(attr.hasWings)Floating else fall)
     val (jkP, ps) = if (justKilled) {
       (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
     } else {
@@ -250,5 +251,5 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
 
 
   def toMassive:Massive[Player] = Massive(_.pos, _.move, _.setFallState, fall, this)
-  def toLight:LightSource = light.get(pos)
+  def toLight:LightSource = light.toLightSource(pos)
 }

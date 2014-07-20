@@ -7,6 +7,7 @@ import in.dogue.profundus.ui.Hud
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.world.GreatWorld
 import in.dogue.profundus.input.Controls
+import in.dogue.profundus.lighting.LightManager
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout, seed:Int) = {
@@ -19,7 +20,7 @@ object GameMode {
   }
 }
 
-case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random) {
+case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random) {
 
   def update = {
     if (Controls.Pause.justPressed) {
@@ -40,7 +41,7 @@ case class GameMode private(cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random
                     .withHealth(pl.getHealthBar)
                     .withBuff(pl.getBuffIcon)
                     .withItems(pl.getItems)
-    copy(gw=gw.update, hud=newHud)
+    copy(gw=gw.setLm(LightManager.create).update, hud=newHud)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

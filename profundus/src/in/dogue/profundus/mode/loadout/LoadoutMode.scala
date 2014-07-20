@@ -78,7 +78,6 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
       CircleTransition.create(cols, rows, this.toMode, f, None).toMode
     } else if (Controls.Space.justPressed) {
       val seed = if (Game.debug) 1 else new Random(System.nanoTime).nextInt()
-      println("SEED " + seed)
       val f = () => GameMode.create(cols, rows, getLoadout, seed).toMode
       CircleTransition.create(cols, rows, this.toMode, f, Some(seed)).toMode
     } else {

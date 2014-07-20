@@ -229,7 +229,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def update:GreatWorld = {
     updates.foldLeft(this) { case (w, (t, up)) =>
       w.doUpdate(t, up)
-    }.copy(lm=LightManager.create)
+    }
   }
 
   def +#+[T](t:T, up:GreatWorld.Update[T]) = copy(updates=updates :+ ((t, up)))
@@ -268,14 +268,13 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   }
 
   def assembleLights:Seq[LightSource] = {
-    Seq(p.toLight)/* +: em.getLights*/
+    Seq(p.toLight) ++ em.getLights
   }
 
   def getFilter(cxy:Cell) = {
     val newLm = assembleLights.foldLeft(lm) { case (l, ls) =>
       l.addLight(ls)
     }
-    println(newLm.lights.length)
     newLm.getFilter(cxy)
   }
 

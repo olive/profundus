@@ -2,6 +2,8 @@ package in.dogue.profundus.lighting
 
 import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.graphics.{Tile, Filter}
+import com.deweyvm.gleany.data.Recti
+import in.dogue.antiqua.geometry.Circle
 
 object LightManager {
   def create = LightManager(Seq())
@@ -18,10 +20,10 @@ case class LightManager(lights:Seq[LightSource]) {
     val map = collection.mutable.Map[Cell, Double]().withDefaultValue(1)
     val cols = 32
     val rows = 32 + 16
-    println("Cam" + cxy)
+    val screenRect = Recti(0, 0, cols, rows)
     for (l <- lights) {
-      val (lx, ly) =  cxy |+| l.pos
-      if (lx >= 0 && lx < cols && ly >= 0 && ly < rows) {
+      val c = l.onScreen(cxy, screenRect)
+      if (c || true) {
         for ((cell, d) <- l.fill) {
           map(cell) = (map(cell) - d).clamp(0, 1)
         }

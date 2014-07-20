@@ -28,10 +28,11 @@ case class Slider private (i:Int, j:Int,
                            up:Tile, down:Tile,
                            width:Int,
                            max:Int, value:Int, cost:Int, incr:Int) {
+  val realCost = cost*incr
   def update(m:Mode[_], rem:Int):(LoadoutUpdate, Slider, Int) = {
     val (slide, remaining) = Controls.AxisY.zip(15,3) match {
-      case -1 if rem >= cost && value < max => (copy(value=value+incr), rem-cost)
-      case 1 if value >= 1 => (copy(value=value.drop(incr)), rem+cost)
+      case -1 if rem >= realCost && value < max => (copy(value=value+incr), rem-realCost)
+      case 1 if value >= 1 => (copy(value=value.drop(incr)), rem+realCost)
       case _ => (this, rem)
     }
     (LoadoutStay, slide, remaining)
@@ -54,7 +55,7 @@ case class Slider private (i:Int, j:Int,
 
   private def drawArrows(selected:Boolean, rem:Int, x:Int)(tr:TileRenderer):TileRenderer = {
     def f(t:Tile) = if (!selected) t.setFg(Color.DarkGrey) else t
-    val upDraw = (i+x, j - 1, f(up)).onlyIf(rem >= cost)
+    val upDraw = (i+x, j - 1, f(up)).onlyIf(rem >= realCost)
     val downDraw =  (i+x, j + 1, f(down)).onlyIf(value >= 1)
     tr <|? upDraw <|? downDraw
   }
