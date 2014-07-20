@@ -4,6 +4,8 @@ import in.dogue.profundus.entities.{Casque, Creature}
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import in.dogue.profundus.Profundus
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, t:Array2d[WorldTile], r:Random) = {

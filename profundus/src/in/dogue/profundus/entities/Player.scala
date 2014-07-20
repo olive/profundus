@@ -107,7 +107,10 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     }
     copy(log=log.eatFood(typ), buff = buff)
   }
-  def collectItem(it:Item) = copy(attr=attr.collectItem(it))
+  def collectItem(it:Item) = {
+    println("collected")
+    copy(attr=attr.collectItem(it))
+  }
   def toolPos = (isShovelling && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = hasStamina

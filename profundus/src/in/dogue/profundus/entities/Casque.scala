@@ -40,7 +40,7 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
 
   def kill = copy(live=Dead)
 
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Casque, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Casque, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     val spawns = if (t > 0 && t % Casque.attackTime == 0) {
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3).toZone
@@ -53,7 +53,7 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
     } else {
       (live, Seq())
     }
-    (copy(t=t+1, live=newLive), spawns, Seq(pickups.ws))
+    (copy(t=t+1, live=newLive), pos, spawns, Seq(pickups.ws))
   }
 
   def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle

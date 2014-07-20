@@ -76,7 +76,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     } else {
       this
     }
-    (w.copy(t=w.t+1), self, Seq())
+    (w.copy(t=w.t+1), pos, self, Seq())
   }
 
   private def updateChase(pos:Cell, c:Chase, cache:TerrainCache, ppos:Cell) = {
@@ -86,16 +86,16 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
     val isIn = dd == ((0,0))
     if (isIn) {
-        val newSelf = if (!cache.isSolid(pos --> Direction.Left)) {
-          this//FIXME copy(i=i-1)
+        val newPos = if (!cache.isSolid(pos --> Direction.Left)) {
+          pos |- 1
         } else if (!cache.isSolid(pos --> Direction.Right)) {
-          this//FIXME copy(i=i+1)
+          pos |+ 1
         } else {
-          this
+          pos
         }
-      (c.update(ppos), newSelf, Seq())
+      (c.update(ppos), newPos, this, Seq())
     } else if (isAdjacent) {
-      (Attack.create(ppos), this, Seq())
+      (Attack.create(ppos), pos, this, Seq())
     } else {
       val dx = math.signum(ppos.x - i)
       val dy = math.signum(ppos.y - j)
@@ -103,9 +103,9 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
       val seen = copy(tile=CP437.b.mkTile(Color.Black, Color.Yellow))
       val newC = c.update(ppos)
       if (moved != ppos && newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
-        (newC, this/*FIXME copy(i=i+dx, j=j+dy)*/, Seq())
+        (newC, moved, this, Seq())
       } else {
-        (newC, seen, Seq())
+        (newC, pos, seen, Seq())
       }
     }
   }
@@ -120,7 +120,7 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     } else {
       (a.update, Seq())
     }
-    (newState, this, zone)
+    (newState, pos, this, zone)
   }
 
   private def updateLost(pos:Cell, l:LostSight) = {
@@ -129,10 +129,11 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
     } else {
       l.copy(t=l.t+1)
     }
-    (state, this, Seq())
+    (state, pos, this, Seq())
   }
 
-  private def updatePlayerAlive(pos:Cell, cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[GlobalSpawn]) = {
+
+  private def updatePlayerAlive(pos:Cell, cache:TerrainCache, ppos:Cell, r:Random):(Creature, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val hasLos = cache.hasLineOfSight(pos, ppos)
     val ns = state match {
@@ -141,29 +142,29 @@ case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
       case a if hasLos && !a.isAttack => Chase.create(ppos)
       case a => a
     }
-    val (newState, newSelf, attacks) = ns match {
+    val (newState, newPos, newSelf, attacks) = ns match {
       case a@Attack(p, t) => updateAttack(pos, a, ppos)
       case c@Chase(p, t) => updateChase(pos, c, cache, ppos)
       case l@LostSight(p, t) => updateLost(pos, l)
       case w@Wander(t) => updateWander(pos, w, cache, r)
     }
-    (newSelf.copy(state = newState), Seq(attacks.gs))
+    (newSelf.copy(state = newState), newPos, Seq(attacks.gs))
   }
 
-  private def updateAlive(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[GlobalSpawn]) = {
+  private def updateAlive(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Cell, Seq[GlobalSpawn]) = {
     pState match {
       case Alive => updatePlayerAlive(pos, cache, ppos, r)
-      case Dead if !state.isWander => (copy(state=Wander.create), Seq())
-      case a => (this, Seq())
+      case Dead if !state.isWander => (copy(state=Wander.create), pos, Seq())
+      case a => (this, pos, Seq())
     }
   }
 
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     live match {
       case Alive =>
-        val (cre, glob) = updateAlive(pos, cache, ppos, pState, r)
-        (cre, glob, Seq())
-      case Dead => (this, Seq(), Seq())
+        val (cre, newPos, glob) = updateAlive(pos, cache, ppos, pState, r)
+        (cre, newPos, glob, Seq())
+      case Dead => (this, pos, Seq(), Seq())
     }
 
   }
