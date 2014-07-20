@@ -3,7 +3,7 @@ package in.dogue.profundus.world
 import com.deweyvm.gleany.graphics.Color
 import scala.util.Random
 import in.dogue.antiqua.data.{Direction, CP437}
-import in.dogue.antiqua.graphics.Tile
+import in.dogue.antiqua.graphics.{ColorHarmony, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 
@@ -55,6 +55,50 @@ object TerrainScheme {
 
 
   val dummy = TerrainScheme(dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
+
+
+  def generate(r:Random) = {
+    val harmony = ColorHarmony.create(4, r.nextDouble, 0.5f, 0.5f, 0, 0, 0.5f, 0.5f, 0.5f, r.nextInt())
+    val dirt = harmony(0)
+    val clay = harmony(1)
+    val rock = harmony(2)
+    val special = harmony(3)
+    val emptyScheme =  Scheme(
+      (r:Random) => dirt.mix(Color.Tan, r.nextDouble/2),
+      (r:Random) => dirt.mix(Color.Tan, r.nextDouble/2)
+    )
+    val dirtScheme = Scheme(
+      (r:Random) => dirt.dim(6 + r.nextDouble),
+      (r:Random) => dirt.dim(3 + r.nextDouble)
+    )
+    val clayScheme = {
+      Scheme(
+        (r:Random) => clay.dim(6 + r.nextDouble),
+        (r:Random) => clay.dim(3 + r.nextDouble)
+      )
+    }
+    val rockScheme = Scheme(
+      (r:Random) => rock.dim(6 + r.nextDouble),
+      (r:Random) => rock.dim(3 + r.nextDouble)
+    )
+    val rock2Scheme = Scheme(
+      (r:Random) => rock.dim(10 + r.nextDouble),
+      (r:Random) => rock.dim(6 + r.nextDouble)
+    )
+    val rock3Scheme = Scheme(
+      (r:Random) => special.dim(6 + r.nextDouble),
+      (r:Random) => special.dim(3 + r.nextDouble)
+    )
+    val shaftScheme = Scheme(
+      (r:Random) => rock.dim(12 + r.nextDouble),
+      (r:Random) => rock.dim(9 + r.nextDouble)
+    )
+    val gemScheme = Scheme(
+      (r:Random) => Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r),
+      (r:Random) => rock.dim(3 + r.nextDouble)
+    )
+    TerrainScheme(dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
+  }
 }
 
 case class TerrainScheme(dirt:Scheme,

@@ -17,7 +17,7 @@ case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
         WorldTile(ts.makeRock2(r))
       } else if (inRange && (i < x + 2 || i > x + width - 3 )) {
         val d = r.nextDouble
-        if (d < 0.01) {
+        if (d < 0.03) {
           WorldTile(ts.makeMineral(r))
         } else if (d < 0.33) {
           WorldTile(ts.makeRock(r))

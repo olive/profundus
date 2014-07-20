@@ -9,7 +9,7 @@ import com.deweyvm.gleany.data.Recti
 
 object Biome {
   def createDummy = {
-    val ts = TerrainScheme.dummy
+    val ts = TerrainScheme.generate(new Random())
     val tg = TerrainGenerator.dummy(ts)
     val fg = FeatureGenerator.dummy
     val eg = EntityGenerator.dummy
