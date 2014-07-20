@@ -10,7 +10,7 @@ import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn}
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.particles.{DeathParticle, Particle, ExplosionParticle}
+import in.dogue.profundus.particles.{RingParticle, DeathParticle, Particle, ExplosionParticle}
 import in.dogue.profundus.entities.pickups.ItemPickup
 
 object Casque {
@@ -32,7 +32,7 @@ case class Casque private (ij:Cell, tg:TileGroup, health:Int, t:Int, live:Living
   def beHit(dmg:Int) = copy(health=health.drop(dmg))
   def update:(Casque, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     val spawns = if (t > 0 && t % Casque.attackTime == 0) {
-      val ps = ExplosionParticle.create(ij.x, ij.y, 0, 8, 3).toParticle
+      val ps = RingParticle.create(ij, 8, 3).toParticle
       val ex = ExplosionZone.create(ij.x, ij.y, 8, 3).toZone
       Seq(Seq(ps).ns, Seq(ex).ns)
     } else {

@@ -67,7 +67,7 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
   private def makeParticle = {
-    ExplosionParticle.create(i, j, 0, 8, 3).toParticle
+    ExplosionParticle.create(i, j, 8, 3).toParticle
   }
 
   private def makeZone = {

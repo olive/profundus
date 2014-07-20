@@ -36,6 +36,10 @@ object LightSource {
     }
     LightSource(pos, 1, cells, onScreen)
   }
+
+  def createAnnulus(center:Cell, innerR:Int, outerR:Int, dim:Double): LightSource = {
+    createCircle(center, innerR, outerR, dim)
+  }
 }
 
 case class LightSource private (pos:Cell, flicker:Double, private val cells:Seq[(Cell, Double)], onScreen: ((Int,Int), Recti) => Boolean) {

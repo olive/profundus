@@ -2,11 +2,12 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.Game
 
 object Attributes {
   def create = {
-
-    Attributes(5, 5, 0, Seq(Wings))
+    val items = if (Game.flyMode) Seq(Wings) else Seq()
+    Attributes(5, 5, 0, items)
   }
   val default = create
 }

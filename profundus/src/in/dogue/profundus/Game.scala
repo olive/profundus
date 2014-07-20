@@ -6,6 +6,7 @@ import in.dogue.profundus.input.Controls
 object Game {
   var t = 0
   val debug = true
+  val flyMode = false && debug
   val version = "Version 0.0.11"
 }
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {

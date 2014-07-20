@@ -1,23 +1,27 @@
 package in.dogue.profundus.particles
 
+import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.graphics.{Tile, TileRenderer}
+import in.dogue.antiqua.Antiqua.Cell
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import scala.util.Random
-import in.dogue.profundus.lighting.LightSource
 
-object ExplosionParticle {
-  def create(i:Int, j:Int, radius:Int, speed:Int) = {
-    ExplosionParticle(i, j, radius, speed, 0, new Random())
+object RingParticle {
+  def create(ij:Cell, radius:Int, speed:Int) = {
+    RingParticle(ij, radius, speed, 0, new Random())
   }
-  private final val colors = Vector(Color.Yellow, Color.Orange, Color.Red)
+  val colors = Vector(Color.Cyan.dim(4), Color.Cyan.dim(3), Color.Cyan.dim(2))
 }
-case class ExplosionParticle private (i:Int, j:Int, radius:Int, speed:Int, t:Int, r:Random) {
-  import ExplosionParticle._
+
+case class RingParticle(ij:Cell, radius:Int, speed:Int, t:Int, r:Random) {
+  val i = ij.x
+  val j = ij.y
+  import RingParticle._
   def update = copy(t=t+1)
   def isDone = t > (radius+1)*speed
-  def toParticle:Particle[ExplosionParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
+  def toParticle:Particle[RingParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
   def getLight = Seq(LightSource.createCircle((i, j), t/speed, t*2/speed, 1))
   def draw(tr:TileRenderer):TileRenderer = {
 
@@ -34,8 +38,8 @@ case class ExplosionParticle private (i:Int, j:Int, radius:Int, speed:Int, t:Int
     }
     tr `$$>` (indices.flatten map { case (p, q) =>
       def f(t:Tile):Tile = {
-        val bg = colors.randomR(r).dim(0.2 + r.nextDouble)
-        val fg = colors.randomR(r).dim(0.2 + r.nextDouble)
+        val bg = colors.randomR(r).dim(1 + r.nextDouble)
+        val fg = colors.randomR(r).dim(1 + r.nextDouble)
         t.setFg(fg).setBg(bg)
       }
       (p, q, f _)

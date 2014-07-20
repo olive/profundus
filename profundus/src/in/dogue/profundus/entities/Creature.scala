@@ -25,7 +25,7 @@ sealed trait CreatureState {
 
 object Attack { def create(ppos:Cell) = Attack(ppos, 0) }
 case class Attack(ppos:Cell, t:Int) extends CreatureState {
-  val attackFreq = 15
+  val attackFreq = 10
   def update = copy(t=t+1)
   override val isAttack = true
 }
@@ -79,7 +79,17 @@ case class Creature private (i:Int, j:Int, tile:Tile,
   private def updateChase(c:Chase, cache:TerrainCache, ppos:Cell) = {
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
-    if (isAdjacent) {
+    val isIn = dd == ((0,0))
+    if (isIn) {
+        val newSelf = if (!cache.isSolid(pos --> Direction.Left)) {
+          copy(i=i-1)
+        } else if (!cache.isSolid(pos --> Direction.Right)) {
+          copy(i=i+1)
+        } else {
+          this
+        }
+      (c.update(ppos), newSelf, Seq())
+    } else if (isAdjacent) {
       (Attack.create(ppos), this, Seq())
     } else {
       val dx = math.signum(ppos.x - i)
@@ -101,7 +111,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     val (newState, zone) = if (!isAdjacent) {
       (Chase.create(ppos), Seq())
     } else if (a.t > 0 && a.t % a.attackFreq == 0) {
-      (a.copy(t=0), Seq(SingleTileZone(ppos, 50).toZone))
+      (a.copy(t=0), Seq(SingleTileZone(ppos, 75).toZone))
     } else {
       (a.update, Seq())
     }

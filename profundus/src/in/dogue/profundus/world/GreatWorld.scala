@@ -155,7 +155,10 @@ object GreatWorld {
   }
 
   private def updateParticles : Update[Unit] =  standard { case (gw, ()) =>
-    gw.setPm(gw.pm.update)
+    val pm = gw.pm
+    val (particles, lights) = pm.update
+    val lm = gw.lm
+    gw.setPm(particles).setLm(lm.addLights(lights))
   }
 
   private def killEntities : Update[Unit] = standard { case (gw, ()) =>

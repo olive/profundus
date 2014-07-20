@@ -13,6 +13,7 @@ case class DeathParticle private (i:Int, j:Int, t:Int, maxT:Int){
   final val expandTime = 6
   def isDone = t >= maxT
   def update = copy(t=t+1)
+  def getLight = Seq()
   def draw(tr:TileRenderer):TileRenderer = {
     val b = 4
     val r = math.min((t/expandTime.toDouble)*b, b)
@@ -38,5 +39,5 @@ case class DeathParticle private (i:Int, j:Int, t:Int, maxT:Int){
     tr `$$>` draws
   }
 
-  def toParticle:Particle[DeathParticle] = Particle(_.update, _.draw, _.isDone, this)
+  def toParticle:Particle[DeathParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
 }
