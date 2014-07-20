@@ -71,15 +71,15 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
   private def makeZone = {
-    ExplosionZone.create(i, j, 8, 3).toZone
+    ExplosionZone.create((i, j), 8, 3).toZone
   }
 
 
   def getExplode:Seq[GlobalSpawn] = {
     import Profundus._
-    Seq(Seq(makeDeformation).ns,
-        Seq(makeParticle).ns,
-        Seq(makeZone).ns)
+    Seq(Seq(makeDeformation).gs,
+        Seq(makeParticle).gs,
+        Seq(makeZone).gs)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

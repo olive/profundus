@@ -207,7 +207,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                     light=light.update,
                     fall=if(attr.hasWings)Floating else fall)
     val (jkP, ps) = if (justKilled) {
-      (newP.copy(justKilled=false), Seq(DeathParticle.create(x, y, Int.MaxValue).toParticle))
+      (newP.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
     } else {
       (newP, Seq())
     }

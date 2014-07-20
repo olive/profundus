@@ -134,11 +134,11 @@ object GreatWorld {
   }
 
   private def updateCreatures : Update[Unit] = { case (gw, ()) =>
-    import Profundus._
     val pl = gw.p
     val cache = gw.cache
-    val (newEm, kills) = gw.em.updateCreatures(cache, pl.pos, pl.state)
-    (gw.setEm(newEm), Seq(kills.ns))
+    val (newEm, glob, worl) = gw.em.updateCreatures(cache, pl.pos, pl.state)
+    val insertedEm = newEm.addSpawns(worl)
+    (gw.setEm(insertedEm), glob)
   }
 
   private def updateDeformations : Update[Unit] = standard { case (gw, ()) =>

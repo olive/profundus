@@ -41,8 +41,8 @@ case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:
 
     }
     val doodads = dg.generate(ts, newTiles, r) ++ ds
-    val (creatures, casques) = eg.generate(cols, rows, y, newTiles, r)
+    val entities = eg.generate(cols, rows, y, newTiles, r)
 
-    (this, Terrain(y*rows, newTiles, doodads, spawn, face), Seq(creatures.ws, casques.ws))
+    (this, Terrain(y*rows, newTiles, doodads, spawn, face), Seq(entities))
   }
 }

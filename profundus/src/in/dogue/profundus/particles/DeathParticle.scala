@@ -6,7 +6,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object DeathParticle {
-  def create(i:Int, j:Int, maxT:Int) = DeathParticle(i, j, 0, maxT)
+  def create(ij:Cell, maxT:Int) = DeathParticle(ij.x, ij.y, 0, maxT)
 }
 
 case class DeathParticle private (i:Int, j:Int, t:Int, maxT:Int){

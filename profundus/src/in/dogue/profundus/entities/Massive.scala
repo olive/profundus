@@ -8,8 +8,8 @@ import Antiqua._
 case class Massive[T](pos: T => Cell,
                       move: T => (Cell, Direction, Direction => Option[WorldTile]) => T,
                       setState: T => FallState => T,
-                      state:FallState,
-                      self:T) {
+                      state: FallState,
+                      self: T) {
   def update(tc:TerrainCache): T = {
     val epos = pos(self)
     if (!tc.isLoaded(epos)) {

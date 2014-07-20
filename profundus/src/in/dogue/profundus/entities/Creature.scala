@@ -5,16 +5,20 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.world.{Spike, WorldTile, TerrainCache}
+import in.dogue.profundus.world._
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle}
 import in.dogue.profundus.entities.damagezones.{SingleTileZone, DamageZone}
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.particles.Particle
+import in.dogue.profundus.world.WorldTile
+import in.dogue.profundus.entities.damagezones.SingleTileZone
+import in.dogue.profundus.Profundus
 
 object Creature {
-  def create(i:Int, j:Int) = {
+  def create(ij:Cell) = {
     val tile = CP437.a.mkTile(Color.Black, Color.Yellow)
-    Creature(i, j, tile, Grounded, Alive, Wander.create)
+    Creature(tile, Alive, Wander.create).toEntity(ij)
   }
 }
 
@@ -43,26 +47,25 @@ case class Wander private (t:Int) extends CreatureState {
   override val isWander = true
 }
 
-case class Creature private (i:Int, j:Int, tile:Tile,
-                             fall:FallState, live:LivingState, state:CreatureState) {
-  def pos = (i, j)
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
-    val newCr = copy(i=ij.x, j=ij.y)
+case class Creature private (tile:Tile, live:LivingState, state:CreatureState) {
+
+  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Creature = {
     if (newTouching(Direction.Down).exists {
       case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
       case a => false
 
     }) {
-      newCr.kill
+      kill
     } else {
-      newCr
+      this
     }
   }
-  def setFall(f:FallState) = copy(fall=f)
+
+  def getLiving = live
 
   def damage(dmg:Int) = kill
   def kill = copy(live=Dead)
-  private def updateWander(w:Wander, c:TerrainCache, r:Random) = {
+  private def updateWander(pos:Cell, w:Wander, c:TerrainCache, r:Random) = {
     val self = if (w.t % 60 == 0) {
       val dir = Vector(Direction.Left, Direction.Right).randomR(r)
       if (!c.isSolid(pos --> dir)) {
@@ -76,15 +79,17 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (w.copy(t=w.t+1), self, Seq())
   }
 
-  private def updateChase(c:Chase, cache:TerrainCache, ppos:Cell) = {
+  private def updateChase(pos:Cell, c:Chase, cache:TerrainCache, ppos:Cell) = {
+    val i = pos.x
+    val j = pos.y
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
     val isIn = dd == ((0,0))
     if (isIn) {
         val newSelf = if (!cache.isSolid(pos --> Direction.Left)) {
-          copy(i=i-1)
+          this//FIXME copy(i=i-1)
         } else if (!cache.isSolid(pos --> Direction.Right)) {
-          copy(i=i+1)
+          this//FIXME copy(i=i+1)
         } else {
           this
         }
@@ -98,14 +103,14 @@ case class Creature private (i:Int, j:Int, tile:Tile,
       val seen = copy(tile=CP437.b.mkTile(Color.Black, Color.Yellow))
       val newC = c.update(ppos)
       if (moved != ppos && newC.t % 7 == 0 && !cache.isSolid((i + dx, j + dy))) {
-        (newC, copy(i=i+dx, j=j+dy), Seq())
+        (newC, this/*FIXME copy(i=i+dx, j=j+dy)*/, Seq())
       } else {
         (newC, seen, Seq())
       }
     }
   }
 
-  private def updateAttack(a:Attack, ppos:Cell) = {
+  private def updateAttack(pos:Cell, a:Attack, ppos:Cell) = {
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
     val (newState, zone) = if (!isAdjacent) {
@@ -118,7 +123,7 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (newState, this, zone)
   }
 
-  private def updateLost(l:LostSight) = {
+  private def updateLost(pos:Cell, l:LostSight) = {
     val state = if (l.isDone) {
       Wander.create
     } else {
@@ -127,8 +132,9 @@ case class Creature private (i:Int, j:Int, tile:Tile,
     (state, this, Seq())
   }
 
-  private def updatePlayerAlive(cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[DamageZone[_]]) = {
-    val hasLos = cache.hasLineOfSight((i, j), ppos)
+  private def updatePlayerAlive(pos:Cell, cache:TerrainCache, ppos:Cell, r:Random):(Creature, Seq[GlobalSpawn]) = {
+    import Profundus._
+    val hasLos = cache.hasLineOfSight(pos, ppos)
     val ns = state match {
       case c@Chase(p, _) if !hasLos => LostSight.create(p)
       case c@Chase(p, _) if hasLos => c
@@ -136,35 +142,40 @@ case class Creature private (i:Int, j:Int, tile:Tile,
       case a => a
     }
     val (newState, newSelf, attacks) = ns match {
-      case a@Attack(p, t) => updateAttack(a, ppos)
-      case c@Chase(p, t) => updateChase(c, cache, ppos)
-      case l@LostSight(p, t) => updateLost(l)
-      case w@Wander(t) => updateWander(w, cache, r)
+      case a@Attack(p, t) => updateAttack(pos, a, ppos)
+      case c@Chase(p, t) => updateChase(pos, c, cache, ppos)
+      case l@LostSight(p, t) => updateLost(pos, l)
+      case w@Wander(t) => updateWander(pos, w, cache, r)
     }
-    (newSelf.copy(state = newState), attacks)
+    (newSelf.copy(state = newState), Seq(attacks.gs))
   }
 
-  private def updateAlive(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[DamageZone[_]]) = {
+  private def updateAlive(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[GlobalSpawn]) = {
     pState match {
-      case Alive => updatePlayerAlive(cache, ppos, r)
+      case Alive => updatePlayerAlive(pos, cache, ppos, r)
       case Dead if !state.isWander => (copy(state=Wander.create), Seq())
       case a => (this, Seq())
     }
   }
 
-  def update(cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[DamageZone[_]]) = {
+  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Creature, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     live match {
-      case Alive => updateAlive(cache, ppos, pState, r)
-      case Dead => (this, Seq())
+      case Alive =>
+        val (cre, glob) = updateAlive(pos, cache, ppos, pState, r)
+        (cre, glob, Seq())
+      case Dead => (this, Seq(), Seq())
     }
 
   }
-  def draw(tr:TileRenderer):TileRenderer = {
-    tr <| (i, j, tile)
+  def draw(pos:Cell)(tr:TileRenderer):TileRenderer = {
+    tr <| (pos.x, pos.y, tile)
   }
 
-  def getDeathParticle:Particle[_] = DeathParticle.create(i, j, 60).toParticle
+  def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
 
-  def toMassive:Massive[Creature] = Massive(_.pos, _.move, _.setFall, fall, this)
-  def toLight:LightSource = LightSource.createCircle(pos, 0, 5, 0.5)
+  def getLight(ij:Cell):Seq[LightSource] = Seq(LightSource.createCircle(ij, 0, 5, 0.5))
+
+  def toEntity(ij:Cell):Entity[Creature] = {
+    Entity(ij, Grounded, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLiving, _.draw, this)
+  }
 }
