@@ -18,6 +18,9 @@ case class Inventory private (fuel:Int, ropes:Int, bombs:Int, gems:Int, tool:Too
   def hasRope = ropes > 0
   def spendRope = copy(ropes = ropes.drop1)
 
+  def hasFlare = fuel > 0
+  def useFlare = copy(fuel=fuel.drop1)
+
   def useTool(dmg:Int) = copy(tool=tool.damage(dmg))
   def setTool(t:Tool) = copy(tool=t)
 

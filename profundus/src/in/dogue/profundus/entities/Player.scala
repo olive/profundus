@@ -73,14 +73,16 @@ object Player {
 
     val i = ij.x
     val j = ij.y
+    val smallLight = LightSource.createCircle(ij, 5, 10, 1)
+    val largeLight = LightSource.createCircle(ij, 5, 20, 1)
     Player((i, j - 1), (i, j), face,
            Attributes.create, NoBuff,
            StaminaBar.create(100), HealthBar.create(200),
            shovel, getLive,
-           ControlState(false, false, false, false, false),
+           ControlState(false, false, false, false, false, false),
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
-           PlayerLight.create(LightSource.createCircle(ij, 5, 10, 1)),
+           PlayerLight.create(smallLight, largeLight),
            0, new StepMachine)
   }
 }
@@ -123,6 +125,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     }
     np.copy(log=newLog)
 
+  }
+
+  def useFuel = {
+    val newLight = light.useFlare
+    val newInv = inv.useFlare
+    copy(light=newLight, inv=newInv)
   }
 
   def collectTool(t:Tool) = {
@@ -237,12 +245,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     import Profundus._
     val newAttr = buff.process(attr)
     val p = copy(ctrl=ctrl.update(canUseTool),
-                    log=log.setDepth(pos.y).incrTime,
-                    attr=newAttr,
-                    stam=stam.update(newAttr),
-                    health=health.update(newAttr),
-                    light=light.update,
-                    fall=if(attr.hasWings) Floating else fall)
+                 log=log.setDepth(pos.y).incrTime,
+                 attr=newAttr,
+                 stam=stam.update(newAttr),
+                 health=health.update(newAttr),
+                 light=light.update,
+                 fall=if(attr.hasWings) Floating else fall)
     val (newP, drops) = updateDropTool(p)
     val (jkP, ps) = if (justKilled) {
       SoundManager.dead.play()
@@ -250,7 +258,13 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else {
       (newP, Seq())
     }
-    (jkP, Seq(ps.gs), Seq(drops.ws))
+    val fpl = if (ctrl.isFlaring && inv.hasFlare && light.lt <= 0) {
+      SoundManager.flare.play()
+      jkP.useFuel
+    } else {
+      jkP
+    }
+    (fpl, Seq(ps.gs), Seq(drops.ws))
   }
 
   private def updateDropTool(p:Player):(Player, Seq[Pickup[_]]) = {
