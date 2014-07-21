@@ -49,8 +49,8 @@ object Loadout {
     lo.copy(`type`=tool)
   }
 
-  def makeSimpleSlider(i:Int, j:Int, icon:Tile, fillIn:Int => Loadout => Loadout, cost:Int, incr:Int)(value:Int) = {
-    val slider = Slider.create(i, j, Seq((0,0,icon)), Loadout.drawNumber(tf), fillIn, 3, Int.MaxValue, value, cost, incr).toLoadoutButton
+  def makeSimpleSlider(ij:Cell, icon:Tile, fillIn:Int => Loadout => Loadout, cost:Int, incr:Int)(value:Int) = {
+    val slider = Slider.create(ij, Seq(((0,0),icon)), Loadout.drawNumber(tf), fillIn, 3, Int.MaxValue, value, cost, incr).toLoadoutButton
     val newRem = value*cost
     (newRem, slider)
   }
@@ -60,17 +60,17 @@ object Loadout {
     val x1 = x0 + 6
     val y0 = 11 + LoadoutMode.topp
     val y1 = y0 + 5
-    val (r1, cap) =  makeSimpleSlider(x0, y0, Capsule.stick, fillBombs, bombCost, 1)(lo.bombs)
-    val (r2, rope) = makeSimpleSlider(x1, y0, Hud.ropeIcon, fillRopes, ropeCost, 1)(lo.ropes)
-    val (r3, gem) =  makeSimpleSlider(x0, y1, Hud.gemIcon, fillGems, gemCost, 5)(lo.gems)
-    val (r4, fuel) = makeSimpleSlider(x1, y1, Hud.fuelIcon, fillFuel, fuelCost, 1)(lo.fuel)
+    val (r1, cap) =  makeSimpleSlider((x0, y0), Capsule.stick, fillBombs, bombCost, 1)(lo.bombs)
+    val (r2, rope) = makeSimpleSlider((x1, y0), Hud.ropeIcon, fillRopes, ropeCost, 1)(lo.ropes)
+    val (r3, gem) =  makeSimpleSlider((x0, y1), Hud.gemIcon, fillGems, gemCost, 5)(lo.gems)
+    val (r4, fuel) = makeSimpleSlider((x1, y1), Hud.fuelIcon, fillFuel, fuelCost, 1)(lo.fuel)
     (rem - (r1 + r2 + r3 + r4), Vector(cap, rope, gem, fuel))
   }
 
   def makeTool(rem:Int, lo:Loadout):(Int, LoadoutButton[Slider]) = {
     val v = toolToIndex(lo.`type`)
     val minus = v*toolCost
-    val s = Slider.create(22, 13 + LoadoutMode.topp, Seq(), drawTool, fillTool, 4, 3, v, toolCost, 1).toLoadoutButton
+    val s = Slider.create((22, 13 + LoadoutMode.topp), Seq(), drawTool, fillTool, 4, 3, v, toolCost, 1).toLoadoutButton
     (rem - minus, s)
   }
 }

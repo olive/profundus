@@ -27,7 +27,7 @@ case class Campfire(ij:Cell, a:Animation, light:LightSource, t:Int) {
 
   def getLight:Option[LightSource] = light.copy(flicker=LightSource.flicker(11111+t)).some
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+< a.drawFg(ij.x, ij.y)
+    tr <+< a.drawFg(ij)
   }
 
   def toDoodad:Doodad[Campfire] = Doodad(_.update, _.draw, _.getLight, this)

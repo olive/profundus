@@ -22,10 +22,8 @@ object ToolSprite {
 }
 
 case class ToolSprite private (tiles:Direction => Tile) {
-  def draw(d:Direction)(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    val x = i + d.dx
-    val y = j + d.dy
+  def draw(d:Direction)(ij:Cell)(tr:TileRenderer):TileRenderer = {
     val t = tiles(d)
-    tr <+ (x, y, t)
+    tr <+ (ij --> d, t)
   }
 }

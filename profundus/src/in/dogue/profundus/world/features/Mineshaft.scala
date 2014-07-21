@@ -9,7 +9,7 @@ import com.badlogic.gdx.physics.box2d.World
 case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
   val rect = Recti(x, y, width, height)
   def create(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
-    val newTiles = tiles.map { case (i, j, t) =>
+    val newTiles = tiles.map { case ((i, j), t) =>
       val inRange = rect.contains((i, j))
       if (inRange && (i == x + 3  && j % 6 == 0) || (i == x + width - 4 && (j + 3) % 6 == 0)) {
         WorldTile(ts.makeRock(r))

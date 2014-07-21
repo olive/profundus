@@ -20,7 +20,7 @@ case class ToolPickup(icon:Tile, tool:Tool) {
   def isCollectable(p:Player) = p.inv.tool.isBare
   def onPickup(p:Player) = p.collectTool(tool)
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <| (ij.x, ij.y, icon)
+    tr <| (ij, icon)
   }
   def toPickup(ij:Cell):Pickup[ToolPickup] = Pickup.create(ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 }

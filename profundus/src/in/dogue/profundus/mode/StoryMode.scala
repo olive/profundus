@@ -15,7 +15,6 @@ import com.deweyvm.gleany.Glean
 
 object StoryMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
-    import scala.collection.JavaConverters._
     val all = Glean.y.files.data("story").readString()
 
     val boxes = all.split("@")
@@ -35,16 +34,14 @@ case class StoryMode private (cols:Int, rows:Int, b:Rect, lo:Loadout, arrow:Tile
       CircleTransition.create(cols, rows, this.toMode, mode, None).toMode
   }
 
-  def drawArrow(i:Int, j:Int) = {
-    if (t % 60 < 30 && mb.pagePending) {
-      (i, j, arrow).some
-    } else {
-      None
-    }
+  def drawArrow(ij:Cell) = {
+
+    (ij, arrow).onlyIf(t % 60 < 30 && mb.pagePending)
+
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+< b.draw(0,0) <+< mb.draw(2,10) <|? drawArrow(cols - 2, 10 + mb.height)
+    tr <+< b.draw((0,0)) <+< mb.draw((2,10)) <|? drawArrow((cols - 2, 10 + mb.height))
   }
 
   def toMode:Mode[StoryMode] = Mode(_.update, _.draw, this)

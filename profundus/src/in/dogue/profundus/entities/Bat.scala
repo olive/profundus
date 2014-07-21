@@ -92,7 +92,7 @@ case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int
   def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <++< a.map{ case (c, anim) => anim.drawFg(c.x + ij.x, c.y + ij.y) _}
+    tr <++< a.map{ case (c, anim) => anim.drawFg(c |+| ij) _}
   }
 
   def getLight(ij:Cell) = Seq(light.copy(pos=ij))

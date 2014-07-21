@@ -41,7 +41,7 @@ case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, last:DamageT
   def permaHurt(i:Int) = {
     copy(max=math.max(max.drop(i), 1))
   }
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    tr <+< vb.draw(i, j)
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
+    tr <+< vb.draw(ij)
   }
 }

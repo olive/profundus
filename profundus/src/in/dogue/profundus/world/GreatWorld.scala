@@ -298,7 +298,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
     val res = tr.withMove(cx, cy) { wp =>
       if (!Game.lightsOn) {
-        wp.withFilter(getFilter((wp.originX, wp.originY))) { wp =>
+        wp.withFilter(getFilter(wp.origin)) { wp =>
           wp <+< drawWorld
         }
       } else {

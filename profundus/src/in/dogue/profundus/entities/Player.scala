@@ -142,7 +142,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def getHealthBar = health.vb
   def getBuffIcon = buff.icon
   def getItems = attr.getItems
-  def pos = (x, y)
+  def pos = ij
   def hasLongArms = attr.hasLongArms
   def move(newPos:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     if ((from == Direction.Left || from == Direction.Right) && newTouching(Direction.Down).exists {!_.isWalkable}) {
@@ -325,12 +325,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   private def drawShovel(tr:TileRenderer):TileRenderer = {
     ctrl.isShovelling.select(
       tr,
-      tr <+< shovel.draw(face)(x, y)
+      tr <+< shovel.draw(face)(ij)
     )
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+ (x, y, t(face)) <+< drawShovel
+    tr <+ (ij, t(face)) <+< drawShovel
   }
 
 

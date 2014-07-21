@@ -7,11 +7,13 @@ import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.entities.Mattock
 
 object ExplosionDeformation {
-  def create(i:Int, j:Int, tickDamage:Int, radius:Int, speed:Int) = {
-    ExplosionDeformation(i, j, tickDamage, radius, speed, 0)
+  def create(ij:Cell, tickDamage:Int, radius:Int, speed:Int) = {
+    ExplosionDeformation(ij, tickDamage, radius, speed, 0)
   }
 }
-case class ExplosionDeformation private (i:Int, j:Int, tickDamage:Int, radius:Int, speed:Int, t:Int) {
+case class ExplosionDeformation private (ij:Cell, tickDamage:Int, radius:Int, speed:Int, t:Int) {
+  final val i = ij.x
+  final val j = ij.y
   def update = copy(t=t+1)
   def isDone = t > radius*speed
 

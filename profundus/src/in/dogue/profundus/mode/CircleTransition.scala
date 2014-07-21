@@ -83,11 +83,8 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Futu
 
     val draws = for (i <- 0 until cols; j <- 0 until rows) yield {
       val hyp = scala.math.hypot(i - cols/2, j - rows/2)
-      if (hyp >= r) {
-        (i, j, f _).some
-      } else {
-        None
-      }
+      ((i, j), f _).onlyIf(hyp >= r)
+
     }
     tr `$$>` draws.flatten
 
@@ -106,8 +103,8 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Futu
       case CircleDone(_) => drawNew
       case CircleFail(_) => id[TileRenderer]
     }) <+< drawCover <+< (state match {
-      case WaitLoad(_,wlt) if wlt > 3 => text.draw(10,10)
-      case CircleFail(tg) => (tr:TileRenderer) => tr <++ (tg |+| (1,1))
+      case WaitLoad(_,wlt) if wlt > 3 => text.draw((10,10))
+      case CircleFail(tg) => (tr:TileRenderer) => tr <++ (tg |+| ((1,1)))
       case a => id[TileRenderer]
     })
   }

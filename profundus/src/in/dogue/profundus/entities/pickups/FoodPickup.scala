@@ -45,7 +45,7 @@ case class FoodPickup private (ij:Cell, a:Tile, typ:FoodType) {
     pl.collectFood(typ)
   }
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <| (ij.x, ij.y, a)
+    tr <| (ij, a)
   }
 
   def toPickup:Pickup[FoodPickup] = Pickup.create[FoodPickup](ij, _.update, _.isCollectable, _.onPickup, _.draw, this)

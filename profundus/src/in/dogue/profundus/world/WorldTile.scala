@@ -130,8 +130,8 @@ case class WorldTile(state:TileType) {
   def isWalkable = state.isWalkable
   def tile = state.tile
   def canBreakBy(s:Seq[TileClass]) = s.contains(state.tileClass)
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     val tile = state.tile
-    tr <+ (i, j, tile)
+    tr <+ (ij, tile)
   }
 }

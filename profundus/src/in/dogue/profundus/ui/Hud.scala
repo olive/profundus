@@ -50,34 +50,34 @@ case class Hud private (height:Int, rect:Rect,
     copy(inv=inv, tool = tool.withTool(inv.tool))
   }
 
-  private def drawInventory(x:Int, y:Int) (tr:TileRenderer):TileRenderer = {
+  private def drawInventory(xy:Cell) (tr:TileRenderer):TileRenderer = {
     def fmt(i:Int) = tf.create("%2s".format(i.toString))
-    val cap  = tr   <+ (x  , y  , Capsule.stick) <+< fmt(inv.bombs).draw(x + 1, y)
-    val gem  = cap  <+ (x  , y+1, Hud.gemIcon)   <+< fmt(inv.gems).draw( x + 1, y + 1)
-    val rope = gem  <+ (x-4, y  , Hud.ropeIcon)  <+< fmt(inv.ropes).draw(x - 3, y)
-               rope <+ (x-4, y+1, Hud.fuelIcon)  <+< fmt(inv.fuel).draw( x - 3, y + 1)
+    val cap  = tr   <+ (              xy, Capsule.stick) <+< fmt(inv.bombs).draw(xy |+ 1)
+    val gem  = cap  <+ (         xy +| 1, Hud.gemIcon)   <+< fmt(inv.gems).draw( xy |+| ((1,1)))
+    val rope = gem  <+ (         xy |- 4, Hud.ropeIcon)  <+< fmt(inv.ropes).draw(xy |- 3)
+               rope <+ (xy |+| ((-4, 1)), Hud.fuelIcon)  <+< fmt(inv.fuel).draw( xy |+| ((-3, 1)))
 
   }
 
-  private def drawDepth(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    tr <+< depth.draw(i, j) <+< depthAmt.draw(i+7, j)
+  private def drawDepth(ij:Cell)(tr:TileRenderer):TileRenderer = {
+    tr <+< depth.draw(ij) <+< depthAmt.draw(ij |+ 7)
   }
 
-  private def drawItems(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
+  private def drawItems(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <++ items.zipWithIndex.map { case (item, k) =>
-      (i + k, j, item.icon)
+      (ij |+ k, item.icon)
     }
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    (tr <+< rect.draw(0,0)
-        <+< text.draw(1, 1)
-        <+< drawDepth(1, 2)
-        <+< drawInventory(28, 1)
-        <+< tool.draw(13, 1)
-        <+< stamBar.draw(13, 3) <+ (12, 3, buffIcon)
-        <+< healthBar.draw(13, 4)
-        <+< drawItems(1, 4)
+    (tr <+< rect.draw((0,0))
+        <+< text.draw((1, 1))
+        <+< drawDepth((1, 2))
+        <+< drawInventory((28, 1))
+        <+< tool.draw((13, 1))
+        <+< stamBar.draw((13, 3)) <+ ((12, 3), buffIcon)
+        <+< healthBar.draw((13, 4))
+        <+< drawItems((1, 4))
       )
   }
 }

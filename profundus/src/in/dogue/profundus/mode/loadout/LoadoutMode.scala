@@ -49,12 +49,12 @@ object LoadoutMode {
       "are true..."
     )
     import LoadoutSection.{create => cr}
-    val desc =  cr(cols, topp, 0, 0, lines, tf, (2,2))
+    val desc =  cr(cols, topp, (0, 0), lines, tf, (2,2))
     val offset = (1,1)
-    val top =   cr(   cols,              5,       0,    0+topp, Vector(""), tf, offset)
-    val left =  cr(cols-14,             17,       0,    5+topp, Vector("Provisions"), tf, offset)
-    val right = cr(     14,             17, cols-14,    5+topp, Vector("Tools"), tf, offset)
-    val bott  = cr(   cols, rows-17-5-topp,       0, 5+17+topp, Vector("Bio"), tf, offset)
+    val top =   cr(   cols,              5, (      0,    0+topp), Vector(""), tf, offset)
+    val left =  cr(cols-14,             17, (      0,    5+topp), Vector("Provisions"), tf, offset)
+    val right = cr(     14,             17, (cols-14,    5+topp), Vector("Tools"), tf, offset)
+    val bott  = cr(   cols, rows-17-5-topp, (      0, 5+17+topp), Vector("Bio"), tf, offset)
     val secs = Vector(desc, top, left, right, bott)
     LoadoutMode(cols, rows, tf, sliders, 1, ptText, rem2, rect, new PlayerInfo(r), secs)
   }
@@ -112,14 +112,14 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
     def create(s:String) = {
       tf.create(s).filterToTileGroup(t => t.code != CP437.` `.toCode)
     }
-    (tr <+< r.draw(0,0)
+    (tr <+< r.draw((0,0))
         <++< sliders.zipWithIndex.map { case (s, i) => s.draw(i == ptr, points) _}
-        <+< ptText.drawFg(ptX, ptY)
-        <|| (create("%3s☼".format(points.toString))|+| (ptX + ptText.length, ptY))
-        <|| (create(pi.title) |+| (2, bioY))
-        <|| (create("Fears : " + pi.weakness) |+| (2, bioY+2))
-        <|| (create("Job   : " + pi.job)      |+| (2, bioY+3))
-        <|| (create("Craves: " + pi.craving)  |+| (2, bioY+4))
+        <+< ptText.drawFg((ptX, ptY))
+        <|| (create("%3s☼".format(points.toString))|+| ((ptX + ptText.length, ptY)))
+        <|| (create(pi.title) |+| ((2, bioY)))
+        <|| (create("Fears : " + pi.weakness) |+| ((2, bioY+2)))
+        <|| (create("Job   : " + pi.job)      |+| ((2, bioY+3)))
+        <|| (create("Craves: " + pi.craving)  |+| ((2, bioY+4)))
         <++< los.map {_.draw _}
       )
   }

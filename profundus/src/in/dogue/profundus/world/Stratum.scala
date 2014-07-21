@@ -36,8 +36,8 @@ case class Stratum(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, e
       ((0,0), Direction.Down, fg.assemble(cols, rows, yIndex, ts, r))
     }
     val noise = new PerlinNoise().generate(cols, rows, 0, yIndex, r.nextInt())
-    val tiles = noise.map { case (i, j, d) =>
-      val state = tg.mkTile(ts, i, j, yIndex, cols, rows, d, r)
+    val tiles = noise.map { case (ij, d) =>
+      val state = tg.mkTile(ts, ij, yIndex, cols, rows, d, r)
       WorldTile(state(r))
     }
 

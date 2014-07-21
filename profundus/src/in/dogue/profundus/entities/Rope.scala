@@ -126,24 +126,24 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
 
 
   private def drawFlyUp(f:FlyUp)(tr:TileRenderer):TileRenderer = {
-    tr <+ (f.x, f.y - f.len, nubT)
+    tr <+ ((f.x, f.y - f.len), nubT)
   }
 
   private def drawDropDown(d:DropDown)(tr:TileRenderer):TileRenderer = {
-    val top = (d.x, d.y, topT)
+    val top = ((d.x, d.y), topT)
     val mid = for (i <- (d.y + 1) until (d.y + d.len)) yield {
-      (d.x, i, midT)
+      ((d.x, i), midT)
     }
-    val bot = (d.x, d.y + d.len, bottomT)
+    val bot = ((d.x, d.y + d.len), bottomT)
     tr <+~ top <++ mid <+~ bot
   }
 
   private def drawSteady(s:Steady)(tr:TileRenderer):TileRenderer = {
-    val top = (s.x, s.y, topT)
+    val top = ((s.x, s.y), topT)
     val mid = for (i <- (s.y + 1) until (s.y + s.len)) yield {
-      (s.x, i, midT)
+      ((s.x, i), midT)
     }
-    val bot = (s.x, s.y + s.len, bottomT)
+    val bot = ((s.x, s.y + s.len), bottomT)
     tr <+~ top <++ mid <+~ bot
   }
 

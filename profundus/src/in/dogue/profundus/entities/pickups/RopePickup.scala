@@ -19,7 +19,7 @@ case class RopePickup private (ij:Cell, t:Tile) {
   def update = this
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <| (ij.x, ij.y, t)
+    tr <| (ij, t)
   }
 
   def isCollectable(p:Player) = true

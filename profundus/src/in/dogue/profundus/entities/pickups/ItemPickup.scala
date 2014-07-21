@@ -10,7 +10,7 @@ case class ItemPickup(ij:Cell, it:Item) {
   def update = this
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <+ (ij.x, ij.y, it.icon)
+    tr <+ (ij, it.icon)
   }
 
   def isCollectable(p:Player) = true

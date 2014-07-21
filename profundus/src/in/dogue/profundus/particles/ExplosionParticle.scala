@@ -9,17 +9,19 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.world.TerrainCache
 
 object ExplosionParticle {
-  def create(i:Int, j:Int, radius:Int, speed:Int) = {
-    ExplosionParticle(i, j, radius, speed, 0, new Random())
+  def create(ij:Cell, radius:Int, speed:Int) = {
+    ExplosionParticle(ij, radius, speed, 0, new Random())
   }
   private final val colors = Vector(Color.Yellow, Color.Orange, Color.Red)
 }
-case class ExplosionParticle private (i:Int, j:Int, radius:Int, speed:Int, t:Int, r:Random) {
+case class ExplosionParticle private (ij:Cell, radius:Int, speed:Int, t:Int, r:Random) {
+  final val i = ij.x
+  final val j = ij.y
   import ExplosionParticle._
   def update(tc:TerrainCache) = copy(t=t+1)
   def isDone = t > (radius+1)*speed
   def toParticle:Particle[ExplosionParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
-  def getLight = Seq(LightSource.createCircle((i, j), t/speed, t*2/speed, 1))
+  def getLight = Seq(LightSource.createCircle(ij, t/speed, t*2/speed, 1))
   def draw(tr:TileRenderer):TileRenderer = {
 
     val outer = t/speed
@@ -27,11 +29,7 @@ case class ExplosionParticle private (i:Int, j:Int, radius:Int, speed:Int, t:Int
     val indices = for (p <- (i - outer) to (i + outer);
                        q <- (j - outer) to (j + outer)) yield {
       val h = scala.math.hypot(i - p, j - q)
-      if (h < outer && h > inner) {
-        (p, q).some
-      } else {
-        None
-      }
+      (p, q).onlyIf(h < outer && h > inner)
     }
     tr `$$>` (indices.flatten map { case (p, q) =>
       def f(t:Tile):Tile = {
@@ -39,7 +37,7 @@ case class ExplosionParticle private (i:Int, j:Int, radius:Int, speed:Int, t:Int
         val fg = colors.randomR(r).dim(0.2 + r.nextDouble)
         t.setFg(fg).setBg(bg)
       }
-      (p, q, f _)
+      ((p, q), f _)
     })
   }
 }

@@ -30,7 +30,7 @@ object LightSource {
   def createRect(pos:Cell/*upper left!*/, width:Int, height:Int, dim:Double): LightSource = {
     val cells = Array2d.tabulate(width, height) { case (i, j) =>
       dim*(1 - j/height.toDouble)
-    }.flatten.map { case (i, j, d) => ((i, j), d)}
+    }.flatten
     def onScreen(cxy:(Int,Int), recti:Recti) = {
       (Recti(pos.x, pos.y, width, height) + Recti(cxy.x, cxy.y, 0, 0)).intersects(recti)
     }

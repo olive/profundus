@@ -31,11 +31,7 @@ case class RingParticle(ij:Cell, radius:Int, speed:Int, t:Int, r:Random) {
     val indices = for (p <- (i - outer) to (i + outer);
                        q <- (j - outer) to (j + outer)) yield {
       val h = scala.math.hypot(i - p, j - q)
-      if (h < outer && h > inner) {
-        (p, q).some
-      } else {
-        None
-      }
+      (p, q).onlyIf(h < outer && h > inner)
     }
     tr `$$>` (indices.flatten map { case (p, q) =>
       def f(t:Tile):Tile = {
@@ -43,7 +39,7 @@ case class RingParticle(ij:Cell, radius:Int, speed:Int, t:Int, r:Random) {
         val fg = colors.randomR(r).dim(1 + r.nextDouble)
         t.setFg(fg).setBg(bg)
       }
-      (p, q, f _)
+      ((p, q), f _)
     })
   }
 }

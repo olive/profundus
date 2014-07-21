@@ -27,7 +27,7 @@ case class StaminaBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
 
   def remove(i:Int) = copy(amt=amt.drop(i), vb=vb.update(amt.drop(i), max))
   def removeAll = remove(amt)
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    tr <+< vb.draw(i, j)
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
+    tr <+< vb.draw(ij)
   }
 }

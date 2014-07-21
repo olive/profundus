@@ -21,7 +21,7 @@ object TitleMode {
     }
     val border = Profundus.border(cols, rows)
     val rect = Rect.createTextured(cols, rows, mk, new Random())
-    val title = Tile.groupFromFile("profundusmap2", "tiles", CP437.intToCode, _.mkTile(Color.Brown.dim(4), Color.Tan.dim(1))).filter { case (i, j, t) =>
+    val title = Tile.groupFromFile("profundusmap2", "tiles", CP437.intToCode, _.mkTile(Color.Brown.dim(4), Color.Tan.dim(1))).filter { case (_, t) =>
     t.code != CP437.` `.toCode}
     val tf = TextFactory(Color.Black, Color.Tan, CP437.unicodeToCode)
     val disc = tf.multiline("@oleaffia\nhttp://dogue.in\nPre-alpha build")
@@ -42,11 +42,11 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect, disclai
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    (tr <+< r.draw(0,0)
-        <+< border.draw(0, 0)
-        <++ (title |+| (9,7+8))
-        <|| (disclaimer |+| (2,rows - 3 - 2))
-        <|| (version |+| (2, 2))
+    (tr <+< r.draw((0,0))
+        <+< border.draw((0, 0))
+        <++ (title |+| ((9,7+8)))
+        <|| (disclaimer |+| ((2,rows - 3 - 2)))
+        <|| (version |+| ((2, 2)))
       )
   }
 

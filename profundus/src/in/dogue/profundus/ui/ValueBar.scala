@@ -19,7 +19,7 @@ case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
   def update(amt:Int, max:Int) = {
     copy(amt=amt, max=max)
   }
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     import scala.math.ceil
     val maxWidth = 10
     val numTiles = ceil((amt/max.toFloat)*2*maxWidth).toInt
@@ -30,7 +30,7 @@ case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
       } else {
         tFull
       }
-      (i+p, j, tile)
+      (ij |+ p, tile)
     }
     tr <++ draws
   }

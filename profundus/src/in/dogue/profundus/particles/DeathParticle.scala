@@ -35,7 +35,7 @@ case class DeathParticle private (i:Int, j:Int, t:Int, maxT:Int){
       } else {
         id[Tile] _
       }
-      (p, q, func)
+      ((p, q), func)
     }
     tr `$$>` draws
   }

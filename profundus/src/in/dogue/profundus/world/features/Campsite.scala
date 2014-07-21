@@ -16,12 +16,11 @@ case class Campsite(center:Cell, radius:Int) {
     val circle = Circle(center, radius)
     val line = Line.bresenham(center.x, center.y, center.x + radius, center.y)
     val line2 = Line.bresenham(center.x, center.y, center.x - radius, center.y)
-    val newTiles = terrain.map { case (i, j, t) =>
-      val p = (i, j)
+    val newTiles = terrain.map { case (p, t) =>
       val contains = circle.contains(p)
       if (line.contains(p) || line2.contains(p)) {
         WorldTile(scheme.makeEmpty(r))
-      } else if (contains && j > fillDepth.y) {
+      } else if (contains && p.y > fillDepth.y) {
         WorldTile(scheme.makeDirt(r))
       } else if (contains && (center |-| p).mag > 3*radius/4){
         WorldTile(scheme.makeDirt(r))

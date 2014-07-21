@@ -12,23 +12,25 @@ import in.dogue.profundus.mode.Mode
 import in.dogue.profundus.audio.SoundManager
 
 object Slider {
-  def create(i:Int, j:Int,
+  def create(ij:Cell,
              icon:TileGroup, values:Int=>TileGroup,
              fillIn:Int => Loadout => Loadout,
              width:Int,
              max:Int, value:Int, cost:Int, incr:Int) = {
     val up = CP437.▲.mkTile(Color.Black, Color.White)
     val down = CP437.▼.mkTile(Color.Black, Color.White)
-    Slider(i, j, icon, values, fillIn, up, down, width, max, value, cost, incr)
+    Slider(ij, icon, values, fillIn, up, down, width, max, value, cost, incr)
   }
 }
 
-case class Slider private (i:Int, j:Int,
+case class Slider private (ij:Cell,
                            icon:TileGroup, values:Int=>TileGroup,
                            private val fillIn:Int => Loadout => Loadout,
                            up:Tile, down:Tile,
                            width:Int,
                            max:Int, value:Int, cost:Int, incr:Int) {
+  final val i = ij.x
+  final val j = ij.y
   val realCost = cost*incr
   def update(m:Mode[_], rem:Int):(LoadoutUpdate, Slider, Int) = {
     def play() = SoundManager.clack.play()
@@ -53,16 +55,16 @@ case class Slider private (i:Int, j:Int,
     } else {
       val tf = TileFactory(Color.Black, Color.White)
       val i0 = i - (icon.length > 0).select(0, 1)
-      (tr <| (i0, j, tf(CP437.`[`))
-          <| (i + width + 1, j, tf(CP437.`]`))
+      (tr <| ((i0, j), tf(CP437.`[`))
+          <| ((i + width + 1, j), tf(CP437.`]`))
         )
     }
   }
 
   private def drawArrows(selected:Boolean, rem:Int, x:Int)(tr:TileRenderer):TileRenderer = {
     def f(t:Tile) = if (!selected) t.setFg(Color.DarkGrey) else t
-    val upDraw = (i+x, j - 1, f(up)).onlyIf(rem >= realCost)
-    val downDraw =  (i+x, j + 1, f(down)).onlyIf(value >= 1)
+    val upDraw = ((i+x, j - 1), f(up)).onlyIf(rem >= realCost)
+    val downDraw =  ((i+x, j + 1), f(down)).onlyIf(value >= 1)
     tr <|? upDraw <|? downDraw
   }
 
@@ -70,9 +72,9 @@ case class Slider private (i:Int, j:Int,
     val spr = values(value)
     val span = spr.getSpan
     val center = span.center
-    (tr <|| (icon |+| (i, j))
+    (tr <|| (icon |+| ij)
         <+< drawArrows(selected, rem, center.x+1)
-        <|| (spr |+| (i+1, j))
+        <|| (spr |+| ij |+ 1)
         <+< drawSelection(selected, span)
       )
   }

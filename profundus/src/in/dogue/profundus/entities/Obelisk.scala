@@ -69,7 +69,7 @@ case class Obelisk private (tg:TileGroup, health:Int, t:Int, light:LightSource, 
   def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <|| (tg |+| (ij.x, ij.y))
+    tr <|| (tg |+| ij)
   }
 
   def getLight(ij:Cell) = Seq(light.copy(pos=ij))

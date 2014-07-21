@@ -44,7 +44,7 @@ case class WaterDrop private (ij:Cell, j0:Double, j:Double, up:Tile, mid:Tile, d
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <| (ij.x, ij.y, getTile)
+    tr <| (ij, getTile)
   }
 
   def isDone = dead

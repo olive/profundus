@@ -8,22 +8,23 @@ import Antiqua._
 import in.dogue.profundus.lighting.LightSource
 
 object Moon {
-  def create(cols:Int, rows:Int, x:Int, y:Int, r:Int) = {
+  def create(cols:Int, rows:Int, xy:Cell, r:Int) = {
     val draws = for (i <- 0 to r*2; j <- 0 to r*2) yield {
       if (scala.math.hypot(r - i, r - j) < r) {
-        (i, j,  CP437.█.mkTile(Color.Black, Color.White)).some
+        ((i, j),  CP437.█.mkTile(Color.Black, Color.White)).some
       } else {
         None
       }
 
     }
     val light = LightSource.createRect((0, 0), cols, rows, 0.5)
-    Moon(x, y, r, light, draws.flatten, 0)
+    Moon(xy, r, light, draws.flatten, 0)
   }
 }
 
-case class Moon private (i:Int, j:Int, r:Int, light:LightSource, tg:TileGroup, t:Int) {
-
+case class Moon private (ij:Cell, r:Int, light:LightSource, tg:TileGroup, t:Int) {
+  final val i = ij.x
+  final val j = ij.y
   def update = copy(t=t+1)
 
   def getLight:Option[LightSource] = light.some
@@ -35,19 +36,19 @@ case class Moon private (i:Int, j:Int, r:Int, light:LightSource, tg:TileGroup, t
       val hyp = hypot(max/2 - h, max/2 - k)
       def f(tile:Tile): Tile = tile.setBg(tile.bgColor.dim((1 - 1/hyp)*(1 - 1/hyp) - abs(sin(t/60f)/10f)))
       if (hyp >= r && hyp < max/2) {
-        (h, k, f _).some
+        ((h, k), f _).some
       } else {
         None
       }
 
     }
-    tr `$$>` (draws.flatten |+| (i-max/4, j-max/4))
+    tr `$$>` (draws.flatten |+| (ij |-| ((max/4, max/4))))
   }
 
 
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++ (tg |+| (i, j)) <+< drawBright
+    tr <++ (tg |+| ij) <+< drawBright
   }
 
   def toDoodad:Doodad[Moon] = Doodad(_.update, _.draw, _.getLight, this)

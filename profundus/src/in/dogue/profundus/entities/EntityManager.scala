@@ -97,7 +97,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
 
   def spawnCapsule(ij:Cell) = {
     SoundManager.shhh.play()
-    val c = Capsule.create(ij.x, ij.y)
+    val c = Capsule.create(ij)
     copy(caps=caps :+ c)
   }
 

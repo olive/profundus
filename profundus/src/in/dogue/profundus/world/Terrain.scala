@@ -33,7 +33,7 @@ object Terrain {
       Empty(night, false)
     }
 
-    val tiles = noise.map { case (i, j, d) =>
+    val tiles = noise.map { case ((i, j), d) =>
       val dim = (j + y*rows) / (cols*2).toDouble
       val night = makeSky(dim) _
 
@@ -90,7 +90,7 @@ object Terrain {
       val empty = scheme.emptyTile(r)
       Dirt.create(grassTile, empty)
     }
-    val tiles = noise.map { case (i, j, d) =>
+    val tiles = noise.map { case ((i, j), d) =>
       val dim = (j + y) / (cols*2).toDouble
       val night = makeSky(dim) _
       val grass = makeGrass(j + y, rows) _
@@ -116,7 +116,7 @@ object Terrain {
         }
       WorldTile(state(r))
     }
-    val moon = Moon.create(cols, rows, 3*cols/4-5, -5, 4)
+    val moon = Moon.create(cols, rows, (3*cols/4-5, -5), 4)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))
     (tiles, Seq(moon.toDoodad, campfire.toDoodad), Seq())
@@ -132,31 +132,31 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
     (copy(doodads=ds), lights)
   }
   def isSolid(s:Cell):Boolean = {
-    val t = (tiles.getOption _).tupled(s)
+    val t = tiles.getOption(s)
     !t.exists{_.state.isWalkable}
   }
 
   def isBackgroundSolid(s:Cell):Boolean = {
-    val t = (tiles.getOption _).tupled(s)
+    val t = tiles.getOption(s)
     t.exists{_.state.bgSolid}
   }
 
 
   def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
-    val t = tiles.get(ij.x, ij.y)
+    val t = tiles.get(ij)
     if (!t.canBreakBy(ttype.breakable)) {
       (this, Seq(), 0, false)
     } else {
       val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
-      val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
+      val newT = copy(tiles=tiles.update(ij, _.copy(state=newState)))
       (newT, drops, damage, broken)
     }
 
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++ tiles.flatten.map {
-      case (i, j, w) => (i, j + y, w.tile)
+    tr <++ tiles.flatten.map { case (p, w) =>
+      (p +| y, w.tile)
     }
   }
 

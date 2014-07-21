@@ -11,7 +11,7 @@ case class SpikeWave(xy:Cell, width:Int, height:Int, wave:Int => Int) {
   def placeSite(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
     val x = xy.x
     val y = xy.y
-    val newTiles = terrain.map { case (i, j, t) =>
+    val newTiles = terrain.map { case ((i, j), t) =>
       val wv = wave(i) + y
       val iRange = i > x && i < x + width
       if (!iRange) {

@@ -26,12 +26,12 @@ case class StoryButton(cols:Int, rows:Int, ij:Cell, text:Text) {
 
   def fill(lo:Loadout) = lo
   def draw(selected:Boolean, rem:Int)(tr:TileRenderer) = {
-    tr <+< text.drawFg(ij.x, ij.y) <+< (if (selected) {
+    tr <+< text.drawFg(ij) <+< (if (selected) {
       val tf = TileFactory(Color.Black, Color.White)
       val left = tf(CP437.`[`)
       val right = tf(CP437.`]`)
       (t:TileRenderer) => {
-        t <| (ij.x - 1, ij.y, left) <| (ij.x + text.length, ij.y, right)
+        t <| (ij |- 1, left) <| (ij |+ text.length, right)
       }
     } else {
       id[TileRenderer]

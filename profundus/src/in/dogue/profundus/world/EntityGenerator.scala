@@ -10,7 +10,7 @@ import Antiqua._
 object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, t:Array2d[WorldTile], r:Random) = {
     import Profundus._
-    def isSolid(ij:Cell) = !t.get(ij.x, ij.y).isWalkable
+    def isSolid(ij:Cell) = !t.get(ij).isWalkable
     val s = if (i <= 0) {
       Seq()
     } else {

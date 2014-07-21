@@ -12,8 +12,8 @@ import in.dogue.profundus.world.TileClass
 case class Tool(dura:Int, `type`:ToolType) {
   def isBare = `type` == BareHands
   def damage(amt:Int) = copy(dura=dura.drop(amt))
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    tr <++ (`type`.icon |+| (i, j))
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
+    tr <++ (`type`.icon |+| ij)
   }
 }
 

@@ -21,16 +21,16 @@ object FeatureGenerator {
       val y = r.nextInt(rows)
       val recti = Recti(x, y, 1, 1)
 
-      Feature(recti, spike(x, y))
+      Feature(recti, spike((x, y)))
     }
   }
-  private def spike(i:Int, j:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+  private def spike(ij:Cell)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
     import Profundus._
-    def get(ij:Cell):Boolean = terrain.getOption(ij.x, ij.y).exists{_.isWalkable}
-    val t = terrain.get(i, j)
-    val p = (i, j)
-    val down = get(p +| 1)
-    val up = get(p -| 1)
+    def get(ij:Cell):Boolean = terrain.getOption(ij
+    ).exists{_.isWalkable}
+    val t = terrain.get(ij)
+    val down = get(ij +| 1)
+    val up = get(ij -| 1)
     val (next, isDown) = if (r.nextDouble > 0.9) {
       if (down && !up && t.isWalkable) {
         (WorldTile(ts.makeSpike(Direction.Down)(r)), true)
@@ -44,11 +44,11 @@ object FeatureGenerator {
       (t, false)
     }
     val ems = if (r.nextDouble > 0.5 && isDown) {
-      Seq(DropEmitter.create(p +| y --> Direction.Down, 60 + r.nextInt(60), math.abs(r.nextInt(10000))).toEmitter)
+      Seq(DropEmitter.create(ij +| y --> Direction.Down, 60 + r.nextInt(60), math.abs(r.nextInt(10000))).toEmitter)
     } else {
       Seq()
     }
-    (terrain.updated(i, j, next), Seq(), Seq(ems.gs))
+    (terrain.updated(ij, next), Seq(), Seq(ems.gs))
 
   }
 

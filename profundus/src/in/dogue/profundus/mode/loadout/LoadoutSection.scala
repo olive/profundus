@@ -6,16 +6,16 @@ import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.data.CP437
 
 object LoadoutSection {
-  def create(cols:Int, rows:Int, i:Int, j:Int, title:Vector[String], tr:TextFactory, offset:(Int,Int)) = {
+  def create(cols:Int, rows:Int, ij:Cell, title:Vector[String], tr:TextFactory, offset:(Int,Int)) = {
     val border = Profundus.border(cols, rows)
     val text = tr.fromLines(title).sfilter(CP437.notBlank)
-    LoadoutSection(i, j, border, text, offset)
+    LoadoutSection(ij, border, text, offset)
   }
 }
 
-case class LoadoutSection private (i:Int, j:Int, b:Border, text:TileGroup, offset:(Int,Int)) {
+case class LoadoutSection private (ij:Cell, b:Border, text:TileGroup, offset:(Int,Int)) {
   def draw(tr:TileRenderer):TileRenderer = {
-    val off = (i, j) |+| offset
-    tr <+< b.draw(i, j) <|| (text |+| (off.x, off.y))
+    val off = ij |+| offset
+    tr <+< b.draw(ij) <|| (text |+| off)
   }
 }

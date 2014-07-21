@@ -22,7 +22,7 @@ case class MineralPickup private (ij:Cell, a:Animation) {
   def update = copy(a=a.update)
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <+< a.drawFg(ij.x, ij.y)
+    tr <+< a.drawFg(ij)
   }
 
   def isCollectable(p:Player) = true

@@ -51,7 +51,7 @@ case class TerrainCache private (cols:Int, rows:Int,
       val terrain = get(p)
       terrain.map { t =>
         val converted = convert(p)
-        val opt = t.tiles.getOption(converted.x, converted.y)
+        val opt = t.tiles.getOption(converted)
         opt.filter{ !_.isWalkable }.onlyIf(isLoaded(p)).flatten
 
       }.getOrElse(None)

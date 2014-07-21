@@ -49,7 +49,7 @@ case class MessageBox[T](boxes:IndexedSeq[TextBox], onFinish:() => T, ptr:Int) {
     }
   }
 
-  def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
-    tr <+< boxes(ptr).draw(i, j)
+  def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
+    tr <+< boxes(ptr).draw(ij)
   }
 }

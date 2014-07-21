@@ -13,7 +13,7 @@ import in.dogue.profundus.Profundus
 
 object Capsule {
   val stick = CP437.║.mkTile(Color.Black, Color.Red.dim(2))
-  def create(i:Int, j:Int) = {
+  def create(ij:Cell) = {
     val fuse = Animation.create(Vector(
       (1, CP437.*.mkTile(Color.Black, Color.Yellow)),
       (1, CP437.Θ.mkTile(Color.Black, Color.Red)),
@@ -25,18 +25,19 @@ object Capsule {
     )
 
     val anims = Seq(
-      (0, 0, stick),
-      (0, -1, fuse)
+      ((0, 0), stick),
+      ((0, -1), fuse)
     )
 
-    Capsule(i, j, anims, Grounded, 0)
+    Capsule(ij, anims, Grounded, 0)
   }
 }
 
-case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallState, t:Int){
-
-  def pos = (i, j)
-  def move(p:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = copy(i=p.x, j=p.y)
+case class Capsule private (ij:Cell, a:AnimationGroup, fall:FallState, t:Int){
+  final val i = ij.x
+  final val j = ij.y
+  def pos = ij
+  def move(p:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = copy(ij = p)
   def setState(f:FallState) = copy(fall=f)
   def update = {
     copy(a=a.smap {_.update}, t=t+1)
@@ -57,21 +58,21 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
       } else {
         id[Tile] _
       }
-      (p, q, func)
+      ((p, q), func)
     }
     tr `$$>` draws
   }
 
   private def makeDeformation = {
-    ExplosionDeformation.create(i, j, 1, 8, 3).toDeformation
+    ExplosionDeformation.create(ij, 1, 8, 3).toDeformation
   }
 
   private def makeParticle = {
-    ExplosionParticle.create(i, j, 8, 3).toParticle
+    ExplosionParticle.create(ij, 8, 3).toParticle
   }
 
   private def makeZone = {
-    ExplosionZone.create((i, j), 8, 3, DamageType.Explosion).toZone
+    ExplosionZone.create(ij, 8, 3, DamageType.Explosion).toZone
   }
 
 
@@ -83,7 +84,7 @@ case class Capsule private (i:Int, j:Int, a:Seq[(Int,Int,Animation)], fall:FallS
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <## (a |+| (i, j)) <+< drawAura
+    tr <## (a |+| ij) <+< drawAura
   }
 
   def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, fall, this)

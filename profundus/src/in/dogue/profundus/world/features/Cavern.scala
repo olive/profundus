@@ -14,11 +14,11 @@ case class Cavern(center:Cell, radius:Int) {
   def placeSite(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
     val fillDepth = center -| (3*radius/4)
     val circle = Circle(center, radius)
-    val newTiles = terrain.map { case (i, j, t) =>
-      val contains = circle.contains((i, j))
-      if (contains && (center |-| ((i, j))).mag > radius) {
+    val newTiles = terrain.map { case (p, t) =>
+      val contains = circle.contains(p)
+      if (contains && (center |-| p).mag > radius) {
         WorldTile(scheme.makeDirt(r))
-      } else if (contains && j > fillDepth.y) {
+      } else if (contains && p.y > fillDepth.y) {
         WorldTile(scheme.makeEmpty(r))
         //WorldTile(scheme.makeDirt(r))
       } else if (contains){

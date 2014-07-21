@@ -10,7 +10,7 @@ import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
 case class SpikePit(x:Int, y:Int, width:Int, height:Int) {
   def placeShaft(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
     val shaftStart = yy + r.nextInt(rows/4)
-    val newTiles = terrain.map { case (i, j, t) =>
+    val newTiles = terrain.map { case ((i, j), t) =>
       val jSpan = j >= y && j <= y + height
       val inShaft = x > i && x < i + width && jSpan
       val tt = if ((i == x || i  + width - 1 == x) && j + yy > shaftStart && jSpan) {
