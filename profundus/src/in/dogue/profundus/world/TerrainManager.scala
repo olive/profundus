@@ -8,9 +8,11 @@ import in.dogue.profundus.entities.Massive
 import in.dogue.profundus.particles.Particle
 import scala.Some
 import in.dogue.profundus.entities.pickups.Pickup
+import in.dogue.profundus.Profundus
 
 class TerrainManager {
-  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[Pickup[_]], Player) = {
+  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[WorldSpawn], Player) = {
+
     pl.toolPos match {
       case Some(p) =>
         val (wHit, drops, damage, broken) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/, pl.inv.tool.`type`)
@@ -74,8 +76,8 @@ class TerrainManager {
   }
 
 
-  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[Pickup[_]], Seq[Particle[_]]) = {
-    val (tryP, ps) = pp.update
+  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+    val (tryP, gs, ws) = pp.update
 
     val (tc, drops, oldPl) = updateShovel(tcache, tryP)
     val (movePl, dir) = oldPl.getMove
@@ -95,6 +97,6 @@ class TerrainManager {
       pl.move(newPos, face, tc.getTouching(newPos))
     }
     val plResult = updateClimb(tc, newP)
-    (tc, plResult, drops, ps)
+    (tc, plResult, gs, drops ++ ws)
   }
 }

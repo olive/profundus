@@ -13,9 +13,11 @@ case class ItemPickup(ij:Cell, it:Item) {
     tr <+ (ij.x, ij.y, it.icon)
   }
 
+  def isCollectable(p:Player) = true
+
   def onPickup(pl:Player) = {
     pl.collectItem(it)
   }
-  def toPickup:Pickup[ItemPickup] = Pickup.create(ij, _.update, _.onPickup, _.draw, this)
+  def toPickup:Pickup[ItemPickup] = Pickup.create(ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 
 }

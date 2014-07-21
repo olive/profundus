@@ -36,6 +36,8 @@ object FoodPickup {
 }
 case class FoodPickup private (ij:Cell, a:Tile, typ:FoodType) {
   def update = this
+
+  def isCollectable(p:Player) = true
   def onPickup(pl:Player) = {
     pl.collectFood(typ)
   }
@@ -43,5 +45,5 @@ case class FoodPickup private (ij:Cell, a:Tile, typ:FoodType) {
     tr <| (ij.x, ij.y, a)
   }
 
-  def toPickup:Pickup[FoodPickup] = Pickup.create[FoodPickup](ij, _.update, _.onPickup, _.draw, this)
+  def toPickup:Pickup[FoodPickup] = Pickup.create[FoodPickup](ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 }

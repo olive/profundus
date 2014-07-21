@@ -8,7 +8,7 @@ object SoundManager {
   val swish = load("swish", 1.0)
   val land = load("land", 0.5)
   val dead = load("dead", 0.5)
-  val item = load("item", 0.5)
+  val item = load("item", 0.2)
   val shhh = load("shhh", 0.5)
   val boom = load("boom", 1.5)
   val step = load("step", 1.0)

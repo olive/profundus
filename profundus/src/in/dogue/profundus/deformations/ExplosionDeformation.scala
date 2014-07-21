@@ -1,6 +1,6 @@
 package in.dogue.profundus.deformations
 
-import in.dogue.profundus.world.TerrainCache
+import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.pickups.Pickup
@@ -26,7 +26,7 @@ case class ExplosionDeformation private (i:Int, j:Int, tickDamage:Int, radius:In
           None
         }
       }
-      val seed = (tc, Seq[Pickup[_]]())
+      val seed = (tc, Seq[WorldSpawn]())
       val (newTc, mins) = indices.flatten.foldLeft(seed) { case ((ttc, mins), ij) =>
 
         val (newTc, drops, _, _) = ttc.hit(ij, tickDamage, Mattock)

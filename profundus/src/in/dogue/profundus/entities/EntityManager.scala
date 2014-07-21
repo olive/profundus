@@ -72,7 +72,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     }
   }
 
-  def spawnEntities(cs:Seq[Entity[_]]) = {
+  private def spawnEntities(cs:Seq[Entity[_]]) = {
     copy(cr=cr++cs)
   }
 
@@ -87,7 +87,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     (copy(cr=newCr), ps)
   }
 
-  def addDrops(gs:Seq[Pickup[_]]) = {
+  private def addDrops(gs:Seq[Pickup[_]]) = {
     copy(picks=picks ++ gs)
   }
 
@@ -112,7 +112,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
   def collectPickups(p:Player):(Player, EntityManager) = {
     val seed = (p, List[Pickup[_]]())
     val (newPl, newPicks) = picks.foldLeft(seed) { case ((pl, list), pick) =>
-      if (pick.getPos == pl.pos) {
+      if (pick.isCollectable(pl) && pick.getPos == pl.pos) {
         (pick.collect(pl), list)
       } else {
         (pl, pick :: list)

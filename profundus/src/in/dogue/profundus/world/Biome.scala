@@ -6,6 +6,8 @@ import in.dogue.profundus.Profundus
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.doodads.Doodad
 import com.deweyvm.gleany.data.Recti
+import in.dogue.profundus.entities.pickups.ToolPickup
+import in.dogue.profundus.entities.{BareHands, Shovel}
 
 object Biome {
   def createDummy = {
@@ -43,11 +45,13 @@ case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:
       (feat, moreDoods ++ doods)
 
     }
+
+
     val pickups = {
       if (yIndex > 2) {
         pg.generate(cols, rows, newTiles, ts, r)
       } else {
-        Seq()
+        Seq(Seq(ToolPickup.create((75, 16), BareHands.toTool)).ws)
       }
     }
     val doodads = dg.generate(ts, newTiles, r) ++ ds

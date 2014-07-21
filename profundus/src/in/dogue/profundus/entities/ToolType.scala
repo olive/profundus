@@ -10,6 +10,7 @@ import Color._
 import in.dogue.profundus.world.TileClass
 
 case class Tool(dura:Int, `type`:ToolType) {
+  def isBare = `type` == BareHands
   def damage(amt:Int) = copy(dura=dura.drop(amt))
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     tr <++ (`type`.icon |+| (i, j))
@@ -27,13 +28,30 @@ sealed trait ToolType {
   def toTool = Tool(durability, this)
 }
 
-case class BareHands(override val icon:TileGroup) extends ToolType {
+case object BareHands extends ToolType {
   override val healthHurt = 1
   override val durability = Int.MaxValue
   override val digDamage = 1
   override val stamCost = 10
   override val breakable = Seq(TileClass.Dirt)
+  override val icon = Tile.makeGroup(Vector(
+    (0, 0, CP437.º, Black, Brown),
+    (1, 0, CP437.☻, Black, Brown),
+    (2, 0, CP437.º, Black, Brown)
+  ))
 
+}
+
+case object Gouge extends ToolType {
+  override val durability = 5000
+  override val digDamage = 1
+  override val stamCost = 3
+  override val breakable = Seq(TileClass.Dirt)
+  override val icon = Tile.makeGroup(Vector(
+    (0, 0, CP437.═, Black, Brown),
+    (1, 0, CP437.═, Black, Brown),
+    (2, 0, CP437.Ç_u, Black, Grey)
+  ))
 }
 
 case object Shovel extends ToolType {

@@ -21,7 +21,7 @@ object Loadout {
     case 1 => Mallet
     case 2 => Mattock
     case 3 => Rapier
-    case 4 => BareHands(HudTool.shovelBroken)
+    case _ => BareHands
   }
 
   private def toolToIndex(t:ToolType):Int = t match {
@@ -29,7 +29,8 @@ object Loadout {
     case Mallet => 1
     case Mattock => 2
     case Rapier => 3
-    case BareHands(_) => 4
+    case _ => 4
+
   }
 
   def drawNumber(tf:TextFactory)(v:Int):TileGroup = {

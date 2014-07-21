@@ -104,9 +104,9 @@ object GreatWorld {
     val tm = gw.mgr
     val pp = gw.p
     val cache = gw.cache
-    val (newCache, newP, drops, ps) = tm.update(cache, pp)
-    val newEm = gw.em.addDrops(drops)
-    gw.setTc(newCache).setPlayer(newP).setEm(newEm).addPs(ps)
+    val (newCache, newP, gs, ws) = tm.update(cache, pp)
+    val newEm = gw.em.addSpawns(ws)
+    gw.setTc(newCache).setPlayer(newP).setEm(newEm).insertSpawns(gs)
   }
 
 
@@ -148,12 +148,12 @@ object GreatWorld {
   private def updateDeformations : Update[Unit] = standard { case (gw, ()) =>
     val ds = gw.ds
     val cache = gw.cache
-    val seed = (cache, Seq[Pickup[_]]())
+    val seed = (cache, Seq[WorldSpawn]())
     val (deformed, mins) = ds.foldLeft(seed){case ((tc, mins), d) =>
       val (nc, drop, _) = d.apply(tc)
       (nc, drop ++ mins)
     }
-    val newEm = gw.em.addDrops(mins)
+    val newEm = gw.em.addSpawns(mins)
     val newDs = ds.map{_.update}.flatten
     gw.setDs(newDs).setTc(deformed).setEm(newEm)
   }

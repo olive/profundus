@@ -142,7 +142,7 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[Pickup[_]], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
     val t = tiles.get(ij.x, ij.y)
     if (!t.canBreakBy(ttype.breakable)) {
       (this, Seq(), 0, false)

@@ -8,16 +8,15 @@ import Direction.Down
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.{Particle, DeathParticle}
-import in.dogue.profundus.world.{Spike, WorldTile}
+import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, Spike, WorldTile}
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.entities.pickups._
 import in.dogue.profundus.entities.pickups.Herb
-import in.dogue.profundus.world.WorldTile
 import scala.util.Random
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.ui.HudTool
 import in.dogue.profundus.audio.SoundManager
-import in.dogue.profundus.Game
+import in.dogue.profundus.{Profundus, Game}
 
 
 object PlayerLog {
@@ -78,7 +77,7 @@ object Player {
            Attributes.create, NoBuff,
            StaminaBar.create(100), HealthBar.create(100),
            shovel, getLive,
-           ControlState(false, false, false, false),
+           ControlState(false, false, false, false, false),
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
            PlayerLight.create(LightSource.createCircle(ij, 5, 10, 1)),
@@ -97,9 +96,16 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                            moveT:Int, stepMachine:StepMachine) {
   @inline def x = ij.x
   @inline def y = ij.y
-  def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
-  def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
+  def collectRope(g:RopePickup) = {
+    SoundManager.item.play()
+    copy(inv=inv.collectRope(g))
+  }
+  def collectMineral(g:MineralPickup) = {
+    SoundManager.item.play()
+    copy(inv=inv.collectMineral(g), log=log.getGem)
+  }
   def collectFood(typ:FoodType) = {
+    SoundManager.item.play()
     val buff = typ match {
       case Toadstool(seed) =>
         val regen = 1 + new Random(seed).nextInt(Attributes.default.stamRegen*2)
@@ -110,6 +116,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     }
     copy(log=log.eatFood(typ), buff = buff)
   }
+
+  def collectTool(t:Tool) = {
+    SoundManager.item.play()
+    copy(inv=inv.setTool(t))
+  }
+
   def collectItem(it:Item) = {
     SoundManager.item.play()
     copy(attr=attr.collectItem(it))
@@ -154,7 +166,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     val prevDur = inv.tool.dura
     val newInv1 = inv.useTool(dmg)
     val (newLog, newInv) = if (newInv1.tool.dura == 0 && prevDur > 0) {
-      (log.breakTool, newInv1.setTool(BareHands(HudTool.shovelBroken).toTool))
+      (log.breakTool, newInv1.setTool(BareHands.toTool))
     } else  {
       (log, newInv1)
     }
@@ -190,7 +202,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     val dx = Controls.AxisX.isPressed
     val dy = Controls.AxisY.isPressed
     val newT = (dx !=0 || dy != 0).select(0, moveT+1)
-    val moveSpeed = fall.moveSlow.select(4, 8)
+    val moveSpeed = fall.moveSlow.select(4, 12)
 
     val face = if (newT > 0 && newT % moveSpeed == 0) {
       chooseFace(dx, dy).some
@@ -208,22 +220,34 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (dx != 0 || dy != 0).select(face, chooseFace(dx, dy))
   }
 
-  def update = {
+  def update: (Player, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+    import Profundus._
     val newAttr = buff.process(attr)
-    val newP = copy(ctrl=ctrl.update(canUseTool),
+    val p = copy(ctrl=ctrl.update(canUseTool),
                     log=log.setDepth(pos.y).incrTime,
                     attr=newAttr,
                     stam=stam.update(newAttr),
                     health=health.update(newAttr),
                     light=light.update,
-                    fall=if(attr.hasWings)Floating else fall)
+                    fall=if(attr.hasWings) Floating else fall)
+    val (newP, drops) = updateDropTool(p)
     val (jkP, ps) = if (justKilled) {
       SoundManager.dead.play()
       (newP.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
     } else {
       (newP, Seq())
     }
-    (jkP, ps)
+    (jkP, Seq(ps.gs), Seq(drops.ws))
+  }
+
+  private def updateDropTool(p:Player):(Player, Seq[Pickup[_]]) = {
+    if (ctrl.isDropping && !inv.tool.isBare) {
+      val newInv = inv.setTool(BareHands.toTool)
+      val pickup = ToolPickup.create(pos --> face.opposite, inv.tool)
+      (p.copy(inv=newInv), Seq(pickup))
+    } else {
+      (p, Seq())
+    }
   }
 
   def fallDamage(fall:Int) = {

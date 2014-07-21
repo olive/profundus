@@ -72,7 +72,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[Pickup[_]], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], Int, Boolean) = {
     val index = getIndex(ij)
     val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg, ttype)
     val updated = tMap.updated(index, broke)
