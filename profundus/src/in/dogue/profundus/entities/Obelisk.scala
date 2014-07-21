@@ -68,8 +68,12 @@ case class Obelisk private (tg:TileGroup, health:Int, t:Int, light:LightSource, 
 
   def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
 
+  def getTg = {
+    val mixAmt = (t % Obelisk.attackTime)/Obelisk.attackTime.toDouble
+    tg.smap{t => t.mapFg(_.mix(Color.Red.dim(3), mixAmt))}
+  }
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <|| (tg |+| ij)
+    tr <|| (getTg |++| ij)
   }
 
   def getLight(ij:Cell) = Seq(light.copy(pos=ij))

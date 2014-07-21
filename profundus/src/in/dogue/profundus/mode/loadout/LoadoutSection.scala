@@ -16,6 +16,6 @@ object LoadoutSection {
 case class LoadoutSection private (ij:Cell, b:Border, text:TileGroup, offset:(Int,Int)) {
   def draw(tr:TileRenderer):TileRenderer = {
     val off = ij |+| offset
-    tr <+< b.draw(ij) <|| (text |+| off)
+    tr <+< b.draw(ij) <|| (text |++| off)
   }
 }

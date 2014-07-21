@@ -84,7 +84,7 @@ case class Capsule private (ij:Cell, a:AnimationGroup, fall:FallState, t:Int){
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <## (a |+| ij) <+< drawAura
+    tr <## (a |++| ij) <+< drawAura
   }
 
   def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, fall, this)

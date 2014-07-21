@@ -44,9 +44,9 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect, disclai
   def draw(tr:TileRenderer):TileRenderer = {
     (tr <+< r.draw((0,0))
         <+< border.draw((0, 0))
-        <++ (title |+| ((9,7+8)))
-        <|| (disclaimer |+| ((2,rows - 3 - 2)))
-        <|| (version |+| ((2, 2)))
+        <++ (title |++| ((9,7+8)))
+        <|| (disclaimer |++| ((2,rows - 3 - 2)))
+        <|| (version |++| ((2, 2)))
       )
   }
 

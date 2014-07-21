@@ -42,13 +42,13 @@ case class Moon private (ij:Cell, r:Int, light:LightSource, tg:TileGroup, t:Int)
       }
 
     }
-    tr `$$>` (draws.flatten |+| (ij |-| ((max/4, max/4))))
+    tr `$$>` (draws.flatten |++| (ij |-| ((max/4, max/4))))
   }
 
 
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++ (tg |+| ij) <+< drawBright
+    tr <++ (tg |++| ij) <+< drawBright
   }
 
   def toDoodad:Doodad[Moon] = Doodad(_.update, _.draw, _.getLight, this)

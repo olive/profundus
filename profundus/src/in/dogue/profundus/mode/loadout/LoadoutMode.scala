@@ -115,11 +115,11 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
     (tr <+< r.draw((0,0))
         <++< sliders.zipWithIndex.map { case (s, i) => s.draw(i == ptr, points) _}
         <+< ptText.drawFg((ptX, ptY))
-        <|| (create("%3s☼".format(points.toString))|+| ((ptX + ptText.length, ptY)))
-        <|| (create(pi.title) |+| ((2, bioY)))
-        <|| (create("Fears : " + pi.weakness) |+| ((2, bioY+2)))
-        <|| (create("Job   : " + pi.job)      |+| ((2, bioY+3)))
-        <|| (create("Craves: " + pi.craving)  |+| ((2, bioY+4)))
+        <|| (create("%3s☼".format(points.toString))|++| ((ptX + ptText.length, ptY)))
+        <|| (create(pi.title) |++| ((2, bioY)))
+        <|| (create("Fears : " + pi.weakness) |++| ((2, bioY+2)))
+        <|| (create("Job   : " + pi.job)      |++| ((2, bioY+3)))
+        <|| (create("Craves: " + pi.craving)  |++| ((2, bioY+4)))
         <++< los.map {_.draw _}
       )
   }

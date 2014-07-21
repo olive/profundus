@@ -49,7 +49,7 @@ object LightSource {
 
 case class LightSource private (pos:Cell, flicker:Double, private val cells:Seq[(Cell, Double)], onScreen: ((Int,Int), Recti) => Boolean) {
   def fill:Seq[(Cell, Double)] = {
-    (cells |+| pos).smap { _ * flicker}
+    (cells |++| pos).smap { _ * flicker}
   }
 }
 

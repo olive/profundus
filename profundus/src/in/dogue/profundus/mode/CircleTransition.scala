@@ -104,7 +104,7 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Futu
       case CircleFail(_) => id[TileRenderer]
     }) <+< drawCover <+< (state match {
       case WaitLoad(_,wlt) if wlt > 3 => text.draw((10,10))
-      case CircleFail(tg) => (tr:TileRenderer) => tr <++ (tg |+| ((1,1)))
+      case CircleFail(tg) => (tr:TileRenderer) => tr <++ (tg |++| ((1,1)))
       case a => id[TileRenderer]
     })
   }

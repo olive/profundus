@@ -13,7 +13,7 @@ case class Tool(dura:Int, `type`:ToolType) {
   def isBare = `type` == BareHands
   def damage(amt:Int) = copy(dura=dura.drop(amt))
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <++ (`type`.icon |+| ij)
+    tr <++ (`type`.icon |++| ij)
   }
 }
 

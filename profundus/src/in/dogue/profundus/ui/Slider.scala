@@ -72,9 +72,9 @@ case class Slider private (ij:Cell,
     val spr = values(value)
     val span = spr.getSpan
     val center = span.center
-    (tr <|| (icon |+| ij)
+    (tr <|| (icon |++| ij)
         <+< drawArrows(selected, rem, center.x+1)
-        <|| (spr |+| ij |+ 1)
+        <|| (spr |++| ij |++ 1)
         <+< drawSelection(selected, span)
       )
   }

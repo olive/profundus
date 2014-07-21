@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.profundus.entities.{Bat, Obelisk, Lurker}
+import in.dogue.profundus.entities._
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import in.dogue.profundus.Profundus
@@ -16,29 +16,30 @@ object EntityGenerator {
     } else {
       val creatures = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
-        if (!isSolid(pos)) {
-          Lurker.create(pos +| (i * rows)).some
-        } else {
-          None
-        }
+        Lurker.create(pos +| (i * rows)).onlyIf(!isSolid(pos))
+
       }.flatten
       val casques = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
-        if (!isSolid(pos)) {
-          Obelisk.create(pos +| (i * rows), r).some
-        } else {
-          None
-        }
+
+        Obelisk.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+
       }.flatten
       val bats = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
-        if (!isSolid(pos)) {
-          Bat.create(pos +| (i * rows), r).some
-        } else {
-          None
-        }
+        Bat.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
-      creatures ++ casques ++ bats
+
+      val wasp = (0 until 10).map { _ =>
+        val pos = (r.nextInt(cols), r.nextInt(rows))
+        PhaseWasp.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+      }.flatten
+
+      val bee = (0 until 10).map { _ =>
+        val pos = (r.nextInt(cols), r.nextInt(rows))
+        Bee.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+      }.flatten
+      creatures ++ casques ++ bats ++ bee
     }
     s.ws
   }

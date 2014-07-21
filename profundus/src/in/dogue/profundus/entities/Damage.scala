@@ -15,6 +15,8 @@ object DamageType {
   }
   val Lurker = Creature("a", "Lurker")
   val HellBat = Creature("a", "Hell Bat")
+  val PhaseWasp = Creature("a", "Phase Wasp")
+  val Bee = Creature("a", "large Bee")
   val Fall = Environment("Fall", "a great fall")
   val Explosion = Environment("Explosion", "an explosion")
   val Spikes = Environment("Explosion", "impalement")
