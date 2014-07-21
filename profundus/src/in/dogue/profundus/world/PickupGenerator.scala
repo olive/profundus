@@ -8,12 +8,15 @@ import in.dogue.antiqua.data.Array2d
 object PickupGenerator {
   val dummy = {
     def gen(cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = {
-      (0 until 10) map { i =>
-        val x = r.nextInt(cols)
-        val y = r.nextInt(rows) + yRoom
-        val ftype = FoodType.random(r)
-        FoodPickup.create((x, y), ftype).toPickup
+      val foods = FoodType.All(r).map { ft =>
+        (0 until 10) map { i =>
+          val x = r.nextInt(cols)
+          val y = r.nextInt(rows) + yRoom
+          FoodPickup.create((x, y), ft).toPickup
+        }
+
       }
+      ts.color.ways1(foods)
 
     }
     PickupGenerator(gen)

@@ -112,7 +112,10 @@ object FeatureGenerator {
     val shafts = makeShafts(2, cols, rows)(ts, r)
     val camps = makeCampsites(1, cols, rows)(ts, r)
     val cavern = makeCaverns(1, cols, rows)(ts, r)
-    spikeWaves ++ cavern ++ pits ++ shafts ++ camps ++ spikes
+    val all = Vector(spikeWaves, cavern, pits, shafts, camps, spikes)
+    val (a, b, c) = ts.color.ways3(all)
+    a ++ b ++ c
+
   }
 
   val dummy = FeatureGenerator(simple)

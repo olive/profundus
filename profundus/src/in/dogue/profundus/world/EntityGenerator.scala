@@ -8,7 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object EntityGenerator {
-  private def dummyFunc(cols:Int, rows:Int, i:Int, t:Array2d[WorldTile], r:Random) = {
+  private def dummyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
     import Profundus._
     def isSolid(ij:Cell) = !t.get(ij).isWalkable
     val s = if (i <= 0) {
@@ -39,15 +39,17 @@ object EntityGenerator {
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bee.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
-      creatures ++ casques ++ bats ++ bee
+      val all = Vector(creatures, casques, bats, bee)
+      val (a, b) = ts.color.ways2(all)
+      a ++ b
     }
     s.ws
   }
   val dummy = EntityGenerator(dummyFunc)
 }
 
-case class EntityGenerator(f: (Int,Int,Int,Array2d[WorldTile], Random) => EntitySpawn) {
-  def generate(cols:Int, rows:Int, i:Int, tiles:Array2d[WorldTile], r:Random):EntitySpawn = {
-    f(cols, rows, i, tiles, r)
+case class EntityGenerator(f: (Int,Int,Int,TerrainScheme, Array2d[WorldTile], Random) => EntitySpawn) {
+  def generate(cols:Int, rows:Int, i:Int, ts:TerrainScheme,tiles:Array2d[WorldTile], r:Random):EntitySpawn = {
+    f(cols, rows, i, ts, tiles, r)
   }
 }

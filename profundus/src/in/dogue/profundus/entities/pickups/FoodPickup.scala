@@ -10,9 +10,12 @@ import Antiqua._
 import scala.util.Random
 
 object FoodType {
+  def All(r:Random) = {
+    val seed = r.nextInt.abs
+    Vector(Toadstool(seed), Herb(seed), Bark(seed))
+  }
   def random(r:Random) = {
-    val seed = r.nextInt
-    Vector(Toadstool(seed), Herb(seed), Bark(seed)).randomR(r)
+    All(r).randomR(r)
   }
 }
 

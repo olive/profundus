@@ -7,8 +7,7 @@ import in.dogue.profundus.world.TerrainCache
 
 object ParticleManager {
   def create = {
-    val em = DropEmitter.create((64,20), 60, 0).toEmitter
-    ParticleManager(Seq(em), Seq())
+    ParticleManager(Seq(), Seq())
   }
 }
 

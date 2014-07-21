@@ -75,7 +75,7 @@ object Player {
     val j = ij.y
     Player((i, j - 1), (i, j), face,
            Attributes.create, NoBuff,
-           StaminaBar.create(100), HealthBar.create(100),
+           StaminaBar.create(100), HealthBar.create(200),
            shovel, getLive,
            ControlState(false, false, false, false, false),
            Inventory.create(lo), PlayerLog.create(lo),
@@ -179,11 +179,11 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
       (log, newInv1)
     }
     val hurtAmt = newInv.tool.`type`.healthHurt
-    if (hurtAmt > 0) {
+    if (hurtAmt > 0 && dmg > 0) {
       SoundManager.hurt.play()
     }
 
-    val newHealth = health.permaHurt(hurtAmt)
+    val newHealth = (dmg > 0).select(health, health.permaHurt(hurtAmt))
 
     val newLog2 = tileBroken.select(newLog, newLog.digTile)
     val stamDmg = (dmg==0).select(inv.tool.`type`.stamCost, 0)

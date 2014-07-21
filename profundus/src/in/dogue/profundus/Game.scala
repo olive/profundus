@@ -10,12 +10,12 @@ import Antiqua._
 object Game {
   var t = 0
   val debug = true
-  val fixedSeed = true && debug
+  val fixedSeed = false && debug
   val flyMode = false && debug
   val invMode = false && debug
   val lightsOn = false && debug
   val version = "Version 0.0.11"
-  def getSeed = (fixedSeed).select(new Random().nextInt(), 2)
+  def getSeed = (fixedSeed).select(new Random().nextInt(), 3)
 }
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {
   private lazy val engine = new Engine()

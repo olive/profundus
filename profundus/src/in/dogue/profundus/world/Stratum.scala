@@ -52,11 +52,11 @@ case class Stratum(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, e
       if (yIndex > 0) {
         pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
       } else {
-        Seq(Seq(ToolPickup.create((75, 16), Gouge.toTool)).ws)
+        Seq()
       }
     }
     val doodads = dg.generate(ts, newTiles, r) ++ ds
-    val entities = eg.generate(cols, rows, yIndex, newTiles, r)
+    val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
     val newBiome = if (yIndex % strataSize == 0) {
       copy(ts=TerrainScheme.generate(r))
     } else {

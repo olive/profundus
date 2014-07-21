@@ -67,8 +67,6 @@ object Terrain {
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
       : (Array2d[WorldTile], Seq[Doodad[_]], Seq[GlobalSpawn]) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
-
-
     val scheme = TerrainScheme.dummy
     val grassScheme = Scheme(
       (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),

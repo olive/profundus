@@ -54,11 +54,12 @@ object TerrainScheme {
   )
 
 
-  val dummy = TerrainScheme(dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
+  val dummy = TerrainScheme(new StratumColor(0), dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
 
 
   def generate(r:Random) = {
-    val harmony = ColorHarmony.create(4, r.nextDouble, 0.5f, 0.5f, 0, 0, 0.5f, 0.5f, 0.5f, r.nextInt())
+    val hue = r.nextDouble
+    val harmony = ColorHarmony.create(4, hue, 0.5f, 0.5f, 0, 0, 0.5f, 0.5f, 0.5f, r.nextInt())
     val dirt = harmony(0)
     val clay = harmony(1)
     val rock = harmony(2)
@@ -97,11 +98,13 @@ object TerrainScheme {
       (r:Random) => Vector(Color.Purple, Color.Red, Color.Green, Color.Blue).randomR(r),
       (r:Random) => rock.dim(3 + r.nextDouble)
     )
-    TerrainScheme(dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
+    val res = TerrainScheme(new StratumColor(hue), dirtScheme, clayScheme, rockScheme, rock2Scheme, rock3Scheme, gemScheme, shaftScheme, emptyScheme)
+    res
   }
 }
 
-case class TerrainScheme(dirt:Scheme,
+case class TerrainScheme(color:StratumColor,
+                         dirt:Scheme,
                          clay:Scheme,
                          rock:Scheme,
                          rock2:Scheme,
@@ -109,7 +112,7 @@ case class TerrainScheme(dirt:Scheme,
                          gem:Scheme,
                          shaft:Scheme,
                          empty:Scheme) {
-  def map(f:Color => Color) = copy(
+  /*def map(f:Color => Color) = copy(
     dirt=dirt.map(f),
     clay=clay.map(f),
     rock=rock.map(f),
@@ -118,7 +121,7 @@ case class TerrainScheme(dirt:Scheme,
     gem=gem.map(f),
     shaft=shaft.map(f),
     empty=empty.map(f)
-  )
+  )*/
   def emptyTile(r:Random) = {
     val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
     empty.mkTile(r, bgCode)
