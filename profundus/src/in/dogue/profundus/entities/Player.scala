@@ -229,7 +229,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     val amount = if (fall < d) {
       0
     } else {
-      50*((fall - d)/d)
+      (100*((fall - d)/d.toDouble)).toInt
     }
     Damage(amount, DamageType.Fall)
   }
@@ -241,11 +241,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
         if (num > 1) {
           SoundManager.land.play()
         }
-        if (num > attr.fallDistance) {
-          newPl.kill
-        } else {
-          newPl
-        }
+        val dmg = fallDamage(num)
+        newPl.damage(dmg)
 
       case _ => newPl
     }
