@@ -18,7 +18,7 @@ import in.dogue.profundus.entities.pickups.ItemPickup
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 
-object Casque {
+object Obelisk {
   val attackTime = 10*60
   def create(ij:Cell, r:Random) = {
     val tg = Tile.makeGroup(Vector(
@@ -26,11 +26,11 @@ object Casque {
       (0, 1, CP437.↑.toCode, Color.Black, Color.White)
     ))
     val light = LightSource.createCircle(ij, 3, 4, 0.5)
-    Casque(tg, 50, math.abs(r.nextInt()), light, Alive).toEntity(ij)
+    Obelisk(tg, 50, math.abs(r.nextInt()), light, Alive).toEntity(ij)
 
   }
 }
-case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, live:LivingState) {
+case class Obelisk private (tg:TileGroup, health:Int, t:Int, light:LightSource, live:LivingState) {
   import Profundus._
 
   def damage(dmg:Damage) = {
@@ -42,14 +42,15 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
 
   }
   def getLive = live
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Casque = {
+  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Obelisk = {
     this
   }
 
   def kill = copy(live=Dead)
 
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Casque, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
-    val spawns = if (t > 0 && t % Casque.attackTime == 0) {
+  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Obelisk, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+
+    val spawns = if (t > 0 && t % Obelisk.attackTime == 0) {
       SoundManager.pop.play()
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3, DamageType.Obelisk).toZone
@@ -73,7 +74,7 @@ case class Casque private (tg:TileGroup, health:Int, t:Int, light:LightSource, l
 
   def getLight(ij:Cell) = Seq(light.copy(pos=ij))
 
-  def toEntity(ij:Cell):Entity[Casque] = {
+  def toEntity(ij:Cell):Entity[Obelisk] = {
     Entity(ij, Floating, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
   }
 }

@@ -4,7 +4,7 @@ import com.deweyvm.gleany.AssetLoader
 
 object SoundManager {
 
-  val dig = load("dig", 1.0)
+  val dig = load("dig", 0.5)
   val swish = load("swish", 1.0)
   val land = load("land", 0.5)
   val dead = load("dead", 0.5)

@@ -9,7 +9,7 @@ import sun.io.CharToByteCp437
 import in.dogue.profundus.world._
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.entities.{Entity, Casque, Lurker}
+import in.dogue.profundus.entities.{Entity, Obelisk, Lurker}
 import in.dogue.profundus.world.PickupSpawn
 import in.dogue.antiqua.graphics.Border
 import in.dogue.profundus.world.NewParticles

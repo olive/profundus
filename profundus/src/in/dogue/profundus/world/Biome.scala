@@ -19,6 +19,7 @@ object Biome {
 }
 
 case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:EntityGenerator, dg:DoodadGenerator) {
+  val strataSize = 4
   def generate(cols:Int, rows:Int, y:Int, r:Random):(Biome, Terrain, Seq[WorldSpawn]) = {
     import Profundus._
     val (spawn, face, features) = if (y < 0) {
@@ -28,7 +29,7 @@ case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:
       val f = Feature(Recti(0,0,cols,rows), Terrain.createMouth(face, lines, circle))
       (spawn, face, Seq(f))
     } else {
-      ((0,0), Direction.Down, fg.f(cols, rows, y, ts, r))
+      ((0,0), Direction.Down, fg.assemble(cols, rows, y, ts, r))
     }
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val tiles = noise.map { case (i, j, d) =>
@@ -37,12 +38,17 @@ case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:
     }
     val seed = (tiles, Seq[Doodad[_]]())
     val (newTiles, ds) = features.foldLeft(seed) { case ((innerTiles, doods), ft) =>
-      ft.transform(cols, rows, y*rows, ts, innerTiles, r)
+      val (feat, moreDoods) = ft.transform(cols, rows, y*rows, ts, innerTiles, r)
+      (feat, moreDoods ++ doods)
 
     }
     val doodads = dg.generate(ts, newTiles, r) ++ ds
     val entities = eg.generate(cols, rows, y, newTiles, r)
-
-    (this, Terrain(y*rows, newTiles, doodads, spawn, face), Seq(entities))
+    val newBiome = if (y % strataSize == 0) {
+      copy(ts=TerrainScheme.generate(r))
+    } else {
+      this
+    }
+    (newBiome, Terrain(y*rows, newTiles, doodads, spawn, face), Seq(entities))
   }
 }

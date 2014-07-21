@@ -121,7 +121,7 @@ case class Lurker private (tile:Tile, live:LivingState, state:LurkerState) {
     val (newState, zone) = if (!isAdjacent) {
       (Chase.create(ppos), Seq())
     } else if (a.t > 0 && a.t % a.attackFreq == 0) {
-      (a.copy(t=0), Seq(SingleTileZone(ppos, 75, DamageType.Creature).toZone))
+      (a.copy(t=0), Seq(SingleTileZone(ppos, 75, DamageType.Lurker).toZone))
     } else {
       (a.update, Seq())
     }

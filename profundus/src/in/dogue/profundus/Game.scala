@@ -13,6 +13,7 @@ object Game {
   val fixedSeed = true && debug
   val flyMode = false && debug
   val invMode = false && debug
+  val lightsOn = false && debug
   val version = "Version 0.0.11"
   def getSeed = (fixedSeed).select(new Random().nextInt(), 0)
 }

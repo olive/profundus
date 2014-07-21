@@ -3,7 +3,7 @@ package in.dogue.profundus.world
 
 import in.dogue.profundus.particles.{ParticleManager}
 import in.dogue.antiqua.graphics.{Filter, Tile, TileRenderer}
-import in.dogue.profundus.Profundus
+import in.dogue.profundus.{Game, Profundus}
 import in.dogue.profundus.entities._
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -294,15 +294,24 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
 
     val res = tr.withMove(cx, cy) { wp =>
+      if (!Game.lightsOn) {
         wp.withFilter(getFilter((wp.originX, wp.originY))) { wp =>
-              (wp <+< cache.draw(p.pos)
-                  <+< em.draw
-                  <+< p.draw
-                  <+< pm.draw
-              )
+          wp <+< drawWorld
         }
+      } else {
+        wp <+< drawWorld
+      }
+
     }
 
     res
+  }
+
+  private def drawWorld(tr:TileRenderer) = {
+    (tr <+< cache.draw(p.pos)
+      <+< em.draw
+      <+< p.draw
+      <+< pm.draw
+      )
   }
 }

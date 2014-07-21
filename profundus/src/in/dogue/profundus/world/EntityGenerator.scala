@@ -1,6 +1,6 @@
 package in.dogue.profundus.world
 
-import in.dogue.profundus.entities.{Bat, Casque, Lurker}
+import in.dogue.profundus.entities.{Bat, Obelisk, Lurker}
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import in.dogue.profundus.Profundus
@@ -25,7 +25,7 @@ object EntityGenerator {
       val casques = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         if (!isSolid(pos)) {
-          Casque.create(pos +| (i * rows), r).some
+          Obelisk.create(pos +| (i * rows), r).some
         } else {
           None
         }

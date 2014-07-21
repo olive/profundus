@@ -26,6 +26,7 @@ case class SpikePit(x:Int, y:Int, width:Int, height:Int) {
       }
       tt.map(WorldTile.apply).getOrElse(t)
     }
+
     (newTiles, Seq())
   }
   def toFeature(cols:Int, rows:Int):Feature = {

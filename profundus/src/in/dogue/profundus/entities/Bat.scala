@@ -56,7 +56,13 @@ case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int
       move.map{pos --> _}.getOrElse(pos)
     } else if (!isAdjacent && t % 5 == 0 && cache.hasLineOfSight(pos, ppos)) {
       val move =  dd.signum
-      pos |+| move
+      val res = pos |+| move
+      if (!cache.isSolid(res)) {
+        res
+      } else {
+        pos
+      }
+
     } else if (t % 15 == 0) {
       val d = Direction.All.randomR(r)
       if (!cache.isSolid(pos --> d)) {
@@ -68,12 +74,19 @@ case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int
       pos
     }
     val attack = if (isAdjacent && t % 15 == 0) {
-      Seq(SingleTileZone(ppos, 75, DamageType.Creature).toZone)
+      Seq(SingleTileZone(ppos, 75, DamageType.HellBat).toZone)
     } else {
       Seq()
     }
 
-    (copy(a=a.smap{_.update}, t=t+1), newPos, Seq(attack.gs), Seq())
+    val updated = copy(a=a.smap{_.update}, t=t+1)
+    val killed = if (health <= 0) {
+      updated.kill
+    } else {
+      updated
+    }
+
+    (killed, newPos, Seq(attack.gs), Seq())
   }
 
   def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle

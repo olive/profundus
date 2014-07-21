@@ -224,6 +224,16 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     (jkP, ps)
   }
 
+  def fallDamage(fall:Int) = {
+    val d = attr.fallDistance
+    val amount = if (fall < d) {
+      0
+    } else {
+      50*((fall - d)/d)
+    }
+    Damage(amount, DamageType.Fall)
+  }
+
   def setFallState(s:FallState) = {
     val newPl = copy(fall=s)
     (fall, s) match {
