@@ -22,12 +22,12 @@ import in.dogue.profundus.Game
 
 object PlayerLog {
   def create(lo:Loadout) = {
-    PlayerLog(lo, lo.name, "killedby", 0, 0, lo.gems, 0, 0, 0, 0, 0, 0, Vector())
+    PlayerLog(lo, lo.name, DamageType.Unknown, 0, 0, lo.gems, 0, 0, 0, 0, 0, 0, Vector())
   }
 
 }
 
-case class PlayerLog(lo:Loadout, title:String, killedBy:String, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
+case class PlayerLog(lo:Loadout, title:String, killedBy:DamageType, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
   def digTile = copy(tilesDug=tilesDug+1)
   def useBomb = copy(bombsUsed = bombsUsed + 1)
   def useRope = copy(ropesUsed = ropesUsed + 1)
@@ -38,7 +38,7 @@ case class PlayerLog(lo:Loadout, title:String, killedBy:String, bombsUsed:Int, r
   def setDepth(d:Int) = copy(deepest = math.max(d, deepest))
   def eatFood(food:FoodType) = copy(foodEaten=foodEaten :+ food)
   def incrTime = copy(timeSpent = timeSpent + 1)
-
+  def getKilledBy = killedBy.message
   def timeString = {
     val mins = timeSpent/(60*60)
     val secs = timeSpent % (60*60)
@@ -74,7 +74,7 @@ object Player {
 
     val i = ij.x
     val j = ij.y
-    Player(i, j - 1, i, j, face,
+    Player((i, j - 1), (i, j), face,
            Attributes.create, NoBuff,
            StaminaBar.create(100), HealthBar.create(100),
            shovel, getLive,
@@ -86,7 +86,7 @@ object Player {
   }
 }
 
-case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
+case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                            attr:Attributes, buff:Buff,
                            stam:StaminaBar, health:HealthBar,
                            shovel:ToolSprite, t:Direction => Tile,
@@ -95,6 +95,8 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
                            fall:FallState, state:LivingState, justKilled:Boolean,
                            light:PlayerLight,
                            moveT:Int, stepMachine:StepMachine) {
+  @inline def x = ij.x
+  @inline def y = ij.y
   def collectRope(g:RopePickup) = copy(inv=inv.collectRope(g))
   def collectMineral(g:MineralPickup) = copy(inv=inv.collectMineral(g), log=log.getGem)
   def collectFood(typ:FoodType) = {
@@ -126,13 +128,13 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     if ((from == Direction.Left || from == Direction.Right) && newTouching(Direction.Down).exists {!_.isWalkable}) {
       stepMachine.increment()
     }
-    val newP = copy(prevX = x, prevY = y, x=newPos._1, y=newPos._2)
+    val newP = copy(prev = ij, ij=newPos)
     if (newTouching(Direction.Down).exists {
       case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
       case a => false
 
     }) {
-      newP.kill
+      newP.kill(DamageType.Spikes.some)
     } else {
       newP
     }
@@ -143,7 +145,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   def spendRope = copy(inv = inv.spendRope, log = log.useRope)
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
-  def hitTool(dmg:Int, broken:Boolean) = {
+  def hitTool(dmg:Int, tileBroken:Boolean) = {
     if (dmg > 0) {
       SoundManager.dig.play()
     } else {
@@ -158,7 +160,7 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     }
     val newHealth = health.permaHurt(newInv.tool.`type`.healthHurt)
 
-    val newLog2 = broken.select(newLog, newLog.digTile)
+    val newLog2 = tileBroken.select(newLog, newLog.digTile)
     val stamDmg = (dmg==0).select(inv.tool.`type`.stamCost, 0)
     val newStam = stam.remove(stamDmg)
     copy(log=newLog2, inv=newInv, stam=newStam, health=newHealth)
@@ -249,9 +251,9 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
   }
 
   def damage(dmg:Damage):Player = {
-    val newHealth = health.remove(dmg.amount)
+    val newHealth = health.remove(dmg)
     val f = if (newHealth.amt <= 0) {
-      (p:Player) => p.kill
+      (p:Player) => p.kill(None)
     } else {
       id[Player] _
     }
@@ -259,12 +261,14 @@ case class Player private (prevX:Int, prevY:Int, x:Int, y:Int, face:Direction,
     f(this).copy(health=newHealth)
   }
 
-  def kill:Player = {
+  def kill(dmg:Option[DamageType]):Player = {
+    val deathCause = dmg.getOrElse(health.last)
     if (attr.hasHalo) {
       this
     } else {
       copy(state=Dead,
            health=health.removeAll,
+           log=log.copy(killedBy=deathCause),
            face=Direction.Down,
            t=Player.getDead,
            justKilled=state!=Dead,

@@ -15,7 +15,7 @@ object Game {
   val invMode = false && debug
   val lightsOn = false && debug
   val version = "Version 0.0.11"
-  def getSeed = (fixedSeed).select(new Random().nextInt(), 0)
+  def getSeed = (fixedSeed).select(new Random().nextInt(), 1)
 }
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {
   private lazy val engine = new Engine()

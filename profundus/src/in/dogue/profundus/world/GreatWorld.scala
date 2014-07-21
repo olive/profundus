@@ -177,7 +177,7 @@ object GreatWorld {
   private def playerKillSelf : Update[Unit] = standard { case (gw, ()) =>
     val pp = gw.p
     if (Controls.Kill.justPressed) {
-      gw.setPlayer(pp.kill)
+      gw.setPlayer(pp.kill(DamageType.Player.some))
     } else {
       gw
     }

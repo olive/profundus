@@ -22,13 +22,13 @@ object ResultMode {
     }
     val rect = Rect.createTextured(cols, rows, f, r)
     val b = Profundus.border(cols, rows)
-    def mk(s:String) = Profundus.tf.create(s).toTileGroup
+    def mk(s:String) = Profundus.tf.create(s).filterToTileGroup(CP437.notBlank)
     val x0 = 2
     val y0 = 2
     val draws = Seq(
       mk("Name: " + pl.lo.name) |+| (x0,y0),
       mk("Loadout: Feisty") |+| (x0,y0+2),
-      mk("Killed by: Demons") |+| (x0, y0+4),
+      mk("Killed by " + pl.getKilledBy) |+| (x0, y0+4),
       mk("Ropes used        : " + pl.ropesUsed) |+| (x0, y0+6),
       mk("Capsules used     : " + pl.bombsUsed) |+| (x0, y0+7),
       mk("Fuel used         : " + pl.fuelUsed) |+| (x0, y0+8),

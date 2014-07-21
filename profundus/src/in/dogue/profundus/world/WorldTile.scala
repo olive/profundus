@@ -8,9 +8,18 @@ import scala.collection.script.Update
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.pickups.{Pickup, MineralPickup}
 
+object TileClass {
+  case object Dirt extends TileClass
+  case object Clay extends TileClass
+  case object Rock extends TileClass
+  case object Invincible extends TileClass
+}
+sealed trait TileClass
+
 
 sealed trait TileType {
   val tile:Tile
+  val tileClass:TileClass
   val bg:Tile
   val isWalkable:Boolean = false
   type Update= (TileType, Seq[Pickup[_]], Int, Boolean)
@@ -35,6 +44,7 @@ sealed trait TileType {
 
 case class Empty(override val tile:Tile, override val bgSolid:Boolean) extends TileType {
   override val isWalkable = true
+  override val tileClass = TileClass.Invincible
   override val bg = tile
   override def hit = { case _ =>
     (this, Seq(), 0, false)
@@ -44,6 +54,7 @@ case class Empty(override val tile:Tile, override val bgSolid:Boolean) extends T
 object Shaft { def create(t:Tile) = Shaft(t) }
 case class Shaft private (override val tile:Tile) extends TileType {
   override val bg = tile
+  override val tileClass = TileClass.Invincible
   override def hit = { case _ =>
     (this, Seq(), 1, false)
   }
@@ -52,6 +63,7 @@ case class Shaft private (override val tile:Tile) extends TileType {
 object Rock3 { def create(t:Tile, bg:Tile) = Rock3(t, bg, 50) }
 case class Rock3(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 50
+  override val tileClass = TileClass.Rock
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
@@ -59,6 +71,7 @@ case class Rock3(override val tile:Tile, override val bg:Tile, hp:Int) extends T
 object Rock2 { def create(t:Tile, bg:Tile) = Rock2(t, bg, 15) }
 case class Rock2(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 15
+  override val tileClass = TileClass.Rock
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
@@ -66,6 +79,7 @@ case class Rock2(override val tile:Tile, override val bg:Tile, hp:Int) extends T
 object Rock { def create(t:Tile, bg:Tile) = Rock(t, bg, 5) }
 case class Rock(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 5
+  override val tileClass = TileClass.Rock
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
@@ -73,6 +87,7 @@ case class Rock(override val tile:Tile, override val bg:Tile, hp:Int) extends Ti
 object Clay { def create(t:Tile, bg:Tile) = Clay(t, bg, 2) }
 case class Clay(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 5
+  override val tileClass = TileClass.Clay
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
@@ -80,6 +95,7 @@ case class Clay(override val tile:Tile, override val bg:Tile, hp:Int) extends Ti
 object Dirt { def create(t:Tile, bg:Tile) = Dirt(t, bg, 1) }
 case class Dirt(override val tile:Tile, override val bg:Tile, hp:Int) extends TileType {
   val toolDamage = 1
+  override val tileClass = TileClass.Dirt
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
@@ -87,6 +103,7 @@ case class Dirt(override val tile:Tile, override val bg:Tile, hp:Int) extends Ti
 object Mineral { def create(t:Tile, bg:Tile, c:Color) = Mineral(t, bg, c, 3) }
 case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int) extends TileType {
   val toolDamage = 1
+  override val tileClass = TileClass.Rock
   def setHp(i:Int) = copy(hp=i)
   override def hit = { case (ij, dmg) =>
     val newHp =  hp.drop(dmg)
@@ -102,6 +119,7 @@ case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int
 object Spike { def create(t:Tile, bg:Tile, spike:Direction) = Spike(t, bg, spike, 0) }
 case class Spike(override val tile:Tile, override val bg:Tile, spike:Direction, hp:Int) extends TileType {
   val toolDamage = 1
+  override val tileClass = TileClass.Rock
   def setHp(i:Int) = copy(hp=i)
   override def hit = toEmpty(toolDamage, hp, setHp)
 }
@@ -109,6 +127,7 @@ case class Spike(override val tile:Tile, override val bg:Tile, spike:Direction, 
 case class WorldTile(state:TileType) {
   def isWalkable = state.isWalkable
   def tile = state.tile
+  def canBreakBy(s:Seq[TileClass]) = s.contains(state.tileClass)
   def draw(i:Int, j:Int)(tr:TileRenderer):TileRenderer = {
     val tile = state.tile
     tr <+ (i, j, tile)

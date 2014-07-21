@@ -13,7 +13,7 @@ class TerrainManager {
   private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[Pickup[_]], Player) = {
     pl.toolPos match {
       case Some(p) =>
-        val (wHit, drops, damage, broken) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/)
+        val (wHit, drops, damage, broken) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/, pl.inv.tool.`type`)
         (wHit, drops, pl.hitTool(damage, broken))
       case None => (tc, Seq(), pl)
     }

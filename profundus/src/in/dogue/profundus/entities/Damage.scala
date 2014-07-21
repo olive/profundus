@@ -1,18 +1,31 @@
 package in.dogue.profundus.entities
 
 object DamageType {
-  case object Obelisk extends DamageType
-  case class Creature private[DamageType] (name:String) extends DamageType
-  case class Environment private[DamageType] (name:String) extends DamageType
-  case object Player extends DamageType
-  val Lurker = Creature("Lurker")
-  val HellBat = Creature("Hell Bat")
-  val Fall = Environment("Fall")
-  val Explosion = Environment("Explosion")
-
+  case object Obelisk extends DamageType {
+    def message = "a horrible device"
+  }
+  case class Creature private[DamageType] (art:String, name:String) extends DamageType {
+    def message = art + " " + name
+  }
+  case class Environment private[DamageType] (name:String, msg:String) extends DamageType {
+    def message = msg
+  }
+  case object Player extends DamageType {
+    def message = "your own hand"
+  }
+  val Lurker = Creature("a", "Lurker")
+  val HellBat = Creature("a", "Hell Bat")
+  val Fall = Environment("Fall", "a great fall")
+  val Explosion = Environment("Explosion", "an explosion")
+  val Spikes = Environment("Explosion", "impalement")
+  case object Unknown extends DamageType {
+    def message = "forces unknown"
+  }
 }
 
-sealed trait DamageType
+sealed trait DamageType {
+  def message:String
+}
 
 
 case class Damage(amount:Int, source:DamageType)

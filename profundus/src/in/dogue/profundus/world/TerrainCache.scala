@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.{Obelisk, Lurker}
+import in.dogue.profundus.entities.{ToolType, Obelisk, Lurker}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 import in.dogue.profundus.lighting.LightSource
@@ -72,9 +72,9 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:Cell, dmg:Int):(TerrainCache, Seq[Pickup[_]], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[Pickup[_]], Int, Boolean) = {
     val index = getIndex(ij)
-    val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg)
+    val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg, ttype)
     val updated = tMap.updated(index, broke)
     (copy(tMap=updated), dropped, damage, broken)
   }

@@ -13,6 +13,7 @@ import in.dogue.profundus.entities.pickups.Pickup
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.world.features.SpikePit
+import in.dogue.profundus.entities.ToolType
 
 
 object Terrain {
@@ -141,11 +142,16 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
   }
 
 
-  def hit(ij:Cell, dmg:Int):(Terrain, Seq[Pickup[_]], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[Pickup[_]], Int, Boolean) = {
     val t = tiles.get(ij.x, ij.y)
-    val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
-    val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
-    (newT, drops, damage, broken)
+    if (!t.canBreakBy(ttype.breakable)) {
+      (this, Seq(), 0, false)
+    } else {
+      val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
+      val newT = copy(tiles=tiles.update(ij.x, ij.y, _.copy(state=newState)))
+      (newT, drops, damage, broken)
+    }
+
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
