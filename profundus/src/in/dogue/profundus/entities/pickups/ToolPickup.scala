@@ -17,7 +17,7 @@ object ToolPickup {
 
 case class ToolPickup(icon:Tile, tool:Tool) {
   def update = this
-  def isCollectable(p:Player) = false
+  def isCollectable(p:Player) = p.inv.tool.isBare
   def onPickup(p:Player) = p.collectTool(tool)
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <| (ij.x, ij.y, icon)

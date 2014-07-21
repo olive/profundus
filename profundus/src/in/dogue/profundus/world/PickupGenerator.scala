@@ -7,10 +7,10 @@ import in.dogue.antiqua.data.Array2d
 
 object PickupGenerator {
   val dummy = {
-    def gen(cols:Int, rows:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = {
+    def gen(cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = {
       (0 until 10) map { i =>
         val x = r.nextInt(cols)
-        val y = r.nextInt(rows)
+        val y = r.nextInt(rows) + yRoom
         val ftype = FoodType.random(r)
         FoodPickup.create((x, y), ftype).toPickup
       }
@@ -20,10 +20,10 @@ object PickupGenerator {
   }
 }
 
-case class PickupGenerator(private val f:(Int,Int,Array2d[WorldTile], TerrainScheme, Random) => Seq[Pickup[_]]) {
-  def generate(cols:Int, rows:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random):Seq[WorldSpawn] = {
+case class PickupGenerator(private val f:(Int,Int,Int,Array2d[WorldTile], TerrainScheme, Random) => Seq[Pickup[_]]) {
+  def generate(cols:Int, rows:Int, y:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random):Seq[WorldSpawn] = {
     import Profundus._
-    val picks = f(cols, rows, cache, ts, r)
+    val picks = f(cols, rows, y, cache, ts, r)
     Seq(picks.ws)
   }
 }

@@ -7,7 +7,12 @@ import in.dogue.antiqua.Antiqua.Cell
 import scala.util.Random
 import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.audio.SoundManager
+import in.dogue.profundus.Game
 
+object Entity {
+  var lastPlayed = 0
+}
 case class Entity[T](ij:Cell,
                      fall:FallState,
                      up: T => (Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]),
@@ -31,7 +36,13 @@ case class Entity[T](ij:Cell,
     copy(ij=to, self=mv(self)(to, dir, newSolid))
   }
 
-  def damage(d:Damage) = copy(self=dmg(self)(d))
+  def damage(d:Damage) = {
+    if (d.amount > 0 && Game.t - Entity.lastPlayed > 7) {
+      SoundManager.enehit.play()
+      Entity.lastPlayed = Game.t
+    }
+    copy(self=dmg(self)(d))
+  }
 
   def kill = copy(self=doKill(self))
 

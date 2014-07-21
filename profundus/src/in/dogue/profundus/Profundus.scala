@@ -18,6 +18,7 @@ import in.dogue.profundus.world.NewDamageZones
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.doodads.Doodad
+import in.dogue.antiqua.algebra.Monoid
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle[_]]) {
@@ -46,4 +47,21 @@ object Profundus {
 
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
+
+
+
+  import Monoid._
+  def fold2[A,B,C](seed:(A,B), as:Seq[C])(f:(C,A) => (A,B))(implicit ev:Monoid[B]):(A,B) = {
+    as.foldLeft(seed) { case ((a, b), c) =>
+      val (ap, bp) = f(c, a)
+      (ap, b <+> bp)
+    }
+  }
+
+  def fold3[A, B1, B2, C](seed:(A,B1, B2), as:Seq[C], f:(C, A) => (A,B1, B2))(implicit ev:Monoid[B1], ev2:Monoid[B2]):(A,B1, B2) = {
+    as.foldLeft(seed) { case ((a, b1, b2), c) =>
+      val (ap, b1p, b2p) = f(c, a)
+      (ap, b1 <+> b1p, b2 <+> b2p)
+    }
+  }
 }

@@ -14,15 +14,15 @@ import in.dogue.profundus.lighting.LightSource
 object TerrainCache {
   def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
-    val biome = Biome.createDummy
-    val (biomep, first, _): (Biome, Terrain, Seq[WorldSpawn]) = biome.generate(cols, rows, 0, copy)
+    val biome = Stratum.createDummy
+    val (biomep, first, _): (Stratum, Terrain, Seq[WorldSpawn]) = biome.generate(cols, rows, 0, copy)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
     (cache, first.spawn, first.spawnFace)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,
                                  tMap:Map[Int, Terrain], max:Int, min:Int,
-                                 biome:Biome,
+                                 biome:Stratum,
                                  r:Random) {
   def isSolid(ij:Cell):Boolean = {
     get(ij).map{_.isSolid(convert(ij))}.getOrElse(true)

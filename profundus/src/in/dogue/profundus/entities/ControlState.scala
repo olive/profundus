@@ -12,6 +12,6 @@ case class ControlState(isShovelling:Boolean,
          isClimbing=Controls.Action.justPressed,
          isBombing=Controls.Capsule.justPressed,
          isRoping=Controls.Rope.justPressed,
-         isDropping=Controls.Action.justPressed && Controls.Down.isPressed)
+         isDropping=Controls.Drop.justPressed)
   }
 }

@@ -170,7 +170,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else  {
       (log, newInv1)
     }
-    val newHealth = health.permaHurt(newInv.tool.`type`.healthHurt)
+    val hurtAmt = newInv.tool.`type`.healthHurt
+    if (hurtAmt > 0) {
+      SoundManager.hurt.play()
+    }
+
+    val newHealth = health.permaHurt(hurtAmt)
 
     val newLog2 = tileBroken.select(newLog, newLog.digTile)
     val stamDmg = (dmg==0).select(inv.tool.`type`.stamCost, 0)
@@ -241,7 +246,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   private def updateDropTool(p:Player):(Player, Seq[Pickup[_]]) = {
-    if (ctrl.isDropping && !inv.tool.isBare) {
+    if (ctrl.isDropping && !inv.tool.isBare && face.isHorizontal) {
+      SoundManager.drop.play()
       val newInv = inv.setTool(BareHands.toTool)
       val pickup = ToolPickup.create(pos --> face.opposite, inv.tool)
       (p.copy(inv=newInv), Seq(pickup))
@@ -275,6 +281,9 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   def damage(dmg:Damage):Player = {
+    if (dmg.amount > 0) {
+      SoundManager.hurt.play()
+    }
     val newHealth = health.remove(dmg)
     val f = if (newHealth.amt <= 0) {
       (p:Player) => p.kill(None)

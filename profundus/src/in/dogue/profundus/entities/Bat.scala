@@ -32,7 +32,7 @@ object Bat {
       ((1,0), rightWing)
     )
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    Bat(anim, light, Alive, 50, math.abs(r.nextInt)).toEntity(ij)
+    Bat(anim, light, Alive, 12, math.abs(r.nextInt)).toEntity(ij)
   }
 }
 

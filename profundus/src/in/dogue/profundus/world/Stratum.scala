@@ -3,13 +3,14 @@ package in.dogue.profundus.world
 import scala.util.Random
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.profundus.Profundus
-import in.dogue.antiqua.data.Direction
+import in.dogue.antiqua.data.{Array2d, Direction}
 import in.dogue.profundus.doodads.Doodad
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.entities.pickups.ToolPickup
-import in.dogue.profundus.entities.{BareHands, Shovel}
+import in.dogue.profundus.entities.{Gouge, BareHands, Shovel}
+import in.dogue.antiqua.algebra.Monoid
 
-object Biome {
+object Stratum {
   def createDummy = {
     val ts = TerrainScheme.generate(new Random())
     val tg = TerrainGenerator.dummy(ts)
@@ -17,13 +18,13 @@ object Biome {
     val eg = EntityGenerator.dummy
     val dg = DoodadGenerator.dummy
     val pg = PickupGenerator.dummy
-    Biome(ts, tg, fg, eg, dg, pg)
+    Stratum(ts, tg, fg, eg, dg, pg)
   }
 }
 
-case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:EntityGenerator, dg:DoodadGenerator, pg:PickupGenerator) {
+case class Stratum(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:EntityGenerator, dg:DoodadGenerator, pg:PickupGenerator) {
   val strataSize = 4
-  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Biome, Terrain, Seq[WorldSpawn]) = {
+  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[WorldSpawn]) = {
     import Profundus._
     val (spawn, face, features) = if (yIndex < 0) {
       ((0,0), Direction.Down, Seq(Terrain.skyFeature(cols, rows)))
@@ -39,19 +40,19 @@ case class Biome(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:
       val state = tg.mkTile(ts, i, j, yIndex, cols, rows, d, r)
       WorldTile(state(r))
     }
-    val seed = (tiles, Seq[Doodad[_]]())
-    val (newTiles, ds) = features.foldLeft(seed) { case ((innerTiles, doods), ft) =>
-      val (feat, moreDoods) = ft.transform(cols, rows, yIndex*rows, ts, innerTiles, r)
-      (feat, moreDoods ++ doods)
 
+
+    val seed = (tiles, Seq[Doodad[_]]())
+    val (newTiles, ds) = fold2(seed, features) { case (ft, tiles) =>
+      ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
     }
 
 
     val pickups = {
-      if (yIndex > 2) {
-        pg.generate(cols, rows, newTiles, ts, r)
+      if (yIndex > 0) {
+        pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
       } else {
-        Seq(Seq(ToolPickup.create((75, 16), BareHands.toTool)).ws)
+        Seq(Seq(ToolPickup.create((75, 16), Gouge.toTool)).ws)
       }
     }
     val doodads = dg.generate(ts, newTiles, r) ++ ds
