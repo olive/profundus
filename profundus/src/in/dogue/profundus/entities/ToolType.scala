@@ -35,9 +35,9 @@ case object BareHands extends ToolType {
   override val stamCost = 10
   override val breakable = Seq(TileClass.Dirt)
   override val icon = Tile.makeGroup(Vector(
-    (0, 0, CP437.º, Black, Brown),
-    (1, 0, CP437.☻, Black, Brown),
-    (2, 0, CP437.º, Black, Brown)
+    (1, 0, CP437.º, Black, Brown),
+    (2, 0, CP437.☻, Black, Brown),
+    (3, 0, CP437.º, Black, Brown)
   ))
 
 }
@@ -48,16 +48,16 @@ case object Gouge extends ToolType {
   override val stamCost = 3
   override val breakable = Seq(TileClass.Dirt)
   override val icon = Tile.makeGroup(Vector(
-    (0, 0, CP437.═, Black, Brown),
     (1, 0, CP437.═, Black, Brown),
-    (2, 0, CP437.Ç_u, Black, Grey)
+    (2, 0, CP437.═, Black, Brown),
+    (3, 0, CP437.Ç_u, Black, Grey)
   ))
 }
 
 case object Shovel extends ToolType {
   override val durability = 1000
   override val digDamage = 3
-  override val stamCost = 5
+  override val stamCost = 8
   override val breakable = Seq(TileClass.Dirt, TileClass.Clay)
   override val icon = Tile.makeGroup(Vector(
     (0, 0, CP437.`[`, Black, Brown),
@@ -80,7 +80,7 @@ case object Mallet extends ToolType {
 }
 case object Mattock extends ToolType {
   override val durability = 500
-  override val digDamage = 15
+  override val digDamage = 5
   override val stamCost = 10
   override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock)
   override val icon = Tile.makeGroup(Vector(

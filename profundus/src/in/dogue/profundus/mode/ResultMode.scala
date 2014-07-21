@@ -37,8 +37,9 @@ object ResultMode {
       mk("Pounds earth moved: " + pl.tilesDug) |++| ((x0, y0+12)),
       mk("Lived for         : " + pl.timeString) |++| ((x0, y0+13)),
       mk("Depth reached     : " + pl.deepest) |++| ((x0, y0+14)),
-      mk("This is the end for you.") |++| ((4,41)),
-      mk("Your memory will fade.") |++| ((5,42))
+      mk("A pathetic end.") |++| ((8,40)),
+      mk("Only a fool-") |++| ((10,42)),
+      mk("would believe such stories.") |++| ((2,43))
     )
 
     ResultMode(cols, rows, pl, rect, b, draws.flatten)

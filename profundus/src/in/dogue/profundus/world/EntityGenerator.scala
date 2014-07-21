@@ -6,11 +6,12 @@ import scala.util.Random
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.antiqua.data.Direction.Down
 
 object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
     import Profundus._
-    def isSolid(ij:Cell) = !t.get(ij).isWalkable
+    def isSolid(ij:Cell) = !t.getOption(ij).exists{_.isWalkable}
     val s = if (i <= 0) {
       Seq()
     } else {
@@ -22,7 +23,9 @@ object EntityGenerator {
       val casques = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
 
-        Obelisk.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+        Obelisk.create(pos +| (i * rows), r).onlyIf(!isSolid(pos)
+                                                 && !isSolid(pos --> Down)
+                                                 && isSolid(pos --> Down --> Down))
 
       }.flatten
       val bats = (0 until 10).map { _ =>
@@ -39,7 +42,7 @@ object EntityGenerator {
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bee.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
-      val all = Vector(creatures, casques, bats, bee)
+      val all = Vector(creatures, casques, bats, bee, wasp)
       val (a, b) = ts.color.ways2(all)
       a ++ b
     }
