@@ -10,6 +10,8 @@ import in.dogue.profundus.world.features.Mineshaft
 import in.dogue.profundus.world.features.SpikePit
 import in.dogue.profundus.world.features.Campsite
 import in.dogue.profundus.world.features.Cavern
+import in.dogue.profundus.particles.{Emitter, DropEmitter, WaterDrop}
+import in.dogue.profundus.Profundus
 
 object FeatureGenerator {
 
@@ -23,27 +25,30 @@ object FeatureGenerator {
     }
   }
   private def spike(i:Int, j:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+    import Profundus._
     def get(ij:Cell):Boolean = terrain.getOption(ij.x, ij.y).exists{_.isWalkable}
     val t = terrain.get(i, j)
     val p = (i, j)
-    val left = get(p |- 1)
-    val right = get(p |+ 1)
     val down = get(p +| 1)
     val up = get(p -| 1)
-    val next = if (r.nextDouble > 0.9) {
+    val (next, isDown) = if (r.nextDouble > 0.9) {
       if (down && !up && t.isWalkable) {
-        WorldTile(ts.makeSpike(Direction.Down)(r))
+        (WorldTile(ts.makeSpike(Direction.Down)(r)), true)
       } else if (up && !down && t.isWalkable) {
-        WorldTile(ts.makeSpike(Direction.Up)(r))
+        (WorldTile(ts.makeSpike(Direction.Up)(r)), false)
       } else {
-        t
+        (t, false)
       }
 
     } else {
-      t
+      (t, false)
     }
-
-    (terrain.updated(i, j, next), Seq())
+    val ems = if (r.nextDouble > 0.5 && isDown) {
+      Seq(DropEmitter.create(p +| y --> Direction.Down, 60 + r.nextInt(60), math.abs(r.nextInt(10000))).toEmitter)
+    } else {
+      Seq()
+    }
+    (terrain.updated(i, j, next), Seq(), Seq(ems.gs))
 
   }
 

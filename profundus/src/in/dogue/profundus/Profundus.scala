@@ -1,7 +1,7 @@
 package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Border, TextFactory, Tile}
-import in.dogue.profundus.particles.Particle
+import in.dogue.profundus.particles.{Emitter, Particle}
 import in.dogue.profundus.deformations.Deformation
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
@@ -16,7 +16,6 @@ import in.dogue.profundus.world.NewParticles
 import in.dogue.profundus.world.NewDeformations
 import in.dogue.profundus.world.NewDamageZones
 import in.dogue.profundus.deformations.Deformation
-import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.antiqua.algebra.Monoid
 
@@ -34,6 +33,10 @@ object Profundus {
     def gs = NewDeformations(s)
   }
   implicit def deformations2NewSpawn(s:Seq[Deformation[_]]) = new AugNewDeformations(s)
+  class AugNewEmitters(s:Seq[Emitter[_]]) {
+    def gs = NewEmitters(s)
+  }
+  implicit def deformations2NewEmitters(s:Seq[Emitter[_]]) = new AugNewEmitters(s)
 
   class AugPickupSpawn(s:Seq[Pickup[_]]) {
     def ws = PickupSpawn(s)
@@ -58,7 +61,7 @@ object Profundus {
     }
   }
 
-  def fold3[A, B1, B2, C](seed:(A,B1, B2), as:Seq[C], f:(C, A) => (A,B1, B2))(implicit ev:Monoid[B1], ev2:Monoid[B2]):(A,B1, B2) = {
+  def fold3[A, B1, B2, C](seed:(A,B1, B2), as:Seq[C])(f:(C, A) => (A, B1, B2))(implicit ev:Monoid[B1], ev2:Monoid[B2]):(A,B1, B2) = {
     as.foldLeft(seed) { case ((a, b1, b2), c) =>
       val (ap, b1p, b2p) = f(c, a)
       (ap, b1 <+> b1p, b2 <+> b2p)

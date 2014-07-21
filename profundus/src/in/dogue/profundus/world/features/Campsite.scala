@@ -34,7 +34,7 @@ case class Campsite(center:Cell, radius:Int) {
 
     }
     val siteSpot = center +| yy +| radius/2
-    (newTiles, Seq(Campfire.create(siteSpot).toDoodad))
+    (newTiles, Seq(Campfire.create(siteSpot).toDoodad), Seq())
   }
   def toFeature(cols:Int, rows:Int):Feature = {
     val rect = Recti(center.x - radius/2, center.y - radius/2, radius*2, radius*2)

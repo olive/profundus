@@ -15,7 +15,7 @@ object TerrainCache {
   def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
     val biome = Stratum.createDummy
-    val (biomep, first, _): (Stratum, Terrain, Seq[WorldSpawn]) = biome.generate(cols, rows, 0, copy)
+    val (biomep, first, _, _): (Stratum, Terrain, Seq[WorldSpawn], Seq[GlobalSpawn]) = biome.generate(cols, rows, 0, copy)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
     (cache, first.spawn, first.spawnFace)
   }
@@ -85,17 +85,17 @@ case class TerrainCache private (cols:Int, rows:Int,
     yy/rows
   }
 
-  def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn]) = {
+  def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
     val index = getIndex(ij)
-    val seed = (this, Seq[WorldSpawn]())
-    Seq(index+2, index+1, index-1).foldLeft(seed) { case ((map, cs), i) =>
-      val (next, newCs) = map.check(i)
-      (next, cs ++ newCs)
+    val seed = (this, Seq[WorldSpawn](), Seq[GlobalSpawn]())
+    Seq(index+2, index+1, index-1).foldLeft(seed) { case ((map, cs, gs), i) =>
+      val (next, newCs, newGs) = map.check(i)
+      (next, cs ++ newCs, gs ++ newGs)
     }
   }
 
   //fixme -- code clones
-  private def check(i:Int):(TerrainCache, Seq[WorldSpawn]) = {
+  private def check(i:Int):(TerrainCache, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
     val range = {
       if (i > max) {
         (max+1) to i
@@ -106,17 +106,17 @@ case class TerrainCache private (cols:Int, rows:Int,
       }
     }
 
-    val (newBiome, newMap, newMin, newMax, ws) = {
-      val seed = (biome, tMap, Seq[WorldSpawn]())
-      val (b, mm, cs) = range.foldLeft(seed) { case ((bm, map, ws), k) =>
-        val (newBiome, next, moreWs) = bm.generate(cols, rows, k, r)
-        (newBiome, map.updated(k, next), moreWs ++ ws)
+    val (newBiome, newMap, newMin, newMax, ws, gs) = {
+      val seed = (biome, tMap, Seq[WorldSpawn](), Seq[GlobalSpawn]())
+      val (b, mm, cs, gs) = range.foldLeft(seed) { case ((bm, map, ws, gs), k) =>
+        val (newBiome, next, moreWs, moreGs) = bm.generate(cols, rows, k, r)
+        (newBiome, map.updated(k, next), moreWs ++ ws, moreGs ++ gs)
       }
-      (b, mm, math.min(min, i), math.max(max, i), cs)
+      (b, mm, math.min(min, i), math.max(max, i), cs, gs)
     }
 
     val newTc = copy(biome = newBiome, tMap=newMap, min=newMin, max=newMax)
-    (newTc, ws)
+    (newTc, ws, gs)
 
   }
 

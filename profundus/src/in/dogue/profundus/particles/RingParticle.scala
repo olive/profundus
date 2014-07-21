@@ -7,6 +7,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import scala.util.Random
+import in.dogue.profundus.world.TerrainCache
 
 object RingParticle {
   def create(ij:Cell, radius:Int, speed:Int) = {
@@ -19,7 +20,7 @@ case class RingParticle(ij:Cell, radius:Int, speed:Int, t:Int, r:Random) {
   val i = ij.x
   val j = ij.y
   import RingParticle._
-  def update = copy(t=t+1)
+  def update(tc:TerrainCache) = copy(t=t+1)
   def isDone = t > (radius+1)*speed
   def toParticle:Particle[RingParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
   def getLight = Seq(LightSource.createCircle((i, j), t/speed, t*2/speed, 1))

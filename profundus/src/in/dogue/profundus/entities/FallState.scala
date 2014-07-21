@@ -10,8 +10,8 @@ sealed trait FallState {
   val moveSlow:Boolean
 }
 
-object Falling { def create = Falling(0, 0) }
-case class Falling(t:Int, override val tiles:Int) extends FallState {
+object Falling {
+  def create = Falling(0, 0)
   val v0 = 8
   val g = 9.8
   def sq(i:Double) = i*i
@@ -19,6 +19,9 @@ case class Falling(t:Int, override val tiles:Int) extends FallState {
   def fallTime(tiles:Int): Int /* in frames */  = {
     ((t(tiles+1) - t(tiles))*60).toInt
   }
+}
+case class Falling(t:Int, override val tiles:Int) extends FallState {
+
   override val moveSlow = true
 }
 case object Grounded extends FallState {

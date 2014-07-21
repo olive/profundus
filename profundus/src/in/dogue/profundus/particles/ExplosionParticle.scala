@@ -6,6 +6,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import scala.util.Random
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.world.TerrainCache
 
 object ExplosionParticle {
   def create(i:Int, j:Int, radius:Int, speed:Int) = {
@@ -15,7 +16,7 @@ object ExplosionParticle {
 }
 case class ExplosionParticle private (i:Int, j:Int, radius:Int, speed:Int, t:Int, r:Random) {
   import ExplosionParticle._
-  def update = copy(t=t+1)
+  def update(tc:TerrainCache) = copy(t=t+1)
   def isDone = t > (radius+1)*speed
   def toParticle:Particle[ExplosionParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
   def getLight = Seq(LightSource.createCircle((i, j), t/speed, t*2/speed, 1))

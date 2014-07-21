@@ -36,7 +36,7 @@ case class SpikeWave(xy:Cell, width:Int, height:Int, wave:Int => Int) {
 
     }
 
-    (newTiles, Seq())
+    (newTiles, Seq(), Seq())
   }
   def toFeature(cols:Int, rows:Int):Feature = {
     val rect = Recti(xy.x, xy.y, width, height)

@@ -4,6 +4,7 @@ import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.world.TerrainCache
 
 object DeathParticle {
   def create(ij:Cell, maxT:Int) = DeathParticle(ij.x, ij.y, 0, maxT)
@@ -12,7 +13,7 @@ object DeathParticle {
 case class DeathParticle private (i:Int, j:Int, t:Int, maxT:Int){
   final val expandTime = 6
   def isDone = t >= maxT
-  def update = copy(t=t+1)
+  def update(tc:TerrainCache) = copy(t=t+1)
   def getLight = Seq()
   def draw(tr:TileRenderer):TileRenderer = {
     val b = 4

@@ -5,7 +5,7 @@ import scala.util.Random
 import in.dogue.antiqua.data.Array2d
 import in.dogue.profundus.doodads.Doodad
 
-case class Feature(private val rect:Recti, private val f:(Int, Int, Int, TerrainScheme, Array2d[WorldTile], Random) => (Array2d[WorldTile], Seq[Doodad[_]])) {
+case class Feature(private val rect:Recti, private val f:(Int, Int, Int, TerrainScheme, Array2d[WorldTile], Random) => (Array2d[WorldTile], Seq[Doodad[_]], Seq[GlobalSpawn])) {
   def intersects(other:Feature) = other.rect.intersects(rect)
   def transform(cols:Int,rows:Int,y:Int,ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
     f(cols, rows, y, ts, t, r)

@@ -106,15 +106,23 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
   def collectFood(typ:FoodType) = {
     SoundManager.item.play()
-    val buff = typ match {
+    val newLog = log.eatFood(typ)
+    val np = typ match {
       case Toadstool(seed) =>
         val regen = 1 + new Random(seed).nextInt(Attributes.default.stamRegen*2)
-        ToadstoolBuff(regen, 0)
+        val buff = ToadstoolBuff(regen, 0)
+        copy(buff = buff)
       case Herb(seed) =>
         val regen = 1 + new Random(seed).nextInt(Attributes.default.healthRegen*2)
-        HerbBuff(regen, 0)
+        val buff = HerbBuff(regen, 0)
+        copy(buff = buff)
+      case Bark(seed) =>
+        val oldMax = health.max
+        val newMax = oldMax + new Random(seed).nextInt(60) - 30
+        copy(health=health.setMax(newMax))
     }
-    copy(log=log.eatFood(typ), buff = buff)
+    np.copy(log=newLog)
+
   }
 
   def collectTool(t:Tool) = {
@@ -256,14 +264,14 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     }
   }
 
-  def fallDamage(fall:Int) = {
+  def fallDamage(fall:Int):Option[Damage] = {
     val d = attr.fallDistance
     val amount = if (fall < d) {
-      0
+      None
     } else {
-      (100*((fall - d)/d.toDouble)).toInt
+      (100*((fall - d)/d.toDouble)).toInt.some
     }
-    Damage(amount, DamageType.Fall)
+    amount.map{a => Damage(a, DamageType.Fall)}
   }
 
   def setFallState(s:FallState) = {
@@ -274,7 +282,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
           SoundManager.land.play()
         }
         val dmg = fallDamage(num)
-        newPl.damage(dmg)
+        dmg.map { value => newPl.damage(value)}.getOrElse(newPl)
 
       case _ => newPl
     }
@@ -284,7 +292,11 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     if (dmg.amount > 0) {
       SoundManager.hurt.play()
     }
-    val newHealth = health.remove(dmg)
+    val newHealth = if (dmg.amount > 0) {
+      health.remove(dmg)
+    } else {
+      health
+    }
     val f = if (newHealth.amt <= 0) {
       (p:Player) => p.kill(None)
     } else {

@@ -1,7 +1,7 @@
 package in.dogue.profundus.world
 
 
-import in.dogue.profundus.particles.{ParticleManager}
+import in.dogue.profundus.particles.{Emitter, ParticleManager, Particle}
 import in.dogue.antiqua.graphics.{Filter, Tile, TileRenderer}
 import in.dogue.profundus.{Game, Profundus}
 import in.dogue.profundus.entities._
@@ -9,7 +9,6 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import scala.util.Random
 import in.dogue.profundus.mode.loadout.Loadout
-import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.damagezones.DamageZone
@@ -20,6 +19,7 @@ import in.dogue.profundus.audio.SoundManager
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
+case class NewEmitters(s:Seq[Emitter[_]]) extends GlobalSpawn
 case class NewDamageZones(s:Seq[DamageZone[_]]) extends GlobalSpawn
 case class NewDeformations(s:Seq[Deformation[_]]) extends GlobalSpawn
 object GreatWorld {
@@ -114,12 +114,12 @@ object GreatWorld {
     val ppos = gw.p.pos
     val cache = gw.cache
     val em = gw.em
-    val (tc, spawns) = cache.checkPositions(ppos)
+    val (tc, spawns, gs) = cache.checkPositions(ppos)
     val newEm = em.addSpawns(spawns)
     val (newTc, newLights) = tc.update(ppos)
     val lm = gw.lm
 
-    gw.setTc(newTc).setEm(newEm).setLm(lm.addLights(newLights))
+    gw.setTc(newTc).setEm(newEm).setLm(lm.addLights(newLights)).insertSpawns(gs)
   }
 
   private def updateEs : Update[Unit] = { case (gw, ()) =>
@@ -160,7 +160,8 @@ object GreatWorld {
 
   private def updateParticles : Update[Unit] =  standard { case (gw, ()) =>
     val pm = gw.pm
-    val (particles, lights) = pm.update
+    val tc = gw.cache
+    val (particles, lights) = pm.update(tc)
     val lm = gw.lm
     gw.setPm(particles).setLm(lm.addLights(lights))
   }
@@ -210,13 +211,13 @@ object GreatWorld {
 
   def create(cols:Int, rows:Int, lo:Loadout, r:Random) = {
     val (cache, spawn, spawnFace) = TerrainCache.create(cols, rows, r)
-    val (tc, cs) = cache.checkPositions(spawn)
+    val (tc, cs, gs) = cache.checkPositions(spawn)
     val p = Player.create(spawn, spawnFace, lo)
     val em = EntityManager.create(r).addSpawns(cs)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create
-    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq())
+    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq()).insertSpawns(gs)
     allUpdates(gw)
   }
 }
@@ -232,6 +233,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setKz(kz:Seq[DamageZone[_]]) = copy(kz=kz)
   def setDs(ds:Seq[Deformation[_]]) = copy(ds=ds)
   def addPs(s:Seq[Particle[_]]) = copy(pm=pm++s)
+  def addEms(ems:Seq[Emitter[_]]) = copy(pm=pm.addEmitters(ems))
 
   def update:GreatWorld = {
     updates.foldLeft(this) { case (w, (t, up)) =>
@@ -260,6 +262,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
       case NewParticles(s) => addPs(s)
       case NewDamageZones(s) => copy(kz=kz++s)
       case NewDeformations(s) => copy(ds=ds++s)
+      case NewEmitters(s) => addEms(s)
     }
   }
 

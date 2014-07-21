@@ -24,7 +24,7 @@ object Stratum {
 
 case class Stratum(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, eg:EntityGenerator, dg:DoodadGenerator, pg:PickupGenerator) {
   val strataSize = 4
-  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[WorldSpawn]) = {
+  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
     import Profundus._
     val (spawn, face, features) = if (yIndex < 0) {
       ((0,0), Direction.Down, Seq(Terrain.skyFeature(cols, rows)))
@@ -42,8 +42,8 @@ case class Stratum(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, e
     }
 
 
-    val seed = (tiles, Seq[Doodad[_]]())
-    val (newTiles, ds) = fold2(seed, features) { case (ft, tiles) =>
+    val seed = (tiles, Seq[Doodad[_]](), Seq[GlobalSpawn]())
+    val (newTiles, ds, gs) = fold3(seed, features) { case (ft, tiles) =>
       ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
     }
 
@@ -62,6 +62,6 @@ case class Stratum(ts:TerrainScheme, tg:TerrainGenerator, fg:FeatureGenerator, e
     } else {
       this
     }
-    (newBiome, Terrain(yIndex*rows, newTiles, doodads, spawn, face), Seq(entities) ++ pickups)
+    (newBiome, Terrain(yIndex*rows, newTiles, doodads, spawn, face), Seq(entities) ++ pickups, gs)
   }
 }

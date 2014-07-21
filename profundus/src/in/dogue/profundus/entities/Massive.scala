@@ -19,7 +19,7 @@ case class Massive[T](pos: T => Cell,
     state match {
       case Floating => self
       case f@Falling(t, tiles) if !grounded =>
-        val newT = (t + 1) % f.fallTime(tiles)
+        val newT = (t + 1) % Falling.fallTime(tiles)
         val newTiles = tiles + (newT == 0).select(0, 1)
         val newPos = (newT == 0).select(epos, epos --> Direction.Down)
         val touching = tc.getTouching(newPos)

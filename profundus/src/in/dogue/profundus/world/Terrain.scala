@@ -40,7 +40,7 @@ object Terrain {
       WorldTile(night(r))
     }
 
-    (tiles, Seq())
+    (tiles, Seq(), Seq())
   }
 
 
@@ -65,7 +65,7 @@ object Terrain {
   }
 
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
-      : (Array2d[WorldTile], Seq[Doodad[_]]) = {
+      : (Array2d[WorldTile], Seq[Doodad[_]], Seq[GlobalSpawn]) = {
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
 
 
@@ -119,7 +119,7 @@ object Terrain {
     val moon = Moon.create(cols, rows, 3*cols/4-5, -5, 4)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))
-    (tiles, Seq(moon.toDoodad, campfire.toDoodad))
+    (tiles, Seq(moon.toDoodad, campfire.toDoodad), Seq())
   }
 
 
