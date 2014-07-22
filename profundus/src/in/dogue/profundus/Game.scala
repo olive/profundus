@@ -10,12 +10,12 @@ import in.dogue.profundus.utils.PerfTrack
 
 object Game {
   var t = 0
-  val debug = true
+  val debug = false
   val fixedSeed = false && debug
   val flyMode   = false && debug
   val invMode   = false && debug
   var lightsOff  = false && debug
-  val version = "Version 0.0.12"
+  val version = "Version 0.0.13"
   val updatePerf = new PerfTrack("World Update")
   val globPerf = new PerfTrack("Everything")
   val drawPerf = new PerfTrack("Drawing")
