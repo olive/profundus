@@ -25,7 +25,8 @@ case class LightManager(lights:Seq[LightSource]) {
       val c = l.onScreen(cxy, screenRect)
       if (c || true) {
         for ((cell, d) <- l.fill) {
-          map(cell) = (map(cell) - d).clamp(0, 1)
+          val c = cell |+| cxy
+          map(c) = (map(c) - d).clamp(0, 1)
         }
       }
     }
