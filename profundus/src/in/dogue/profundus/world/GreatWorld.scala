@@ -14,7 +14,7 @@ import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.lighting.{LightSource, LightManager}
 import in.dogue.profundus.input.Controls
-import in.dogue.profundus.audio.SoundManager
+import in.dogue.profundus.audio.{MusicManager, SoundManager}
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
@@ -28,14 +28,18 @@ object GreatWorld {
     */
   //type Update[T] = (GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])
 
-  case class Update[T](f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]), name:String) {
+  case class Update[T](f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]), name:Option[String]) {
     def apply = f.apply _
   }
 
-  def withName[T](s:String)(f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])) = Update(f, s)
+  def withName[T](s:String)(f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])) = Update(f, s.some)
   def stdName[T](s:String)(f:(GreatWorld, T) => GreatWorld) = {
     val ff = standard(f)
-    Update(ff, s)
+    Update(ff, s.some)
+  }
+  def stdNoName[T](f:(GreatWorld, T) => GreatWorld) = {
+    val ff = standard(f)
+    Update(ff, None)
   }
   private def updateClimbRope : Update[Unit] = stdName("climbRope") { case (gw, ()) =>
     val em = gw.em
@@ -93,7 +97,7 @@ object GreatWorld {
       case None => em
       case Some(pos) =>
         val dmg = Damage(pp.inv.tool.`type`.digDamage, DamageType.Player)
-        em.hitRopes(pos).hitCreatures(pos, dmg/*fixme*/)
+        em.hitRopes(pos).hitCreatures(pos, dmg)
 
     }
     gw.setEm(newEm)
@@ -157,7 +161,7 @@ object GreatWorld {
     val cache = gw.cache
     val seed = (cache, Seq[WorldSpawn]())
     val (deformed, mins) = ds.foldLeft(seed){case ((tc, mins), d) =>
-      val (nc, drop, _) = d.apply(tc)
+      val (nc, drop, _/*damage from deformations is void*/) = d.apply(tc)
       (nc, drop ++ mins)
     }
     val newEm = gw.em.addSpawns(mins)
@@ -182,7 +186,7 @@ object GreatWorld {
     gw.setEm(newEm).addPs(ps).setPlayer(hurtPl)
   }
 
-  private def playerSelfQuit : Update[Unit] = stdName("selfQuit") { case (gw, ()) =>
+  private def playerSelfQuit : Update[Unit] = stdNoName { case (gw, ()) =>
     val pp = gw.p
     if (Controls.Kill.justPressed) {
       gw.setPlayer(pp.kill(DamageType.Player.some))
@@ -192,6 +196,12 @@ object GreatWorld {
 
   }
 
+  private def updateMusicManager : Update[Unit] = stdNoName { case (gw, ()) =>
+    val mm = gw.mm
+    val p = gw.p
+    val newMm = mm.setPlayer(p.y)
+    gw.setMm(newMm)
+  }
 
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
@@ -208,6 +218,7 @@ object GreatWorld {
         #+ updateParticles
         #+ killEntities
         #+ playerSelfQuit
+        #+ updateMusicManager
       )
   }
 
@@ -225,11 +236,11 @@ object GreatWorld {
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq()).insertSpawns(gs)
+    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), new MusicManager(0)).insertSpawns(gs)
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}]) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager) {
   import GreatWorld._
 
   def setPlayer(pl:Player) = copy(p=pl)
@@ -241,6 +252,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setKz(kz:Seq[DamageZone[_]]) = copy(kz=kz)
   def setDs(ds:Seq[Deformation[_]]) = copy(ds=ds)
   def addPs(s:Seq[Particle[_]]) = copy(pm=pm++s)
+  def setMm(m:MusicManager) = copy(mm=m)
   def addEms(ems:Seq[Emitter[_]]) = copy(pm=pm.addEmitters(ems))
   def resetLm = copy(lm = lm.reset)
   def update:GreatWorld = {
@@ -253,9 +265,20 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   def #+(up:GreatWorld.Update[Unit]) = copy(updates=updates :+ (((), up)))
 
-  private def doUpdate[T](t:T, u:Update[T]) = Game.updatePerf.track(u.name) {
+  private def doUpdateWrap[T](t:T, u:Update[T]) = {
     val (gw, ns) = u.apply(this, t)
     gw.insertSpawns(ns)
+  }
+  //fixme: code clones
+  private def doUpdate[T](t:T, u:Update[T]) = {
+    u.name match {
+      case Some(name) => Game.updatePerf.track(name) {
+        doUpdateWrap(t, u)
+      }
+      case None =>
+        doUpdateWrap(t, u)
+    }
+
   }
 
   private def insertSpawns(seq:Seq[GlobalSpawn]) = {
