@@ -19,18 +19,20 @@ case class LightManager(cols:Int, rows:Int, lights:Seq[LightSource]) {
     copy(lights = ls ++ lights)
   }
   private def process(cxy:Cell) = {
-    //val map = collection.mutable.Map[Cell, Double]().withDefaultValue(1)
     val map = new Array[Double](cols*rows)
 
     val screenRect = Recti(0, 0, cols, rows)
-    for (l <- lights if l.isOnScreen(cxy, screenRect)) {
-      for ((cell, d) <- l.fill;
-           c = cell |+| cxy
-           if screenRect.contains(c)) {
-        val k = Array2d.coordsToIndex(c, cols)
-        map(k) += d
+    lights.par.filter( l => l.isOnScreen(cxy, screenRect)).map { l =>
+      l.fill.map { case (cell, d) =>
+        val c = cell |+| cxy
+        if (screenRect.contains(c)) {
+          val k = Array2d.coordsToIndex(c, cols)
+          map(k) += d
+        }
       }
+
     }
+
     for (k <- 0 until (cols * rows)) {
       map(k) = map(k).clamp(0, 1)
     }

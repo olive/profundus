@@ -137,11 +137,10 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   def draw(ij:Cell)(t:TileRenderer):TileRenderer = {
-    //optimization: only draw the two on screen
     val things = Vector(
-      //tMap(getIndex(ij)-1),
-      tMap(getIndex(ij))
-      //tMap(getIndex(ij)+1)
+      tMap(getIndex(ij)-1),
+      tMap(getIndex(ij)),
+      tMap(getIndex(ij)+1)
     )
 
     val onScreen = things.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
