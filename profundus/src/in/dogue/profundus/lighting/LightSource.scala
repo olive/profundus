@@ -21,7 +21,7 @@ object LightSource {
       intensity*dim
 
     }
-    def onScreen(cxy:(Int,Int), recti:Recti) = {
+    def onScreen(pos:Cell)(cxy:(Int,Int), recti:Recti) = {
       Circle(pos |+| cxy, outerR).intersects(recti)
     }
     LightSource(pos, 1, Circle.fill(0, 0, outerR, light), onScreen)
@@ -31,7 +31,7 @@ object LightSource {
     val cells = Array2d.tabulate(width, height) { case (i, j) =>
       dim*(1 - j/height.toDouble)
     }.flatten
-    def onScreen(cxy:(Int,Int), recti:Recti) = {
+    def onScreen(pos:Cell)(cxy:(Int,Int), recti:Recti) = {
       (Recti(pos.x, pos.y, width, height) + Recti(cxy.x, cxy.y, 0, 0)).intersects(recti)
     }
     LightSource(pos, 1, cells, onScreen)
@@ -47,9 +47,15 @@ object LightSource {
   }
 }
 
-case class LightSource private (pos:Cell, flicker:Double, private val cells:Seq[(Cell, Double)], onScreen: ((Int,Int), Recti) => Boolean) {
+case class LightSource private (pos:Cell, flicker:Double,
+                                private val cells:Seq[(Cell, Double)],
+                                private val onScreen: Cell => ((Int,Int), Recti) => Boolean) {
   def fill:Seq[(Cell, Double)] = {
     (cells |++| pos).smap { _ * flicker}
+  }
+
+  def isOnScreen(cxy:Cell, r:Recti) = {
+    onScreen(pos)(cxy, r)
   }
 }
 

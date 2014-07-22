@@ -209,14 +209,14 @@ object GreatWorld {
   }
 
 
-  def create(cols:Int, rows:Int, lo:Loadout, r:Random) = {
-    val (cache, spawn, spawnFace) = TerrainCache.create(cols, rows, r)
+  def create(worldCols:Int, worldRows:Int, screenCols:Int, screenRows:Int, lo:Loadout, r:Random) = {
+    val (cache, spawn, spawnFace) = TerrainCache.create(worldCols, worldRows, r)
     val (tc, cs, gs) = cache.checkPositions(spawn)
     val p = Player.create(spawn, spawnFace, lo)
     val em = EntityManager.create(r).addSpawns(cs)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
-    val lm = LightManager.create
+    val lm = LightManager.create(screenCols, screenRows)
     val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq()).insertSpawns(gs)
     allUpdates(gw)
   }
@@ -234,7 +234,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setDs(ds:Seq[Deformation[_]]) = copy(ds=ds)
   def addPs(s:Seq[Particle[_]]) = copy(pm=pm++s)
   def addEms(ems:Seq[Emitter[_]]) = copy(pm=pm.addEmitters(ems))
-
+  def resetLm = copy(lm = lm.reset)
   def update:GreatWorld = {
     updates.foldLeft(this) { case (w, (t, up)) =>
       w.doUpdate(t, up)

@@ -141,10 +141,11 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
 
 
   def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
-    val t = tiles.get(ij)
-    if (!t.canBreakBy(ttype.breakable)) {
+    val to = tiles.getOption(ij)
+    if (!to.exists{_.canBreakBy(ttype.breakable)}) {
       (this, Seq(), 0, false)
     } else {
+      val t = to.get//fixme
       val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
       val newT = copy(tiles=tiles.update(ij, _.copy(state=newState)))
       (newT, drops, damage, broken)

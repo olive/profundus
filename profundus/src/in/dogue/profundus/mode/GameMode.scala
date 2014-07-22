@@ -14,7 +14,7 @@ object GameMode {
     val worldCols = cols*4
     val r = new Random(seed)
     val hudHeight = 6
-    val gw = GreatWorld.create(worldCols, rows - hudHeight, lo, r)
+    val gw = GreatWorld.create(worldCols, rows - hudHeight, cols, rows, lo, r)
     val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.getStamBar, gw.p.getHealthBar)
     GameMode(cols, rows, gw, hud, r)
   }
@@ -41,7 +41,7 @@ case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Rando
                     .withHealth(pl.getHealthBar)
                     .withBuff(pl.getBuffIcon)
                     .withItems(pl.getItems)
-    copy(gw=gw.setLm(LightManager.create).update, hud=newHud)
+    copy(gw=gw.resetLm.update, hud=newHud)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
