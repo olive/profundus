@@ -5,6 +5,7 @@ import in.dogue.antiqua.graphics.{Tile, Filter}
 import com.deweyvm.gleany.data.Recti
 import in.dogue.antiqua.geometry.Circle
 import in.dogue.antiqua.data.Array2d
+import in.dogue.profundus.Game
 
 object LightManager {
   def create(cols:Int, rows:Int) = LightManager(cols, rows, Seq())
@@ -18,7 +19,10 @@ case class LightManager(cols:Int, rows:Int, lights:Seq[LightSource]) {
   def addLights(ls:Seq[LightSource]) = {
     copy(lights = ls ++ lights)
   }
-  private def process(cxy:Cell) = {
+
+
+
+  private def process(cxy:Cell) = Game.drawPerf.track("processLights") {
     val map = new Array[Double](cols*rows)
 
     val screenRect = Recti(0, 0, cols, rows)

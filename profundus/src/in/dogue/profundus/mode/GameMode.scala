@@ -8,6 +8,7 @@ import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.world.GreatWorld
 import in.dogue.profundus.input.Controls
 import in.dogue.profundus.lighting.LightManager
+import in.dogue.profundus.{Profundus, Game}
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout, seed:Int) = {
@@ -49,6 +50,7 @@ case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Rando
     tr.withMove(0, hud.height){ t =>
       t <+< gw.draw
     }.<+<(hud.draw)
+
   }
 
   def toMode:Mode[GameMode] = Mode(_.update, _.draw, this)

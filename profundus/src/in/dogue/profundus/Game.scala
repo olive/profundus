@@ -6,6 +6,7 @@ import in.dogue.profundus.input.Controls
 import scala.util.Random
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.utils.PerfTrack
 
 object Game {
   var t = 0
@@ -15,6 +16,9 @@ object Game {
   val invMode   = false && debug
   var lightsOff  = false && debug
   val version = "Version 0.0.12"
+  val updatePerf = new PerfTrack("World Update")
+  val globPerf = new PerfTrack("Everything")
+  val drawPerf = new PerfTrack("Drawing")
   def getSeed = fixedSeed.select(new Random().nextInt(), 3)
 }
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {

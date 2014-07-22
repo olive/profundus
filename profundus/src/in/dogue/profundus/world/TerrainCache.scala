@@ -10,6 +10,7 @@ import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 import in.dogue.profundus.lighting.LightSource
 import com.deweyvm.gleany.data.Recti
+import in.dogue.profundus.Game
 
 
 object TerrainCache {
@@ -145,7 +146,8 @@ case class TerrainCache private (cols:Int, rows:Int,
 
     val onScreen = things.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
     val doodads = onScreen.map{_.doodads}
-
-    onScreen.foldLeft(t) {   _ <+< _.draw } <++< doodads.flatten.map{_.draw _}
+    Game.drawPerf.track("terrain") {
+      onScreen.foldLeft(t) { _ <+< _.draw } <++< doodads.flatten.map { _.draw _ }
+    }
   }
 }

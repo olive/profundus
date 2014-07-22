@@ -8,7 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.{Item, Capsule, Inventory}
 import in.dogue.antiqua.graphics.Text
-import in.dogue.profundus.{Engine, Game, Profundus}
+import in.dogue.profundus.Profundus
 import scala.util.Random
 
 
@@ -78,7 +78,6 @@ case class Hud private (height:Int, rect:Rect,
         <+< stamBar.draw((13, 3)) <| ((12, 3), buffIcon)
         <+< healthBar.draw((13, 4))
         <+< drawItems((1, 4))
-        <+< Profundus.tf.create("%.2f".format (Engine.ms)).drawFg((0,0))
       )
   }
 }

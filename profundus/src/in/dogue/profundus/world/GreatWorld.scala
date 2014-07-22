@@ -26,10 +26,18 @@ object GreatWorld {
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
     *           otherwise it should be extracted anew from the GreatWorld instance
     */
-  type Update[T] = (GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])
+  //type Update[T] = (GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])
 
+  case class Update[T](f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]), name:String) {
+    def apply = f.apply _
+  }
 
-  private def updateClimbRope : Update[Unit] = standard { case (gw, ()) =>
+  def withName[T](s:String)(f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])) = Update(f, s)
+  def stdName[T](s:String)(f:(GreatWorld, T) => GreatWorld) = {
+    val ff = standard(f)
+    Update(ff, s)
+  }
+  private def updateClimbRope : Update[Unit] = stdName("climbRope") { case (gw, ()) =>
     val em = gw.em
     val p = gw.p
     val curState = p.fall
@@ -45,7 +53,7 @@ object GreatWorld {
     gw.setPlayer(newP)
   }
 
-  private def updateItemUse : Update[Unit] = standard { case (gw, ()) =>
+  private def updateItemUse : Update[Unit] = stdName("itemUse") { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
     val tc = gw.cache
@@ -78,7 +86,7 @@ object GreatWorld {
     gw.setEm(newEm).setPlayer(newP)
   }
 
-  private def updateShovel : Update[Unit] = standard { case (gw, ()) =>
+  private def updateTool : Update[Unit] = stdName("updateTool") { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
     val newEm = pp.toolPos match {
@@ -91,7 +99,7 @@ object GreatWorld {
     gw.setEm(newEm)
   }
 
-  private def collectGems : Update[Unit] = standard { case (gw, ()) =>
+  private def collectGems : Update[Unit] = stdName("collectMinerals") { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
     val (newP, newEm) = em.collectPickups(pp)
@@ -99,7 +107,7 @@ object GreatWorld {
   }
 
 
-  private def updatePlayer : Update[Unit] = standard { case (gw, ()) =>
+  private def updatePlayer : Update[Unit] = stdName("updatePlayer") { case (gw, ()) =>
     val tm = gw.mgr
     val pp = gw.p
     val cache = gw.cache
@@ -109,7 +117,7 @@ object GreatWorld {
   }
 
 
-  private def updateCache : Update[Unit] = standard { case (gw, ()) =>
+  private def updateCache : Update[Unit] = stdName("updateTerrain") { case (gw, ()) =>
     val ppos = gw.p.pos
     val cache = gw.cache
     val em = gw.em
@@ -121,22 +129,22 @@ object GreatWorld {
     gw.setTc(newTc).setEm(newEm).setLm(lm.addLights(newLights)).insertSpawns(gs)
   }
 
-  private def updateEs : Update[Unit] = { case (gw, ()) =>
+  private def updateEs : Update[Unit] = withName("entityManager") { case (gw, ()) =>
     val (ns, newEm) = gw.em.update(gw.cache)
     (gw.setEm(newEm), ns)
   }
 
-  private def updateKzs : Update[Unit] = standard { case (gw, ()) =>
+  private def updateKzs : Update[Unit] = stdName("killzones") { case (gw, ()) =>
     val newKz = gw.kz.map{_.update}.flatten
     gw.setKz(newKz)
   }
 
-  private def updateGravity : Update[Unit] = standard { case (gw, ()) =>
+  private def updateGravity : Update[Unit] = stdName("gravity") { case (gw, ()) =>
     val newEm = gw.em.doGravity(gw.cache)
     gw.setEm(newEm)
   }
 
-  private def updateCreatures : Update[Unit] = { case (gw, ()) =>
+  private def updateCreatures : Update[Unit] = withName("entities") { case (gw, ()) =>
     val pl = gw.p
     val cache = gw.cache
     val (newEm, glob, worl) = gw.em.updateCreatures(cache, pl.pos, pl.state)
@@ -144,7 +152,7 @@ object GreatWorld {
     (gw.setEm(insertedEm), glob)
   }
 
-  private def updateDeformations : Update[Unit] = standard { case (gw, ()) =>
+  private def updateDeformations : Update[Unit] = stdName("deformations") { case (gw, ()) =>
     val ds = gw.ds
     val cache = gw.cache
     val seed = (cache, Seq[WorldSpawn]())
@@ -157,7 +165,7 @@ object GreatWorld {
     gw.setDs(newDs).setTc(deformed).setEm(newEm)
   }
 
-  private def updateParticles : Update[Unit] =  standard { case (gw, ()) =>
+  private def updateParticles : Update[Unit] = stdName("particles") { case (gw, ()) =>
     val pm = gw.pm
     val tc = gw.cache
     val (particles, lights) = pm.update(tc)
@@ -165,7 +173,7 @@ object GreatWorld {
     gw.setPm(particles).setLm(lm.addLights(lights))
   }
 
-  private def killEntities : Update[Unit] = standard { case (gw, ()) =>
+  private def killEntities : Update[Unit] = stdName("kills") { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
     val kz = gw.kz
@@ -174,7 +182,7 @@ object GreatWorld {
     gw.setEm(newEm).addPs(ps).setPlayer(hurtPl)
   }
 
-  private def playerKillSelf : Update[Unit] = standard { case (gw, ()) =>
+  private def playerSelfQuit : Update[Unit] = stdName("selfQuit") { case (gw, ()) =>
     val pp = gw.p
     if (Controls.Kill.justPressed) {
       gw.setPlayer(pp.kill(DamageType.Player.some))
@@ -188,7 +196,7 @@ object GreatWorld {
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
         #+ updateItemUse
-        #+ updateShovel
+        #+ updateTool
         #+ collectGems
         #+ updatePlayer
         #+ updateCache
@@ -199,11 +207,12 @@ object GreatWorld {
         #+ updateDeformations
         #+ updateParticles
         #+ killEntities
-        #+ playerKillSelf
+        #+ playerSelfQuit
       )
   }
 
-  private def standard[T](func:(GreatWorld, T) => GreatWorld) : Update[T] = { case (gw, t) =>
+  private def standard[T](func:(GreatWorld, T) => GreatWorld)
+             :(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]) = { case (gw, t) =>
     (func(gw, t), Seq())
   }
 
@@ -244,10 +253,9 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   def #+(up:GreatWorld.Update[Unit]) = copy(updates=updates :+ (((), up)))
 
-  private def doUpdate[T](t:T, u:Update[T]) = {
-    val (gw, ns) = u(this, t)
+  private def doUpdate[T](t:T, u:Update[T]) = Game.updatePerf.track(u.name) {
+    val (gw, ns) = u.apply(this, t)
     gw.insertSpawns(ns)
-
   }
 
   private def insertSpawns(seq:Seq[GlobalSpawn]) = {
