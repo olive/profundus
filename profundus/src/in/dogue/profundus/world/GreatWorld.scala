@@ -2,7 +2,7 @@ package in.dogue.profundus.world
 
 
 import in.dogue.profundus.particles.{Emitter, ParticleManager, Particle}
-import in.dogue.antiqua.graphics.{Filter, Tile, TileRenderer}
+import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.profundus.{Game, Profundus}
 import in.dogue.profundus.entities._
 import in.dogue.antiqua.Antiqua
@@ -12,7 +12,6 @@ import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.damagezones.DamageZone
-import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.lighting.{LightSource, LightManager}
 import in.dogue.profundus.input.Controls
 import in.dogue.profundus.audio.SoundManager
@@ -312,9 +311,9 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   private def drawWorld(tr:TileRenderer) = {
     (tr <+< cache.draw(p.pos)
-      <+< em.draw
-      <+< p.draw
-      <+< pm.draw
-      )
+        <+< em.draw
+        <+< p.draw
+        <+< pm.draw
+    )
   }
 }
