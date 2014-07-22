@@ -124,6 +124,8 @@ object Terrain {
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
 case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSome {type T}], spawn:Cell, spawnFace:Direction) {
+
+  def getRect = Recti(0, y, tiles.cols, tiles.rows)
   def update = {
     val ds = doodads.map{_.update}
     val lights = doodads.map{_.getLight}
@@ -154,8 +156,8 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <++ tiles.flatten.map { case (p, w) =>
-      (p +| y, w.tile)
+    tiles.foldLeft(tr) { case (r, (p, t)) =>
+      r <+ (p +| y, t.tile)
     }
   }
 

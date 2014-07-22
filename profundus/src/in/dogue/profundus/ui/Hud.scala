@@ -8,7 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.{Item, Capsule, Inventory}
 import in.dogue.antiqua.graphics.Text
-import in.dogue.profundus.Profundus
+import in.dogue.profundus.{Engine, Game, Profundus}
 import scala.util.Random
 
 
@@ -52,32 +52,33 @@ case class Hud private (height:Int, rect:Rect,
 
   private def drawInventory(xy:Cell) (tr:TileRenderer):TileRenderer = {
     def fmt(i:Int) = tf.create("%2s".format(i.toString))
-    val cap  = tr   <+ (              xy, Capsule.stick) <+< fmt(inv.bombs).draw(xy |+ 1)
-    val gem  = cap  <+ (         xy +| 1, Hud.gemIcon)   <+< fmt(inv.gems).draw( xy |+| ((1,1)))
-    val rope = gem  <+ (         xy |- 4, Hud.ropeIcon)  <+< fmt(inv.ropes).draw(xy |- 3)
-               rope <+ (xy |+| ((-4, 1)), Hud.fuelIcon)  <+< fmt(inv.fuel).draw( xy |+| ((-3, 1)))
+    val cap  = tr   <| (              xy, Capsule.stick) <+< fmt(inv.bombs).drawFg(xy |+ 1)
+    val gem  = cap  <| (         xy +| 1, Hud.gemIcon)   <+< fmt(inv.gems).drawFg( xy |+| ((1,1)))
+    val rope = gem  <| (         xy |- 4, Hud.ropeIcon)  <+< fmt(inv.ropes).drawFg(xy |- 3)
+               rope <| (xy |+| ((-4, 1)), Hud.fuelIcon)  <+< fmt(inv.fuel).drawFg( xy |+| ((-3, 1)))
 
   }
 
   private def drawDepth(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <+< depth.draw(ij) <+< depthAmt.draw(ij |+ 7)
+    tr <+< depth.drawFg(ij) <+< depthAmt.drawFg(ij |+ 7)
   }
 
   private def drawItems(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <++ items.zipWithIndex.map { case (item, k) =>
+    tr <|| items.zipWithIndex.map { case (item, k) =>
       (ij |+ k, item.icon)
     }
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
     (tr <+< rect.draw((0,0))
-        <+< text.draw((1, 1))
+        <+< text.drawFg((1, 1))
         <+< drawDepth((1, 2))
         <+< drawInventory((28, 1))
         <+< tool.draw((13, 1))
-        <+< stamBar.draw((13, 3)) <+ ((12, 3), buffIcon)
+        <+< stamBar.draw((13, 3)) <| ((12, 3), buffIcon)
         <+< healthBar.draw((13, 4))
         <+< drawItems((1, 4))
+        <+< Profundus.tf.create("%.2f".format (Engine.ms)).drawFg((0,0))
       )
   }
 }

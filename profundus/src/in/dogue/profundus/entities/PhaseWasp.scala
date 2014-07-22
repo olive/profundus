@@ -14,7 +14,7 @@ import in.dogue.profundus.deformations.ExplosionDeformation
 
 object PhaseWasp {
   def create(ij:Cell, r:Random) = {
-    val tf = TileFactory(Color.Black, Color.Black)
+    val tf = TileFactory(Color.Black, Color.White)
     val rightWing = Animation.create(Vector(
       (15, tf(CP437.<)),
       (15, tf(CP437.`«`))

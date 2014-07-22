@@ -35,7 +35,7 @@ case class HudTool private (bar:ValueBar, tf:TextFactory, icon:TileGroup) {
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     def fmt(i:Int) = tf.create("%3s%%".format(i.toString))
     val percent = (100*bar.amt/bar.max.toFloat).toInt
-    tr <++ (icon |++| ij) <+< bar.draw(ij +| 1) <+< fmt(percent).draw(ij |+ 6)
+    tr <|| (icon |++| ij) <+< bar.draw(ij +| 1) <+< fmt(percent).drawFg(ij |+ 6)
   }
 
 }

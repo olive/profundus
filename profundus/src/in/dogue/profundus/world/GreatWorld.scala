@@ -303,9 +303,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
       } else {
         wp <+< drawWorld
       }
-
     }
-
     res
   }
 

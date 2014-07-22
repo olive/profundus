@@ -19,6 +19,7 @@ object Controls {
   val Rope = makeKb(Input.Keys.Z)
   val Drop = makeKb(Input.Keys.V)
   val Pause = makeKb(Input.Keys.P)
+  val Debug = makeKb(Input.Keys.D)
   val Escape = makeKb(Input.Keys.ESCAPE)
 
   val AxisX = new AxisControl(Left, Right)

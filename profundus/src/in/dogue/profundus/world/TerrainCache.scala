@@ -9,6 +9,7 @@ import in.dogue.profundus.entities.{ToolType, Obelisk, Lurker}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 import in.dogue.profundus.lighting.LightSource
+import com.deweyvm.gleany.data.Recti
 
 
 object TerrainCache {
@@ -138,13 +139,14 @@ case class TerrainCache private (cols:Int, rows:Int,
   def draw(ij:Cell)(t:TileRenderer):TileRenderer = {
     //optimization: only draw the two on screen
     val things = Vector(
-      tMap(getIndex(ij)-1),
-      tMap(getIndex(ij)),
-      tMap(getIndex(ij)+1)
+      //tMap(getIndex(ij)-1),
+      tMap(getIndex(ij))
+      //tMap(getIndex(ij)+1)
     )
 
-    val doodads = things.map{_.doodads}
+    val onScreen = things.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
+    val doodads = onScreen.map{_.doodads}
 
-    things.foldLeft(t) {   _ <+< _.draw } <++< doodads.flatten.map{_.draw _}
+    onScreen.foldLeft(t) {   _ <+< _.draw } <++< doodads.flatten.map{_.draw _}
   }
 }

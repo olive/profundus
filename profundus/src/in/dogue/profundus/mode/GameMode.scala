@@ -12,9 +12,10 @@ import in.dogue.profundus.lighting.LightManager
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout, seed:Int) = {
     val worldCols = cols*4
+    val worldRows = rows*1
     val r = new Random(seed)
     val hudHeight = 6
-    val gw = GreatWorld.create(worldCols, rows - hudHeight, cols, rows, lo, r)
+    val gw = GreatWorld.create(worldCols, worldRows, cols, rows, lo, r)
     val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.getStamBar, gw.p.getHealthBar)
     GameMode(cols, rows, gw, hud, r)
   }

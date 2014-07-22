@@ -33,7 +33,7 @@ object EntityGenerator {
         Bat.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val wasp = (0 until 3).map { _ =>
+      val wasp = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         PhaseWasp.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
