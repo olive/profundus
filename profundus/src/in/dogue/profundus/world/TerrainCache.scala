@@ -48,6 +48,17 @@ case class TerrainCache private (cols:Int, rows:Int,
     !points.exists { p => isSolid(p)}
   }
 
+  def isRock(ij:Cell):Boolean ={
+    get(ij).map{_.isRock(convert(ij))}.getOrElse(false)
+  }
+
+  def mineralize(ij:Cell):TerrainCache = {
+    val index = getIndex(ij)
+    val converted = convert(ij)
+    val mineraled = tMap(index).mineralize(converted)
+    copy(tMap=tMap.updated(index, mineraled))
+  }
+
   def getTouching(ij:Cell):Direction => Option[WorldTile] = {
     def g(p:Cell) = {
       val terrain = get(p)

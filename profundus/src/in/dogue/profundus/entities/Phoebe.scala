@@ -30,7 +30,7 @@ object Phoebe {
 
 case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, close:Boolean, aggroed:Boolean, maxHealth:Int, t:Int) {
 
-  def getBox = boxes(ptr)
+  private def getBox = boxes(ptr)
   def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Phoebe, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     import Profundus._
     val isClose = (pos |-| ppos).mag < 5 && !aggroed

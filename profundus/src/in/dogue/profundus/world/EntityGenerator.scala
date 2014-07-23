@@ -17,7 +17,7 @@ object EntityGenerator {
     val s:Seq[Entity[_]] = if (i <= 0) {
       Seq()
     } else {
-      val creatures:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val lurkers:Seq[Entity[_]] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Lurker.create(pos +| (i * rows)).onlyIf(!isSolid(pos))
 
@@ -44,9 +44,25 @@ object EntityGenerator {
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bee.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
-      val all = Vector(creatures, casques, bats, bee, wasp)
+
+      val witness:Seq[Entity[_]] = (0 until 10).map { _ =>
+        val pos = (r.nextInt(cols), r.nextInt(rows))
+        Witness.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+      }.flatten
+
+      val beezles:Seq[Entity[_]] = (0 until 10).map { _ =>
+        val pos = (r.nextInt(cols), r.nextInt(rows))
+        Beezle.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+      }.flatten
+
+      val midas:Seq[Entity[_]] = (0 until 10).map { _ =>
+        val pos = (r.nextInt(cols), r.nextInt(rows))
+        Midas.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
+      }.flatten
+
+      val all = Vector(lurkers, casques, bats, bee, wasp, witness, beezles)
       val (a, b) = ts.color.ways2(all)
-      a ++ b
+      a ++ b ++ midas
     }
     s.ws
   }

@@ -141,6 +141,17 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
     t.exists{_.state.bgSolid}
   }
 
+  def isRock(s:Cell):Boolean = {
+    val t = tiles.getOption(s)
+    t.exists{_.isRock}
+  }
+
+  def mineralize(s:Cell):Terrain = {
+    val t = CP437.n.mkTile(Color.Red, Color.Black)
+    val newTiles = tiles.updated(s, WorldTile(Mineral.create(t, t, t.fgColor)))
+    copy(tiles=newTiles)
+  }
+
 
   def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
     val to = tiles.getOption(ij)

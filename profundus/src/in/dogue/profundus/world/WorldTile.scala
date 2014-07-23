@@ -128,6 +128,12 @@ case class Spike(override val tile:Tile, override val bg:Tile, spike:Direction, 
 
 case class WorldTile(state:TileType) {
   def isWalkable = state.isWalkable
+  def isRock = state match {
+    case r@Rock(_,_,_) => true
+    case r@Rock2(_,_,_) => true
+    case r@Rock3(_,_,_) => true
+    case _ => false
+  }
   def tile = state.tile
   def canBreakBy(s:Seq[TileClass]) = s.contains(state.tileClass)
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

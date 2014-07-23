@@ -48,7 +48,7 @@ case class PlayerLog(lo:Loadout, title:String, killedBy:DamageType, bombsUsed:In
 
 
 object Player {
-
+  var lastHurt = 0
   def getLive(d:Direction) = {
     val code = d match {
       case Direction.Up => CP437.▀
@@ -303,7 +303,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   def damage(dmg:Damage):Player = {
-    if (dmg.amount > 0) {
+    if (state == Alive && dmg.amount > 0 && Game.t - Player.lastHurt > 7) {
+      Player.lastHurt = Game.t
       SoundManager.hurt.play()
     }
     val newHealth = if (dmg.amount > 0) {
