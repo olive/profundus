@@ -199,7 +199,7 @@ object GreatWorld {
   private def updateMusicManager : Update[Unit] = stdNoName { case (gw, ()) =>
     val mm = gw.mm
     val p = gw.p
-    val newMm = mm.setPlayer(p.y)
+    val newMm = mm.setPlayer(p.y, p.state)
     gw.setMm(newMm)
   }
 
@@ -236,7 +236,7 @@ object GreatWorld {
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), new MusicManager(0)).insertSpawns(gs)
+    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows)).insertSpawns(gs)
     allUpdates(gw)
   }
 }

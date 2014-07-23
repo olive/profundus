@@ -7,7 +7,7 @@ import in.dogue.profundus.Game
 object Attributes {
   def create = {
     val fly = if (Game.flyMode) Seq(Wings) else Seq()
-    val halo = if (Game.invMode) Seq(Halo) else Seq()
+    val halo = if (Game.invMode) Seq(Halo) else Seq(LongArms)
     Attributes(5, 5, 0, fly ++ halo)
   }
   val default = create

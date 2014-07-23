@@ -10,10 +10,10 @@ sealed trait Item {
   val icon:Tile
 }
 case object LongArms extends Item {
-  override val icon = CP437.∩.mkTile(Color.Black, Color.Tan)
+  override val icon = CP437.¬.mkTile(Color.Black, Color.Tan)
 }
 case object Trampoline extends Item {
-  override val icon = CP437.¬.mkTile(Color.Black, Color.Purple)
+  override val icon = CP437.∩.mkTile(Color.Black, Color.Purple)
 }
 
 case object Wings extends Item {

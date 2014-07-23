@@ -74,7 +74,7 @@ object Player {
     val i = ij.x
     val j = ij.y
     val smallLight = LightSource.createCircle(ij, 5, 10, 1)
-    val largeLight = LightSource.createCircle(ij, 5, 20, 1)
+    val largeLight = LightSource.createCircle(ij, 5, 13, 1)
     Player((i, j - 1), (i, j), face,
            Attributes.create, NoBuff,
            StaminaBar.create(100), HealthBar.create(200),

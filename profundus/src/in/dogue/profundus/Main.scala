@@ -14,7 +14,7 @@ object Main {
     val iconPath = "sprites/icon.gif"
     val settings = new Settings(ProfundusControls, new SettingDefaults() {
       val SfxVolume: Float = 0.2f
-      val MusicVolume: Float = 0.2f
+      val MusicVolume: Float = 1.0f
       val WindowSize: Point2i = Point2i(512,512 + 256)
       val DisplayMode: Int = 0
     }, false)
