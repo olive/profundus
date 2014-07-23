@@ -31,6 +31,7 @@ case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, last:DamageT
 
   def remove(dmg:Damage) = {
     val i = dmg.amount
+    println(dmg.source)
     drop(i).copy(last=dmg.source)
   }
 

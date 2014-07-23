@@ -24,12 +24,11 @@ case class MusicManager(j:Int, pState:LivingState, worldRows:Int) {
   }
 
   val caveVol = if (j > worldRows) {
-    (j.toDouble - worldRows)/(worldRows)
+    (j.toDouble - worldRows)/worldRows
   } else {
     0
   }
   if (pState == Alive) {
-    //println("setting fade")
     setFade(MusicManager.chirps, cricketVol, MusicManager.notatm, caveVol)
   } else {
     halt()

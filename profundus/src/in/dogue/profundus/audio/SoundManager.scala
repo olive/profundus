@@ -24,6 +24,8 @@ object SoundManager {
   val enehit = load("enehit", 0.5)
   val flare = load("flare", 0.5)
   val fdown = load("fdown", 0.5)
+  val pew = load("pew", 0.5)
+  val pow = load("pow", 0.5)
   def load(s:String, adj:Double) = {
     val sound = AssetLoader.loadSound(s)
     sound.setAdjustVolume(adj.toFloat)

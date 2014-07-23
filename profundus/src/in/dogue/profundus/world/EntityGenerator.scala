@@ -8,6 +8,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction.Down
 import scala.collection.immutable.IndexedSeq
+import in.dogue.profundus.utils.MessageBoxReader
 
 object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
@@ -49,12 +50,24 @@ object EntityGenerator {
     }
     s.ws
   }
+
+  private def lairFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
+    val pos =  (cols - 14, rows - 2) +| (i * rows)
+    val tbs = (1 to 4) map { case i =>
+      val name = "fakeending" + i
+      MessageBoxReader.load(name)
+    }
+    EntitySpawn(Seq(Phoebe.create(pos, tbs.toVector)))
+  }
+
   private def emptyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
     EntitySpawn(Seq())
   }
 
-  val dummy = EntityGenerator(dummyFunc)
 
+
+  val dummy = EntityGenerator(dummyFunc)
+  val lair = EntityGenerator(lairFunc)
   val empty = EntityGenerator(emptyFunc)
 }
 

@@ -12,14 +12,11 @@ import java.nio.file.{Paths, Files}
 import java.nio.charset.Charset
 import com.badlogic.gdx.Gdx
 import com.deweyvm.gleany.Glean
+import in.dogue.profundus.utils.MessageBoxReader
 
 object StoryMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
-    val all = Glean.y.files.data("story").readString()
-
-    val boxes = all.split("@")
-
-    val lines = boxes//box1, box2, box3, box4, box5)
+    val lines = MessageBoxReader.load("story")
     def getMode():() => Mode[_] = () => LoadoutMode.create(cols, rows, lo.some).toMode
     val mb = MessageBox.create(Profundus.tf, lines, getMode)
     val rect = Rect.createPlain(cols, rows, CP437.`#`.mkTile(Color.Brown.dim(10), Color.Black))

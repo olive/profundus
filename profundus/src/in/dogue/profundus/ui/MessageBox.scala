@@ -29,6 +29,9 @@ case class MessageBoxContinue[T](mb:MessageBox[T]) extends MessageBoxResult[T]
 case class MessageBoxComplete[T](t:T) extends MessageBoxResult[T]
 
 case class MessageBox[T](boxes:IndexedSeq[TextBox], onFinish:() => T, ptr:Int) {
+
+  def reset = copy(boxes=boxes.map{_.reset}, ptr=0)
+
   def pagePending = ptr < boxes.length - 1 && boxes(ptr).isFinished
   def isFinished = ptr == boxes.length - 1 && boxes(ptr).isFinished
   def height = boxes(ptr).lines.length

@@ -317,7 +317,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
       id[Player] _
     }
 
-    f(this).copy(health=newHealth)
+    f(this.copy(health=newHealth))
   }
 
   def kill(dmg:Option[DamageType]):Player = {

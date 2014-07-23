@@ -9,7 +9,7 @@ import sun.io.CharToByteCp437
 import in.dogue.profundus.world._
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.entities.{Entity, Obelisk, Lurker}
+import in.dogue.profundus.entities.{GameBox, Entity, Obelisk, Lurker}
 import in.dogue.profundus.world.PickupSpawn
 import in.dogue.antiqua.graphics.Border
 import in.dogue.profundus.world.NewParticles
@@ -18,33 +18,48 @@ import in.dogue.profundus.world.NewDamageZones
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.antiqua.algebra.Monoid
+import in.dogue.profundus.ui.MessageBox
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle]) {
     def gs = NewParticles(s)
+    def gss = Seq(gs)
   }
   implicit def particles2NewSpawn(s:Seq[Particle]) = new AugNewParticles(s)
 
   class AugNewDamageZones(s:Seq[DamageZone]) {
     def gs = NewDamageZones(s)
+    def gss = Seq(gs)
   }
   implicit def damageZones2NewSpawn(s:Seq[DamageZone]) = new AugNewDamageZones(s)
+
+  class AugNewMessageBox(s:GameBox) {
+    def gs = NewMessageBox(s)
+    def gss = Seq(gs)
+  }
+  implicit def damageZones2NewMessageBox(s:GameBox) = new AugNewMessageBox(s)
+
+
   class AugNewDeformations(s:Seq[Deformation]) {
     def gs = NewDeformations(s)
+    def gss = Seq(gs)
   }
   implicit def deformations2NewSpawn(s:Seq[Deformation]) = new AugNewDeformations(s)
   class AugNewEmitters(s:Seq[Emitter]) {
     def gs = NewEmitters(s)
+    def gss = Seq(gs)
   }
   implicit def deformations2NewEmitters(s:Seq[Emitter]) = new AugNewEmitters(s)
 
   class AugPickupSpawn(s:Seq[Pickup]) {
     def ws = PickupSpawn(s)
+    def wss = Seq(ws)
   }
   implicit def pickup2PickupSpawn(s:Seq[Pickup])  = new AugPickupSpawn(s)
 
   class AugEntitySpawn(s:Seq[Entity[_]]) {
     def ws = EntitySpawn(s)
+    def wss = Seq(ws)
   }
   implicit def creature2EntitySpawn(s:Seq[Entity[_]]) = new AugEntitySpawn(s)
 

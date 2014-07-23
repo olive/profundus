@@ -9,6 +9,9 @@ class PerfTrack(trackerName:String) {
   private val map = collection.mutable.Map[String,Double]().withDefaultValue(0)
   private val tick = collection.mutable.Map[String,Int]().withDefaultValue(0)
   private val mmap = collection.mutable.Map[String,Double]().withDefaultValue(0)
+  def tracku[T](name:String)(f:() => T) = {
+    track(name) { f() }
+  }
   def track[T](name:String)(f: => T) = {
     lastTracked = Game.t
     val time = System.nanoTime

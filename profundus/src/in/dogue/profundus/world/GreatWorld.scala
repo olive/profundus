@@ -21,13 +21,12 @@ case class NewParticles(s:Seq[Particle]) extends GlobalSpawn
 case class NewEmitters(s:Seq[Emitter]) extends GlobalSpawn
 case class NewDamageZones(s:Seq[DamageZone]) extends GlobalSpawn
 case class NewDeformations(s:Seq[Deformation]) extends GlobalSpawn
+case class NewMessageBox(mb:GameBox) extends GlobalSpawn
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
     *           otherwise it should be extracted anew from the GreatWorld instance
     */
-  //type Update[T] = (GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])
-
   case class Update[T](f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]), name:Option[String]) {
     def apply = f.apply _
   }
@@ -236,11 +235,11 @@ object GreatWorld {
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows)).insertSpawns(gs)
+    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs)
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager, gb:Option[GameBox]) {
   import GreatWorld._
 
   def setPlayer(pl:Player) = copy(p=pl)
@@ -254,11 +253,17 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def addPs(s:Seq[Particle]) = copy(pm=pm++s)
   def setMm(m:MusicManager) = copy(mm=m)
   def addEms(ems:Seq[Emitter]) = copy(pm=pm.addEmitters(ems))
+  def setGb(b:GameBox) = copy(gb=b.some)
   def resetLm = copy(lm = lm.reset)
   def update:GreatWorld = {
-    updates.foldLeft(this) { case (w, (t, up)) =>
-      w.doUpdate(t, up)
+    gb match {
+      case Some(mb) => copy(gb = gb.map(_.update).flatten)
+      case None =>
+        updates.foldLeft(this) { case (w, (t, up)) =>
+          w.doUpdate(t, up)
+        }
     }
+
   }
 
   def +#+[T](t:T, up:GreatWorld.Update[T]) = copy(updates=updates :+ ((t, up)))
@@ -271,12 +276,16 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   }
   //fixme: code clones
   private def doUpdate[T](t:T, u:Update[T]) = {
+    def update() = {
+      doUpdateWrap(t, u)
+    }
+
     u.name match {
       case Some(name) => Game.updatePerf.track(name) {
-        doUpdateWrap(t, u)
+        update()
       }
       case None =>
-        doUpdateWrap(t, u)
+        update()
     }
 
   }
@@ -293,6 +302,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
       case NewDamageZones(s) => copy(kz=kz++s)
       case NewDeformations(s) => copy(ds=ds++s)
       case NewEmitters(s) => addEms(s)
+      case NewMessageBox(gb) => setGb(gb)
     }
   }
 
@@ -326,16 +336,15 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
     val cy = -p.y + cameraY(p.pos)
 
 
-    val res = tr.withMove(cx, cy) { wp =>
-      if (!Game.lightsOff) {
-        wp.withFilter(getFilter(wp.origin)) { wp =>
-          wp <+< drawWorld
-        }
-      } else {
-        wp <+< drawWorld
-      }
+    val fs = (c:Cell) => if (Game.lightsOff) {
+      Seq()
+    } else {
+      Seq(getFilter(c))
     }
-    res
+
+    tr.withMove(cx, cy) { wp =>
+      wp.withFilters(fs(wp.origin))(drawWorld) <+?< gb.map{b => b.draw _}
+    }
   }
 
   private def drawWorld(tr:TileRenderer) = {

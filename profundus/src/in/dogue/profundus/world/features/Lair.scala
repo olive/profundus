@@ -19,7 +19,7 @@ class Lair {
       if (tmx.get(p) < 1) {
         WorldTile(ts.makeEmpty(r))
       } else {
-        WorldTile(ts.makeDirt(r))
+        WorldTile(ts.makeShaft(r))
       }
 
     }

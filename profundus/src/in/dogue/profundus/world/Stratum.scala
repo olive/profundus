@@ -32,7 +32,7 @@ object Stratum {
     val sg = SpawnGenerator.dummy
     val tg = TerrainGenerator.dummy(ts)
     val fg = FeatureGenerator.lair
-    val eg = EntityGenerator.empty
+    val eg = EntityGenerator.lair
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
     Stratum(ts, tg, fg, eg, dg, pg, sg)
@@ -89,7 +89,7 @@ trait Stratum {
            sg:SpawnGenerator[T]=sg) = Stratum(ts, tg, fg, eg, dg, pg, sg)
 
   def modBiome(yIndex:Int, r:Random):Stratum = {
-    val endIndex = 3
+    val endIndex = 21
     if (yIndex > endIndex) {
       Stratum.createAbyss(r)
     } else if (yIndex == endIndex) {
@@ -97,7 +97,7 @@ trait Stratum {
     } else if (yIndex == 1) {
       Stratum.createDummy(r)
     } else {
-      if (yIndex % strataSize == 0) {
+      if ((yIndex + 1) % strataSize == 0) {
         copy(ts=TerrainScheme.generate(r))
       } else {
         this
