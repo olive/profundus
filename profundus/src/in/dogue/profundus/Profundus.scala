@@ -54,14 +54,16 @@ object Profundus {
 
 
   import Monoid._
-  def fold2[A,B,C](seed:(A,B), as:Seq[C])(f:(C,A) => (A,B))(implicit ev:Monoid[B]):(A,B) = {
+  def fold2[A,B,C](init:A, as:Seq[C])(f:(C,A) => (A,B))(implicit ev:Monoid[B]):(A,B) = {
+    val seed = (init, ev.zero)
     as.foldLeft(seed) { case ((a, b), c) =>
       val (ap, bp) = f(c, a)
       (ap, b <+> bp)
     }
   }
 
-  def fold3[A, B1, B2, C](seed:(A,B1, B2), as:Seq[C])(f:(C, A) => (A, B1, B2))(implicit ev:Monoid[B1], ev2:Monoid[B2]):(A,B1, B2) = {
+  def fold3[A, B1, B2, C](init:A, as:Seq[C])(f:(C, A) => (A, B1, B2))(implicit ev:Monoid[B1], ev2:Monoid[B2]):(A,B1, B2) = {
+    val seed = (init, ev.zero, ev2.zero)
     as.foldLeft(seed) { case ((a, b1, b2), c) =>
       val (ap, b1p, b2p) = f(c, a)
       (ap, b1 <+> b1p, b2 <+> b2p)

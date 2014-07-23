@@ -24,7 +24,7 @@ object TitleMode {
     val title = Tile.groupFromFile("profundusmap2", "tiles", CP437.intToCode, _.mkTile(Color.Brown.dim(4), Color.Tan.dim(1))).filter { case (_, t) =>
     t.code != CP437.` `.toCode}
     val tf = TextFactory(Color.Black, Color.Tan, CP437.unicodeToCode)
-    val disc = tf.multiline("@oleaffia\nhttp://dogue.in\nPre-alpha build")
+    val disc = tf.multiline("made by: @oleaffia\nmusic: @lukaramu_\nhttp://dogue.in\nPre-alpha build")
     val version = tf.multiline(Game.version)
     TitleMode(cols, rows, border, rect, disc, version, title)
   }

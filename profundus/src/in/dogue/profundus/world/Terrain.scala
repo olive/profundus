@@ -61,7 +61,7 @@ object Terrain {
     val l5 = Line.bresenham(lower.x, lower.y, finalX, rows)
     val l6 = Line.bresenham(lower.x+1, lower.y, finalX+1, rows)
     val lines: Vector[Seq[(Int, Int)]] = Vector(l1, l2, l3, l4, l5, l6)
-    ((l2(0).x, l2(0).y), face, lines, circle)
+    ((l2(0).x, l2(0).y), face, (lines, circle))
   }
 
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)

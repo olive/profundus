@@ -115,7 +115,6 @@ object FeatureGenerator {
     val all = Vector(spikeWaves, cavern, pits, shafts, camps, spikes)
     val (a, b, c) = ts.color.ways3(all)
     a ++ b ++ c
-
   }
 
   val dummy = FeatureGenerator(simple)

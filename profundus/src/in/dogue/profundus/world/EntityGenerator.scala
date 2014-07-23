@@ -48,7 +48,13 @@ object EntityGenerator {
     }
     s.ws
   }
+  private def emptyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
+    EntitySpawn(Seq())
+  }
+
   val dummy = EntityGenerator(dummyFunc)
+
+  val empty = EntityGenerator(emptyFunc)
 }
 
 case class EntityGenerator(f: (Int,Int,Int,TerrainScheme, Array2d[WorldTile], Random) => EntitySpawn) {
