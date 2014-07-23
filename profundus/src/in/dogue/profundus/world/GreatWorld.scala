@@ -17,10 +17,10 @@ import in.dogue.profundus.input.Controls
 import in.dogue.profundus.audio.{MusicManager, SoundManager}
 
 sealed trait GlobalSpawn
-case class NewParticles(s:Seq[Particle[_]]) extends GlobalSpawn
-case class NewEmitters(s:Seq[Emitter[_]]) extends GlobalSpawn
-case class NewDamageZones(s:Seq[DamageZone[_]]) extends GlobalSpawn
-case class NewDeformations(s:Seq[Deformation[_]]) extends GlobalSpawn
+case class NewParticles(s:Seq[Particle]) extends GlobalSpawn
+case class NewEmitters(s:Seq[Emitter]) extends GlobalSpawn
+case class NewDamageZones(s:Seq[DamageZone]) extends GlobalSpawn
+case class NewDeformations(s:Seq[Deformation]) extends GlobalSpawn
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
@@ -240,7 +240,7 @@ object GreatWorld {
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone[_]] , ds:Seq[Deformation[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager) {
   import GreatWorld._
 
   def setPlayer(pl:Player) = copy(p=pl)
@@ -249,11 +249,11 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setTm(tm:TerrainManager) = copy(mgr=tm)
   def setPm(pm:ParticleManager) = copy(pm = pm)
   def setTc(tc:TerrainCache) = copy(cache=tc)
-  def setKz(kz:Seq[DamageZone[_]]) = copy(kz=kz)
-  def setDs(ds:Seq[Deformation[_]]) = copy(ds=ds)
-  def addPs(s:Seq[Particle[_]]) = copy(pm=pm++s)
+  def setKz(kz:Seq[DamageZone]) = copy(kz=kz)
+  def setDs(ds:Seq[Deformation]) = copy(ds=ds)
+  def addPs(s:Seq[Particle]) = copy(pm=pm++s)
   def setMm(m:MusicManager) = copy(mm=m)
-  def addEms(ems:Seq[Emitter[_]]) = copy(pm=pm.addEmitters(ems))
+  def addEms(ems:Seq[Emitter]) = copy(pm=pm.addEmitters(ems))
   def resetLm = copy(lm = lm.reset)
   def update:GreatWorld = {
     updates.foldLeft(this) { case (w, (t, up)) =>

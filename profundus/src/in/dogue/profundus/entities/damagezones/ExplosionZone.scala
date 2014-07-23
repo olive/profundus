@@ -17,7 +17,7 @@ case class ExplosionZone private (pos:Cell, radius:Int, speed:Int, source:Damage
   def contains(ij:Cell) = {
     scala.math.hypot(ij.x - pos.x, ij.y - pos.y) < t/speed
   }
-  def toZone:DamageZone[ExplosionZone] = {
-    DamageZone.create(_.update, _.isDone, _.damagePerTick, _.tickFreq, _.contains, this)
+  def toZone:DamageZone = {
+    DamageZone[ExplosionZone](_.update, _.isDone, _.damagePerTick, _.tickFreq, _.contains, this, 0)
   }
 }

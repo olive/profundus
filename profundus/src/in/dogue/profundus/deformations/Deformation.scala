@@ -5,17 +5,36 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.pickups.Pickup
 
-case class Deformation[T](up:T => T,
-                          done:T => Boolean,
-                          deform:T=>TerrainCache => (TerrainCache, Seq[WorldSpawn], Int),
-                          self:T) {
+
+object Deformation {
+  def apply[A](aup:A => A,
+               adone:A => Boolean,
+               adeform:A=>TerrainCache => (TerrainCache, Seq[WorldSpawn], Int),
+               aself:A) = new Deformation {
+    override type T = A
+    override val up = aup
+    override val done = adone
+    override val deform = adeform
+    override val self = aself
+  }
+}
+
+trait Deformation {
+  type T
+  val up:T => T
+  val done:T => Boolean
+  val deform:T=>TerrainCache => (TerrainCache, Seq[WorldSpawn], Int)
+  val self:T
+
   def apply(tr:TerrainCache):(TerrainCache, Seq[WorldSpawn], Int) = deform(self)(tr)
 
-  def update:Option[Deformation[A] forSome {type A}] = {
+  private def updateSelf = Deformation(up, done, deform, up(self))
+
+  def update:Option[Deformation] = {
     if (done(self)) {
       None
     } else {
-      copy(self=up(self)).some
+      updateSelf.some
     }
   }
 

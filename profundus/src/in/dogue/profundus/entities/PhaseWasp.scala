@@ -90,7 +90,7 @@ case class PhaseWasp(a:AnimationGroup, light:LightSource, live:LivingState, heal
     (killed.copy(t=t+1).updateAnim, newPos, gs, Seq())
   }
 
-  def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
+  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <++< a.map{ case (c, anim) => anim.drawFg(c |+| ij) _}

@@ -42,7 +42,7 @@ case class ExplosionDeformation private (ij:Cell, tickDamage:Int, radius:Int, sp
     }
   }
 
-  def toDeformation:Deformation[ExplosionDeformation] = {
-    Deformation(_.update, _.isDone, _.deform, this)
+  def toDeformation:Deformation = {
+    Deformation[ExplosionDeformation](_.update, _.isDone, _.deform, this)
   }
 }

@@ -49,5 +49,5 @@ case class WaterDrop private (ij:Cell, j0:Double, j:Double, up:Tile, mid:Tile, d
 
   def isDone = dead
   def getLight = Seq()
-  def toParticle:Particle[WaterDrop] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
+  def toParticle:Particle = Particle[WaterDrop](_.update, _.draw, _.getLight, _.isDone, this)
 }

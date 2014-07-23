@@ -27,5 +27,5 @@ case class RopePickup private (ij:Cell, t:Tile) {
   def onPickup(pl:Player) = {
     pl.collectRope(this)
   }
-  def toPickup:Pickup[RopePickup] = Pickup.create(ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
+  def toPickup:Pickup = Pickup.create[RopePickup](ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 }

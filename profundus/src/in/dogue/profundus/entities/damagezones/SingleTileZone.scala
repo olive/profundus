@@ -9,5 +9,5 @@ case class SingleTileZone(ij:Cell, dmgPerTick:Int, source:DamageType) {
   def damagePerTick = Damage(dmgPerTick, source)
   def tickFreq = 1
   def contains(pq:Cell) = ij == pq
-  def toZone:DamageZone[SingleTileZone] = DamageZone.create(_.update, _.isDone, _.damagePerTick, _.tickFreq, _.contains, this)
+  def toZone:DamageZone = DamageZone[SingleTileZone](_.update, _.isDone, _.damagePerTick, _.tickFreq, _.contains, this, 0)
 }

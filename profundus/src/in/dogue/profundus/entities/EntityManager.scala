@@ -24,7 +24,7 @@ object EntityManager {
   }
 }
 
-case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Seq[Pickup[_]], ropes:Seq[Rope], r:Random) {
+case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Seq[Pickup], ropes:Seq[Rope], r:Random) {
   def update(tc:TerrainCache):(Seq[GlobalSpawn], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
@@ -80,14 +80,14 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     (pl, this)
   }
 
-  def doKill(kz:Seq[DamageZone[_]]):(EntityManager, Seq[Particle[A] forSome {type A}]) = {
+  def doKill(kz:Seq[DamageZone]):(EntityManager, Seq[Particle]) = {
     val applied = cr.map { c => DamageZone.process(kz, c, c.damage, c.pos)}
     val (newCr, deadCr) = applied.partition { _.getLiving == Alive}
     val ps = deadCr.map {_.getDeathParticle}
     (copy(cr=newCr), ps)
   }
 
-  private def addDrops(gs:Seq[Pickup[_]]) = {
+  private def addDrops(gs:Seq[Pickup]) = {
     copy(picks=picks ++ gs)
   }
 
@@ -110,7 +110,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
   }
 
   def collectPickups(p:Player):(Player, EntityManager) = {
-    val seed = (p, List[Pickup[_]]())
+    val seed = (p, List[Pickup]())
     val (newPl, newPicks) = picks.foldLeft(seed) { case ((pl, list), pick) =>
       if (pick.isCollectable(pl) && pick.getPos == pl.pos) {
         (pick.collect(pl), list)

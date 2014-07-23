@@ -22,5 +22,5 @@ case class ToolPickup(icon:Tile, tool:Tool) {
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <| (ij, icon)
   }
-  def toPickup(ij:Cell):Pickup[ToolPickup] = Pickup.create(ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
+  def toPickup(ij:Cell):Pickup = Pickup.create[ToolPickup](ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 }

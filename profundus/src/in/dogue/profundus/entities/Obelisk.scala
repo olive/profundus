@@ -66,7 +66,7 @@ case class Obelisk private (tg:TileGroup, health:Int, t:Int, light:LightSource, 
     (copy(t=t+1, live=newLive), pos, spawns, Seq(pickups.ws))
   }
 
-  def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
+  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def getTg = {
     val mixAmt = (t % Obelisk.attackTime)/Obelisk.attackTime.toDouble

@@ -6,17 +6,37 @@ import Antiqua._
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.world.TerrainCache
 
-case class Particle[T](up:T=>TerrainCache => T,
-                       drawFunc:T => TileRenderer => TileRenderer,
-                       getLight:T => Seq[LightSource],
-                       isDone:T => Boolean,
-                       self:T) {
-  def update(tc:TerrainCache):Option[(Particle[_] forSome {type A},Seq[LightSource])] = {
+object Particle {
+  def apply[A](aup:A=>TerrainCache => A,
+               adrawFunc:A => TileRenderer => TileRenderer,
+               agetLight:A => Seq[LightSource],
+               aisDone:A => Boolean,
+               aself:A) = new Particle {
+    override type T = A
+    override val up = aup
+    override val drawFunc = adrawFunc
+    override val getLight = agetLight
+    override val isDone = aisDone
+    override val self = aself
+  }
+}
+
+trait Particle {
+  type T
+  val up:T=>TerrainCache => T
+  val drawFunc:T => TileRenderer => TileRenderer
+  val getLight:T => Seq[LightSource]
+  val isDone:T => Boolean
+  val self:T
+
+  private def updateSelf(tc:TerrainCache) = Particle(up, drawFunc, getLight, isDone, up(self)(tc))
+
+  def update(tc:TerrainCache):Option[(Particle,Seq[LightSource])] = {
     if (isDone(self)) {
       None
     } else {
       val light = getLight(self)
-      (copy(self=up(self)(tc)), light).some
+      (updateSelf(tc), light).some
     }
   }
   def draw(tr:TileRenderer):TileRenderer = {

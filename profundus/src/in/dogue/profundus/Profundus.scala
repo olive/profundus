@@ -20,28 +20,28 @@ import in.dogue.profundus.doodads.Doodad
 import in.dogue.antiqua.algebra.Monoid
 
 object Profundus {
-  class AugNewParticles(s:Seq[Particle[_]]) {
+  class AugNewParticles(s:Seq[Particle]) {
     def gs = NewParticles(s)
   }
-  implicit def particles2NewSpawn(s:Seq[Particle[_]]) = new AugNewParticles(s)
+  implicit def particles2NewSpawn(s:Seq[Particle]) = new AugNewParticles(s)
 
-  class AugNewDamageZones(s:Seq[DamageZone[_]]) {
+  class AugNewDamageZones(s:Seq[DamageZone]) {
     def gs = NewDamageZones(s)
   }
-  implicit def damageZones2NewSpawn(s:Seq[DamageZone[_]]) = new AugNewDamageZones(s)
-  class AugNewDeformations(s:Seq[Deformation[_]]) {
+  implicit def damageZones2NewSpawn(s:Seq[DamageZone]) = new AugNewDamageZones(s)
+  class AugNewDeformations(s:Seq[Deformation]) {
     def gs = NewDeformations(s)
   }
-  implicit def deformations2NewSpawn(s:Seq[Deformation[_]]) = new AugNewDeformations(s)
-  class AugNewEmitters(s:Seq[Emitter[_]]) {
+  implicit def deformations2NewSpawn(s:Seq[Deformation]) = new AugNewDeformations(s)
+  class AugNewEmitters(s:Seq[Emitter]) {
     def gs = NewEmitters(s)
   }
-  implicit def deformations2NewEmitters(s:Seq[Emitter[_]]) = new AugNewEmitters(s)
+  implicit def deformations2NewEmitters(s:Seq[Emitter]) = new AugNewEmitters(s)
 
-  class AugPickupSpawn(s:Seq[Pickup[_]]) {
+  class AugPickupSpawn(s:Seq[Pickup]) {
     def ws = PickupSpawn(s)
   }
-  implicit def pickup2PickupSpawn(s:Seq[Pickup[_]])  = new AugPickupSpawn(s)
+  implicit def pickup2PickupSpawn(s:Seq[Pickup])  = new AugPickupSpawn(s)
 
   class AugEntitySpawn(s:Seq[Entity[_]]) {
     def ws = EntitySpawn(s)

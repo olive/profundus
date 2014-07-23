@@ -20,5 +20,5 @@ case class DropEmitter private (ij:Cell, freq:Int, t:Int) {
 
   def isDone = false
 
-  def toEmitter:Emitter[DropEmitter] = Emitter(_.update, _.isDone, this)
+  def toEmitter:Emitter = Emitter[DropEmitter](_.update, _.isDone, this)
 }

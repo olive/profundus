@@ -20,7 +20,7 @@ case class ExplosionParticle private (ij:Cell, radius:Int, speed:Int, t:Int, r:R
   import ExplosionParticle._
   def update(tc:TerrainCache) = copy(t=t+1)
   def isDone = t > (radius+1)*speed
-  def toParticle:Particle[ExplosionParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
+  def toParticle:Particle = Particle[ExplosionParticle](_.update, _.draw, _.getLight, _.isDone, this)
   def getLight = Seq(LightSource.createCircle(ij, t/speed, t*2/speed, 1))
   def draw(tr:TileRenderer):TileRenderer = {
 

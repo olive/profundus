@@ -18,6 +18,6 @@ case class ItemPickup(ij:Cell, it:Item) {
   def onPickup(pl:Player) = {
     pl.collectItem(it)
   }
-  def toPickup:Pickup[ItemPickup] = Pickup.create(ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
+  def toPickup:Pickup = Pickup.create[ItemPickup](ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 
 }

@@ -34,16 +34,15 @@ object Bat {
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
     Bat(anim, light, Alive, 12, math.abs(r.nextInt)).toEntity(ij)
   }
+
+
+  //def mkBat
+
 }
 
-case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int, t:Int) {
-  def damage(dmg:Damage) = copy(health=health.drop(dmg.amount))
-  def getLive = live
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Bat = {
-    this
-  }
 
-  def kill = copy(live=Dead)
+case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int, t:Int) {
+
 
   def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     import Profundus._
@@ -89,7 +88,14 @@ case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int
     (killed, newPos, Seq(attack.gs), Seq())
   }
 
-  def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
+  def damage(dmg:Damage) = copy(health=health.drop(dmg.amount))
+  def getLive = live
+  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Bat = {
+    this
+  }
+
+  def kill = copy(live=Dead)
+  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <++< a.map{ case (c, anim) => anim.drawFg(c |+| ij) _}

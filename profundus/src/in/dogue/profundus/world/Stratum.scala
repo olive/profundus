@@ -3,10 +3,6 @@ package in.dogue.profundus.world
 import scala.util.Random
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.profundus.Profundus
-import in.dogue.antiqua.data.{Array2d, Direction}
-import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.Profundus._
-import in.dogue.profundus.world.features.Lair
 
 object Stratum {
   def createDummy(r:Random) = {

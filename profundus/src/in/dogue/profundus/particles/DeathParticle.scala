@@ -40,5 +40,5 @@ case class DeathParticle private (i:Int, j:Int, t:Int, maxT:Int){
     tr `$$>` draws
   }
 
-  def toParticle:Particle[DeathParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
+  def toParticle:Particle = Particle[DeathParticle](_.update, _.draw, _.getLight, _.isDone, this)
 }

@@ -5,16 +5,24 @@ import in.dogue.profundus.entities.{DamageType, Damage}
 
 
 object DamageZone {
-  def create[T](up:T => T,
-                isDone:T => Boolean,
-                damagePerTick:T => Damage,
-                tickFreq:T => Int,
-                cnts:T => Cell => Boolean,
-                self:T) = {
-    DamageZone(up, isDone, damagePerTick, tickFreq, cnts, self, 0)
+  def apply[A](aup:A => A,
+               aisDone:A => Boolean,
+               adamagePerTick:A => Damage,
+               atickFreq:A => Int,
+               acnts:A => Cell => Boolean,
+               aself:A,
+               at:Int) = new DamageZone {
+    override type T = A
+    override val up = aup
+    override val isDone = aisDone
+    override val damagePerTick = adamagePerTick
+    override val tickFreq = atickFreq
+    override val cnts = acnts
+    override val self = aself
+    override val t = at
   }
 
-  def process[T](kz:Seq[DamageZone[_]], t:T, apply:Damage => T, pos:Cell):T = {
+  def process[T](kz:Seq[DamageZone], t:T, apply:Damage => T, pos:Cell):T = {
     kz.foldLeft(t) { case (tt, z) =>
       if (z.contains(pos)) {
         z.getDamage.map { d => apply(d) }.getOrElse(tt)
@@ -24,17 +32,22 @@ object DamageZone {
     }
   }
 }
-case class DamageZone[T] private (up:T => T,
-                                  isDone:T => Boolean,
-                                  damagePerTick:T => Damage,
-                                  tickFreq:T => Int,
-                                  cnts:T => Cell => Boolean,
-                                  self:T,
-                                  t:Int) {
-  def update: Option[DamageZone[A] forSome { type A }] = if (isDone(self)) {
+trait DamageZone {
+  type T
+  val up:T => T
+  val isDone:T => Boolean
+  val damagePerTick:T => Damage
+  val tickFreq:T => Int
+  val cnts:T => Cell => Boolean
+  val self:T
+  val t:Int
+
+  def updateSelf = DamageZone(up, isDone, damagePerTick, tickFreq, cnts, up(self), t+1)
+
+  def update: Option[DamageZone] = if (isDone(self)) {
     None
   } else {
-    copy(self=up(self), t=t+1).some
+    updateSelf.some
   }
 
   def getDamage = {

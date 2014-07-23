@@ -66,7 +66,7 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     case Steady(top, len) => between(ij, top.x, top.y, top.y + len)
   }
 
-  def update(tc:TerrainCache):(Option[Rope], Seq[Pickup[_]]) = {
+  def update(tc:TerrainCache):(Option[Rope], Seq[Pickup]) = {
     val (rs, picks) = state match {
       case f@FlyUp(_,_,_) => updateFlyUp(f, tc)
       case d@DropDown(_,_,_) => (updateDropDown(d, tc).some, Seq())
@@ -75,7 +75,7 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     (rs.map { s => copy(state=s) }, picks)
   }
 
-  private def updateFlyUp(f:FlyUp, tc:TerrainCache):(Option[RopeState], Seq[Pickup[_]]) = {
+  private def updateFlyUp(f:FlyUp, tc:TerrainCache):(Option[RopeState], Seq[Pickup]) = {
     val newT = f.t + 1
     if (newT % f.flySpeed == 0) {
       val top = f.top

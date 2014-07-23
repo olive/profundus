@@ -16,15 +16,46 @@ object Pickup {
                self:T) = {
     Pickup(ij, Grounded, up, collectable, onPickup, dr, self)
   }
+
+  def apply[A](aij:Cell,
+               afall:FallState,
+               aup:A => A,
+               acollectable:A => Player => Boolean,
+               aonPickup: A => Player => Player,
+               adr: A => Cell => TileRenderer => TileRenderer,
+               aself:A) = new Pickup {
+
+     override type T = A
+     override val ij = aij
+     override val fall = afall
+     override val up = aup
+     override val collectable = acollectable
+     override val onPickup = aonPickup
+     override val dr = adr
+     override val self = aself
+  }
 }
 
-case class Pickup[T] private (ij:Cell,
-                              fall:FallState,
-                              up:T => T,
-                              collectable:T => Player => Boolean,
-                              onPickup: T => Player => Player,
-                              dr: T => Cell => TileRenderer => TileRenderer,
-                              self:T) {
+trait Pickup   {
+  type T
+  val ij:Cell
+  val fall:FallState
+  val up:T => T
+  val collectable:T => Player => Boolean
+  val onPickup: T => Player => Player
+  val dr: T => Cell => TileRenderer => TileRenderer
+  val self:T
+
+  private def copy(ij:Cell=ij,
+                   fall:FallState=fall,
+                   up:T => T=up,
+                   collectable:T => Player => Boolean=collectable,
+                   onPickup: T => Player => Player=onPickup,
+                   dr: T => Cell => TileRenderer => TileRenderer=dr,
+                   self:T=self) = {
+    Pickup(ij, fall, up, collectable, onPickup, dr, self)
+  }
+
   def update = copy(self=up(self))
 
   def getPos = ij
@@ -35,7 +66,7 @@ case class Pickup[T] private (ij:Cell,
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     copy(ij=ij)
   }
-  def toMassive:Massive[Pickup[_]] = Massive(_.getPos, _.move, _.setState, fall, this)
+  def toMassive:Massive[Pickup] = Massive[Pickup](_.getPos, _.move, _.setState, fall, this)
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+< dr(self)(ij)
   }

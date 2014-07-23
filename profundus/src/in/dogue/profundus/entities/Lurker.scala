@@ -177,7 +177,7 @@ case class Lurker private (tile:Tile, live:LivingState, state:LurkerState) {
     tr <| (pos, tile)
   }
 
-  def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
+  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def getLight(ij:Cell):Seq[LightSource] = Seq(LightSource.createCircle(ij, 0, 5, 0.5))
 

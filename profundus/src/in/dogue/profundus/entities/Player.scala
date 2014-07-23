@@ -267,7 +267,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (fpl, Seq(ps.gs), Seq(drops.ws))
   }
 
-  private def updateDropTool(p:Player):(Player, Seq[Pickup[_]]) = {
+  private def updateDropTool(p:Player):(Player, Seq[Pickup]) = {
     if (ctrl.isDropping && !inv.tool.isBare && face.isHorizontal) {
       SoundManager.drop.play()
       val newInv = inv.setTool(BareHands.toTool)

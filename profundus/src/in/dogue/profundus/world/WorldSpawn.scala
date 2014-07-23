@@ -6,4 +6,4 @@ import in.dogue.profundus.doodads.Doodad
 
 sealed trait WorldSpawn
 case class EntitySpawn(s:Seq[Entity[_]]) extends WorldSpawn
-case class PickupSpawn(s:Seq[Pickup[_]]) extends WorldSpawn
+case class PickupSpawn(s:Seq[Pickup]) extends WorldSpawn

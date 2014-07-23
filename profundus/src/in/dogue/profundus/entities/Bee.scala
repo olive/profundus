@@ -99,7 +99,7 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation, light:LightSource, 
     (newSelf.copy(drawAnim=anim), newPos, Seq(kz.gs), Seq())
   }
 
-  def getDeathParticle(ij:Cell):Particle[_] = DeathParticle.create(ij, 60).toParticle
+  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <+< drawAnim.drawFg(ij)

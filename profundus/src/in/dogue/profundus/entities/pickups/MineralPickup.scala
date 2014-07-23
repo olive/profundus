@@ -30,5 +30,5 @@ case class MineralPickup private (ij:Cell, a:Animation) {
   def onPickup(pl:Player) = {
     pl.collectMineral(this)
   }
-  def toPickup:Pickup[MineralPickup] = Pickup.create(ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
+  def toPickup:Pickup = Pickup.create[MineralPickup](ij, _.update, _.isCollectable, _.onPickup, _.draw, this)
 }

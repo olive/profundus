@@ -112,16 +112,7 @@ case class TerrainScheme(color:StratumColor,
                          gem:Scheme,
                          shaft:Scheme,
                          empty:Scheme) {
-  /*def map(f:Color => Color) = copy(
-    dirt=dirt.map(f),
-    clay=clay.map(f),
-    rock=rock.map(f),
-    rock2=rock2.map(f),
-    rock3=rock3.map(f),
-    gem=gem.map(f),
-    shaft=shaft.map(f),
-    empty=empty.map(f)
-  )*/
+
   def emptyTile(r:Random) = {
     val bgCode = Vector(CP437.`.`, CP437.`,`, CP437.`'`, CP437.`"`).randomR(r)
     empty.mkTile(r, bgCode)

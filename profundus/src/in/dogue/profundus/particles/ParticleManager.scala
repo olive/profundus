@@ -11,17 +11,17 @@ object ParticleManager {
   }
 }
 
-case class ParticleManager private (emitters:Seq[Emitter[_]], ps:Seq[Particle[_]]) {
+case class ParticleManager private (emitters:Seq[Emitter], ps:Seq[Particle]) {
   def update(tc:TerrainCache) = {
     val (ems, emps) = emitters.map {e =>
-      e.update : (Option[(Emitter[_$1] forSome {type _$1}, Seq[Particle[_]])])
+      e.update : (Option[(Emitter, Seq[Particle])])
     }.flatten.unzip
     val (updated, lights) = ps.map{_.update(tc)}.flatten.unzip
     (copy(ps = updated ++ emps.flatten, emitters=ems), lights.flatten)
   }
-  def ++(s:Seq[Particle[_]]) = copy(ps = ps ++ s)
+  def ++(s:Seq[Particle]) = copy(ps = ps ++ s)
 
-  def addEmitters(ems:Seq[Emitter[_]]) = copy(emitters = emitters ++ ems)
+  def addEmitters(ems:Seq[Emitter]) = copy(emitters = emitters ++ ems)
   def draw(tr:TileRenderer):TileRenderer = {
     tr <++< ps.map { _.draw _ }
   }

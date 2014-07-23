@@ -22,7 +22,7 @@ case class RingParticle(ij:Cell, radius:Int, speed:Int, t:Int, r:Random) {
   import RingParticle._
   def update(tc:TerrainCache) = copy(t=t+1)
   def isDone = t > (radius+1)*speed
-  def toParticle:Particle[RingParticle] = Particle(_.update, _.draw, _.getLight, _.isDone, this)
+  def toParticle:Particle = Particle[RingParticle](_.update, _.draw, _.getLight, _.isDone, this)
   def getLight = Seq(LightSource.createCircle((i, j), t/speed, t*2/speed, 1))
   def draw(tr:TileRenderer):TileRenderer = {
 
