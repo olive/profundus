@@ -12,6 +12,7 @@ import in.dogue.profundus.world.features.Campsite
 import in.dogue.profundus.world.features.Cavern
 import in.dogue.profundus.particles.{Emitter, DropEmitter, WaterDrop}
 import in.dogue.profundus.Profundus
+import in.dogue.antiqua.geometry.Circle
 
 object FeatureGenerator {
 
@@ -105,7 +106,7 @@ object FeatureGenerator {
     }
   }
 
-  def simple(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random) = {
+  def simple(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, u:Unit) = {
     val spikeWaves = makeSpikeWaves(1, cols, rows)(ts, r)
     val pits = makePits(3, cols, rows)(ts, r)
     val spikes = makeSpikes(1000, cols, rows)(ts, r)
@@ -117,13 +118,32 @@ object FeatureGenerator {
     a ++ b ++ c
   }
 
-  val dummy = FeatureGenerator(simple)
+  val dummy = FeatureGenerator[Unit](simple)
 
+  //(Vector[Seq[Cell]], Circle)
+  private def mkSurface(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:(Direction, Vector[Seq[Cell]], Circle)) = {
+    Seq(Feature(Recti(0, 0, cols, rows), Terrain.createMouth(args._1, args._2, args._3)))
+  }
+
+  val surface = FeatureGenerator(mkSurface)
+
+
+  private def mkLair(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:Unit) = {
+    Seq(new Lair().toFeature(cols, rows))
+  }
+
+  val lair = FeatureGenerator(mkLair)
+
+  private def mkAbyss(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:Unit) = {
+    Seq(new Abyss().toFeature(cols, rows))
+  }
+
+  val abyss = FeatureGenerator(mkAbyss)
 }
 
-case class FeatureGenerator(private val f:(Int, Int, Int, TerrainScheme, Random) => Seq[Feature]) {
-  def assemble(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random) = {
-    val feats = f(cols, rows, y, ts, r)
+case class FeatureGenerator[T](private val f:(Int, Int, Int, TerrainScheme, Random, T) => Seq[Feature]) {
+  def assemble(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, t:T) = {
+    val feats = f(cols, rows, y, ts, r, t)
     val result = ArrayBuffer[Feature]()
     for (feat <- feats) {
       var foundCollision = false

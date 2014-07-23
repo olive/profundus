@@ -16,7 +16,7 @@ import in.dogue.profundus.Game
 object TerrainCache {
   def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
-    val biome = Stratum.createDummy
+    val biome = Stratum.createSurface(r)
     val (biomep, first, _, _): (Stratum, Terrain, Seq[WorldSpawn], Seq[GlobalSpawn]) = biome.generate(cols, rows, 0, copy)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
     (cache, first.spawn, first.spawnFace)
@@ -110,6 +110,7 @@ case class TerrainCache private (cols:Int, rows:Int,
 
     val (newBiome, newMap, newMin, newMax, ws, gs) = {
       val seed = (biome, tMap, Seq[WorldSpawn](), Seq[GlobalSpawn]())
+      //fixme -- use fold3
       val (b, mm, cs, gs) = range.foldLeft(seed) { case ((bm, map, ws, gs), k) =>
         val (newBiome, next, moreWs, moreGs) = bm.generate(cols, rows, k, r)
         (newBiome, map.updated(k, next), moreWs ++ ws, moreGs ++ gs)

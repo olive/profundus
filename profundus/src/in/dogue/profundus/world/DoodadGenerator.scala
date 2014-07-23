@@ -6,7 +6,7 @@ import scala.util.Random
 
 object DoodadGenerator {
   private def dummyFunc(ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = Seq()
-  val dummy = DoodadGenerator(dummyFunc)
+  val empty = DoodadGenerator(dummyFunc)
 }
 
 case class DoodadGenerator(f: (TerrainScheme, Array2d[WorldTile], Random) => Seq[Doodad[_]]) {

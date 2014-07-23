@@ -21,6 +21,11 @@ object PickupGenerator {
     }
     PickupGenerator(gen)
   }
+
+  val empty = {
+    def gen(cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = Seq()
+    PickupGenerator(gen)
+  }
 }
 
 case class PickupGenerator(private val f:(Int,Int,Int,Array2d[WorldTile], TerrainScheme, Random) => Seq[Pickup[_]]) {
