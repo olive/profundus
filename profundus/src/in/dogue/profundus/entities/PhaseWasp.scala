@@ -32,34 +32,22 @@ object PhaseWasp {
       ((1,0), rightWing)
     )
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    PhaseWasp(anim, light, Alive, 12, math.abs(r.nextInt)).toEntity(ij)
+    StandardEntity.create[PhaseWasp](_.update, _.draw, PhaseWasp(anim), light, true, DamageType.PhaseWasp.some, 3).toEntity(ij)
   }
 }
 
-case class PhaseWasp(a:AnimationGroup, light:LightSource, live:LivingState, health:Int, t:Int) {
+case class PhaseWasp(a:AnimationGroup) {
   final val moveTime = 30
   final val range = 30
   final val innerRange = 4
   final val attackTime = 60
-  def damage(dmg:Damage) = {
-    if (dmg.source == DamageType.PhaseWasp) {
-      this
-    } else {
-      copy(health=health.drop(dmg.amount))
-    }
-  }
-  def getLive = live
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
-    this
-  }
 
-  def kill = copy(live=Dead)
   private def updateAnim = copy(a=a.smap {_.update})
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (PhaseWasp, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (PhaseWasp, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     import Profundus._
     val diff = ppos |-| pos
     if (diff.mag2 > range*range || pState == Dead) {
-      return (copy(t=t+1).updateAnim, pos, Seq(), Seq())
+      return (updateAnim, pos, Seq(), Seq())
     }
     val d = diff.signum
     val (newPos, canAttack) = if (t % moveTime == 0) {
@@ -81,24 +69,10 @@ case class PhaseWasp(a:AnimationGroup, light:LightSource, live:LivingState, heal
       Seq()
     }
 
-    val killed = if (health <= 0) {
-      this.kill
-    } else {
-      this
-    }
-
-    (killed.copy(t=t+1).updateAnim, newPos, gs, Seq())
+    (updateAnim, newPos, gs, Seq())
   }
-
-  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <++< a.map{ case (c, anim) => anim.drawFg(c |+| ij) _}
-  }
-
-  def getLight(ij:Cell) = Seq(light.copy(pos=ij))
-
-  def toEntity(ij:Cell):Entity[PhaseWasp] = {
-    Entity(ij, Floating, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
   }
 }

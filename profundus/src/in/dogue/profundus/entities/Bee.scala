@@ -21,35 +21,21 @@ object Bee {
   def create(ij:Cell, r:Random) = {
 
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    Bee(passive, attacking, passive, light, Alive, 1, math.abs(r.nextInt)).toEntity(ij)
+    StandardEntity.create[Bee](_.update, _.draw, Bee(passive, attacking, passive), light, true, None, 1).toEntity(ij)
   }
 }
 
-case class Bee(a:Animation, b:Animation, drawAnim:Animation, light:LightSource, live:LivingState, health:Int, t:Int) {
+case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
   final val moveTime = 30
   final val range = 6
   final val innerRange = 4
   final val attackTime = 60
-  def damage(dmg:Damage) =  copy(health=health.drop(dmg.amount))
-  def getLive = live
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
-    this
-  }
 
-  def kill = copy(live=Dead)
-
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Bee, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Bee, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     import Profundus._
 
-    val killed = if (health <= 0) {
-      kill
-    } else {
-      this
-    }
-    val newSelf = killed.copy(t = t + 1, a = a.update, b = b.update)
-    if (pState == Dead) {
-      return (newSelf, pos, Seq(), Seq())
-    }
+    val newSelf = copy(a = a.update, b = b.update)
+
     val diff = ppos |-| pos
     val isClose = diff.mag2 < range * range
     val hasLos = cache.hasLineOfSight(pos, ppos)
@@ -99,16 +85,10 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation, light:LightSource, 
     (newSelf.copy(drawAnim=anim), newPos, Seq(kz.gs), Seq())
   }
 
-  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <+< drawAnim.drawFg(ij)
   }
 
-  def getLight(ij:Cell) = Seq(light.copy(pos=ij))
-
-  def toEntity(ij:Cell):Entity[Bee] = {
-    Entity(ij, Floating, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
-  }
 
 }

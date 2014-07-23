@@ -7,20 +7,21 @@ import in.dogue.profundus.Profundus
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction.Down
+import scala.collection.immutable.IndexedSeq
 
 object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
     import Profundus._
     def isSolid(ij:Cell) = !t.getOption(ij).exists{_.isWalkable}
-    val s = if (i <= 0) {
+    val s:Seq[Entity[_]] = if (i <= 0) {
       Seq()
     } else {
-      val creatures = (0 until 10).map { _ =>
+      val creatures:Seq[Entity[_]] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Lurker.create(pos +| (i * rows)).onlyIf(!isSolid(pos))
 
       }.flatten
-      val casques = (0 until 1).map { _ =>
+      val casques:Seq[Entity[_]] = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
 
         Obelisk.create(pos +| (i * rows), r).onlyIf(!isSolid(pos)
@@ -28,17 +29,17 @@ object EntityGenerator {
                                                  && isSolid(pos --> Down --> Down))
 
       }.flatten
-      val bats = (0 until 10).map { _ =>
+      val bats:Seq[Entity[_]] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bat.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val wasp = (0 until 1).map { _ =>
+      val wasp:Seq[Entity[_]] = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         PhaseWasp.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val bee = (0 until 10).map { _ =>
+      val bee:Seq[Entity[_]] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bee.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten

@@ -13,7 +13,7 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.Profundus
 
 object Bat {
-  def create(ij:Cell, r:Random) = {
+  private def mkAnim = {
     val tf = TileFactory(Color.Black, Color.Red.dim(2))
     val rightWing = Animation.create(Vector(
       (15, tf(CP437.¬)),
@@ -26,25 +26,25 @@ object Bat {
 
     ))
     val body = Animation.singleton(tf(CP437.◦))
-    val anim = Vector(
+    Vector(
       ((-1,0), leftWing),
       ((0,0), body),
       ((1,0), rightWing)
     )
-    val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    Bat(anim, light, Alive, 12, math.abs(r.nextInt)).toEntity(ij)
   }
-
-
-  //def mkBat
+  def create(ij:Cell, r:Random) = {
+    val anim = mkAnim
+    val light = LightSource.createCircle(ij, 0, 3, 0.2)
+    StandardEntity.create[Bat](_.update, _.draw, Bat(anim), light, true, None, 12).toEntity(ij)
+  }
 
 }
 
 
-case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int, t:Int) {
+case class Bat(a:AnimationGroup) {
 
 
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
@@ -78,32 +78,14 @@ case class Bat(a:AnimationGroup, light:LightSource, live:LivingState, health:Int
       Seq()
     }
 
-    val updated = copy(a=a.smap{_.update}, t=t+1)
-    val killed = if (health <= 0) {
-      updated.kill
-    } else {
-      updated
-    }
+    val updated = copy(a=a.smap{_.update})
 
-    (killed, newPos, Seq(attack.gs), Seq())
+
+    (updated, newPos, Seq(attack.gs), Seq())
   }
-
-  def damage(dmg:Damage) = copy(health=health.drop(dmg.amount))
-  def getLive = live
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Bat = {
-    this
-  }
-
-  def kill = copy(live=Dead)
-  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <++< a.map{ case (c, anim) => anim.drawFg(c |+| ij) _}
   }
 
-  def getLight(ij:Cell) = Seq(light.copy(pos=ij))
-
-  def toEntity(ij:Cell):Entity[Bat] = {
-    Entity(ij, Floating, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
-  }
 }

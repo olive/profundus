@@ -26,29 +26,14 @@ object Obelisk {
       (0, 1, CP437.↑.toCode, Color.Black, Color.White)
     ))
     val light = LightSource.createCircle(ij, 3, 4, 0.5)
-    Obelisk(tg, 50, math.abs(r.nextInt()), light, Alive).toEntity(ij)
+    StandardEntity.create[Obelisk](_.update, _.draw, Obelisk(tg, 0), light, true, None, 50).toEntity(ij)
 
   }
 }
-case class Obelisk private (tg:TileGroup, health:Int, t:Int, light:LightSource, live:LivingState) {
+case class Obelisk private (tg:TileGroup, mixAmt:Double) {
   import Profundus._
 
-  def damage(dmg:Damage) = {
-    if (dmg.source == DamageType.Obelisk) {
-      this
-    } else {
-      copy(health=health.drop(dmg.amount))
-    }
-
-  }
-  def getLive = live
-  def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]): Obelisk = {
-    this
-  }
-
-  def kill = copy(live=Dead)
-
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Obelisk, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Obelisk, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
 
     val spawns = if (t > 0 && t % Obelisk.attackTime == 0) {
       SoundManager.pop.play()
@@ -58,27 +43,20 @@ case class Obelisk private (tg:TileGroup, health:Int, t:Int, light:LightSource, 
     } else {
       Seq()
     }
-    val (newLive, pickups) = if (health <= 0){
-      (Dead, Seq(ItemPickup(pos, Trampoline).toPickup))
+    val pickups = if (health <= 0){
+      (Seq(ItemPickup(pos, Trampoline).toPickup))
     } else {
-      (live, Seq())
+      (Seq())
     }
-    (copy(t=t+1, live=newLive), pos, spawns, Seq(pickups.ws))
+    val mixAmt = (t % Obelisk.attackTime)/Obelisk.attackTime.toDouble
+    (copy(mixAmt = mixAmt), pos, spawns, Seq(pickups.ws))
   }
 
-  def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
-
   def getTg = {
-    val mixAmt = (t % Obelisk.attackTime)/Obelisk.attackTime.toDouble
     tg.smap{t => t.mapFg(_.mix(Color.Red.dim(3), mixAmt))}
   }
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <|| (getTg |++| ij)
   }
 
-  def getLight(ij:Cell) = Seq(light.copy(pos=ij))
-
-  def toEntity(ij:Cell):Entity[Obelisk] = {
-    Entity(ij, Floating, _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
-  }
 }
