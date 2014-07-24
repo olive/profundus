@@ -18,26 +18,26 @@ import in.dogue.profundus.audio.{MusicManager, SoundManager}
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.profundus.entities.pickups.Pickup
 
-sealed trait GlobalSpawn
-case class NewParticles(s:Seq[Particle]) extends GlobalSpawn
-case class NewEmitters(s:Seq[Emitter]) extends GlobalSpawn
-case class NewDamageZones(s:Seq[DamageZone]) extends GlobalSpawn
-case class NewDeformations(s:Seq[Deformation]) extends GlobalSpawn
-case class NewMessageBox(mb:GameBox) extends GlobalSpawn
-case class NewDoodads(s:Seq[Doodad[_]]) extends GlobalSpawn
+sealed trait WorldSpawn
+case class NewParticles(s:Seq[Particle]) extends WorldSpawn
+case class NewEmitters(s:Seq[Emitter]) extends WorldSpawn
+case class NewDamageZones(s:Seq[DamageZone]) extends WorldSpawn
+case class NewDeformations(s:Seq[Deformation]) extends WorldSpawn
+case class NewMessageBox(mb:GameBox) extends WorldSpawn
+case class NewDoodads(s:Seq[Doodad[_]]) extends WorldSpawn
 
-case class NewEntities(s:Seq[Entity[_]]) extends GlobalSpawn
-case class NewPickups(s:Seq[Pickup]) extends GlobalSpawn
+case class NewEntities(s:Seq[Entity[_]]) extends WorldSpawn
+case class NewPickups(s:Seq[Pickup]) extends WorldSpawn
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
     *           otherwise it should be extracted anew from the GreatWorld instance
     */
-  case class Update[T](f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]), name:Option[String]) {
+  case class Update[T](f:(GreatWorld, T) => (GreatWorld, Seq[WorldSpawn]), name:Option[String]) {
     def apply = f.apply _
   }
 
-  def withName[T](s:String)(f:(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn])) = Update(f, s.some)
+  def withName[T](s:String)(f:(GreatWorld, T) => (GreatWorld, Seq[WorldSpawn])) = Update(f, s.some)
   def stdName[T](s:String)(f:(GreatWorld, T) => GreatWorld) = {
     val ff = standard(f)
     Update(ff, s.some)
@@ -159,7 +159,7 @@ object GreatWorld {
   private def updateDeformations : Update[Unit] = stdName("deformations") { case (gw, ()) =>
     val ds = gw.ds
     val cache = gw.cache
-    val seed = (cache, Seq[GlobalSpawn]())
+    val seed = (cache, Seq[WorldSpawn]())
     val (deformed, mins) = ds.foldLeft(seed){case ((tc, mins), d) =>
       val (nc, drop, _/*damage from deformations is void*/) = d.apply(tc)
       (nc, drop ++ mins)
@@ -229,7 +229,7 @@ object GreatWorld {
   }
 
   private def standard[T](func:(GreatWorld, T) => GreatWorld)
-             :(GreatWorld, T) => (GreatWorld, Seq[GlobalSpawn]) = { case (gw, t) =>
+             :(GreatWorld, T) => (GreatWorld, Seq[WorldSpawn]) = { case (gw, t) =>
     (func(gw, t), Seq())
   }
 
@@ -300,13 +300,13 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
 
   }
 
-  private def insertSpawns(seq:Seq[GlobalSpawn]) = {
+  private def insertSpawns(seq:Seq[WorldSpawn]) = {
     seq.foldLeft(this) { case (gw, ns) =>
       gw.insertSpawn(ns)
     }
   }
 
-  private def insertSpawn(ns:GlobalSpawn) = {
+  private def insertSpawn(ns:WorldSpawn) = {
     ns match {
       case NewParticles(s) => addPs(s)
       case NewDamageZones(s) => copy(kz=kz++s)

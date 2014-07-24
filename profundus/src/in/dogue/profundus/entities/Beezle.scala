@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
 import scala.util.Random
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.data.CP437
@@ -23,7 +23,7 @@ object Beezle {
 }
 
 case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Beezle, Cell, Seq[GlobalSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Beezle, Cell, Seq[WorldSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val close = dd.mag < 10

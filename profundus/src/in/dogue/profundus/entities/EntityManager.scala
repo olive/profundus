@@ -22,7 +22,7 @@ object EntityManager {
 }
 
 case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Seq[Pickup], ropes:Seq[Rope], r:Random) {
-  def update(tc:TerrainCache):(Seq[GlobalSpawn], EntityManager) = {
+  def update(tc:TerrainCache):(Seq[WorldSpawn], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
     if (done.length > 0) {
@@ -109,9 +109,9 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     (newPl, copy(picks=newPicks))
   }
 
-  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[GlobalSpawn]) = {
+  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[WorldSpawn]) = {
     val (newCr, glob) = cr.map { c =>
-      val thing: ((Entity[T] forSome {type T}, Seq[GlobalSpawn])) = c.update(w, ppos, pState, r)
+      val thing: ((Entity[T] forSome {type T}, Seq[WorldSpawn])) = c.update(w, ppos, pState, r)
       thing
     }.unzip
     (copy(cr=newCr), glob.flatten)

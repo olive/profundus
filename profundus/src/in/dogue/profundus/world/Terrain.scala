@@ -45,7 +45,7 @@ case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], spawn:Cell
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[GlobalSpawn], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
     val to = tiles.getOption(ij)
     if (!to.exists{_.canBreakBy(ttype.breakable)}) {
       (this, Seq(), 0, false)

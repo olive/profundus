@@ -14,7 +14,7 @@ import in.dogue.profundus.Game
 
 
 object TerrainCache {
-  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction, Seq[GlobalSpawn]) = {
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction, Seq[WorldSpawn]) = {
     val copy = new Random(r.nextInt())
     val biome = Stratum.createSurface(r)
     val (biomep, first, gs) = biome.generate(cols, rows, 0, copy)
@@ -85,7 +85,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[GlobalSpawn], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], Int, Boolean) = {
     val index = getIndex(ij)
     val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg, ttype)
     val updated = tMap.updated(index, broke)
@@ -98,9 +98,9 @@ case class TerrainCache private (cols:Int, rows:Int,
     yy/rows
   }
 
-  def checkPositions(ij:Cell):(TerrainCache, Seq[GlobalSpawn]) = {
+  def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn]) = {
     val index = getIndex(ij)
-    val seed = (this, Seq[GlobalSpawn]())
+    val seed = (this, Seq[WorldSpawn]())
     Seq(index-1, index+1, index+2).foldLeft(seed) { case ((map, gs), i) =>
       val (next, newGs) = map.check(i)
       (next, gs ++ newGs)
@@ -108,7 +108,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   //fixme -- code clones
-  private def check(i:Int):(TerrainCache, Seq[GlobalSpawn]) = {
+  private def check(i:Int):(TerrainCache, Seq[WorldSpawn]) = {
 
     val range = {
       if (i > max) {
@@ -123,7 +123,7 @@ case class TerrainCache private (cols:Int, rows:Int,
 
 
     val (newBiome, newMap, newMin, newMax, gs) = {
-      val seed = (biome, tMap, Seq[GlobalSpawn]())
+      val seed = (biome, tMap, Seq[WorldSpawn]())
       //fixme -- use fold3
       val (b, mm, gs) = range.foldLeft(seed) { case ((bm, map, gs), k) =>
         val (newBiome, next, moreGs) = bm.generate(cols, rows, k, r)

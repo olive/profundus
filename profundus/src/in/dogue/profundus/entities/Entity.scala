@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.world.{GlobalSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{WorldSpawn, TerrainCache, WorldTile}
 import in.dogue.antiqua.Antiqua.Cell
 import scala.util.Random
 import in.dogue.profundus.particles.{Particle, DeathParticle}
@@ -15,7 +15,7 @@ object Entity {
 }
 case class Entity[T](ij:Cell,
                      fall:FallState,
-                     up: T => (Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn]),
+                     up: T => (Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[WorldSpawn]),
                      mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T,
                      dmg: T => Damage => T,
                      doKill: T => T,
@@ -25,7 +25,7 @@ case class Entity[T](ij:Cell,
                      dr:T => Cell => TileRenderer => TileRenderer,
                      self:T) {
   def pos = ij
-  def update(tc:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Entity[T], Seq[GlobalSpawn]) = {
+  def update(tc:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Entity[T], Seq[WorldSpawn]) = {
     val (t, newPos, glob) = up(self)(ij, tc, ppos, pState, r)
     (copy(self=t, ij=newPos), glob)
   }

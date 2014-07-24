@@ -107,7 +107,7 @@ trait Stratum {
 
 
 
-  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[GlobalSpawn]) = {
+  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[WorldSpawn]) = {
     import Profundus._
 
     val (spawn, face, t) = sg.gen(cols, rows, r)

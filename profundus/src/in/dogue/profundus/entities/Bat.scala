@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.data.{CP437, Direction}
-import in.dogue.profundus.world.{GlobalSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{WorldSpawn, TerrainCache, WorldTile}
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle, RingParticle}
 import in.dogue.profundus.entities.damagezones.{SingleTileZone, ExplosionZone}
@@ -44,7 +44,7 @@ object Bat {
 case class Bat(a:AnimationGroup) {
 
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[GlobalSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[WorldSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1

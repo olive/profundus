@@ -23,7 +23,7 @@ sealed trait TileType {
   val tileClass:TileClass
   val bg:Tile
   val isWalkable:Boolean = false
-  type Update= (TileType, Seq[GlobalSpawn], Int, Boolean)
+  type Update= (TileType, Seq[WorldSpawn], Int, Boolean)
   def hit:(Cell, Int) => Update
   def standard(f:(Cell, Int) => (TileType, Int, Boolean)): (Cell, Int) => Update = { case (ij, dmg) =>
     val (tt, toolDmg, broke) = f(ij, dmg)

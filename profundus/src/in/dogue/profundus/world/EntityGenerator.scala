@@ -87,8 +87,8 @@ object EntityGenerator {
   val empty = EntityGenerator(emptyFunc)
 }
 
-case class EntityGenerator(f: (Int,Int,Int,TerrainScheme, Array2d[WorldTile], Random) => GlobalSpawn) {
-  def generate(cols:Int, rows:Int, i:Int, ts:TerrainScheme,tiles:Array2d[WorldTile], r:Random):GlobalSpawn = {
+case class EntityGenerator(f: (Int,Int,Int,TerrainScheme, Array2d[WorldTile], Random) => WorldSpawn) {
+  def generate(cols:Int, rows:Int, i:Int, ts:TerrainScheme,tiles:Array2d[WorldTile], r:Random):WorldSpawn = {
     f(cols, rows, i, ts, tiles, r)
   }
 }

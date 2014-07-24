@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
 import scala.util.Random
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.graphics.{Tile, TileRenderer}
@@ -19,7 +19,7 @@ object Shopkeeper {
   }
 }
 class Shopkeeper(t:Tile) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Shopkeeper, Cell, Seq[GlobalSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Shopkeeper, Cell, Seq[WorldSpawn]) = {
     this @@ pos @@ Seq()
   }
 

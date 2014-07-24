@@ -64,7 +64,7 @@ object CaveMouth {
   }
 
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
-  : (Array2d[WorldTile], Seq[GlobalSpawn]) = {
+  : (Array2d[WorldTile], Seq[WorldSpawn]) = {
     import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val scheme = TerrainScheme.dummy

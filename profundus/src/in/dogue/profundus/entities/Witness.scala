@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Tile, TileFactory, Animation}
 import scala.util.Random
 import in.dogue.antiqua.Antiqua.{AnimationGroup, Cell}
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -67,7 +67,7 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     normalAnim
   }
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Witness, Cell, Seq[GlobalSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Witness, Cell, Seq[WorldSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val killer = if (dd.mag < 10 && cache.hasLineOfSight(ppos, pos)) {

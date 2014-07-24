@@ -11,7 +11,7 @@ import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.Profundus
 
 class TerrainManager {
-  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[GlobalSpawn], Player) = {
+  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[WorldSpawn], Player) = {
 
     pl.toolPos match {
       case Some(p) =>
@@ -79,7 +79,7 @@ class TerrainManager {
     p.processForces(tc)
   }
 
-  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[GlobalSpawn]) = {
+  def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[WorldSpawn]) = {
     import Profundus._
     val (tryP, gs) = pp.update
     val (dropP, tool) = tryP.updateDropTool(tryP, tcache)
