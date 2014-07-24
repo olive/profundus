@@ -60,9 +60,9 @@ object EntityGenerator {
         Midas.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val all = Vector(lurkers, casques, bats, bee, wasp, witness, beezles)
+      val all = Vector(lurkers, casques, bats, bee, wasp, witness, beezles, midas)
       val (a, b) = ts.color.ways2(all)
-      a ++ b ++ midas
+      a ++ b
     }
     s.ws
   }

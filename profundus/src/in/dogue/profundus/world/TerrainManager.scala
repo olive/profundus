@@ -75,13 +75,17 @@ class TerrainManager {
     p.update(tc)
   }
 
+  private def processForces(tc:TerrainCache, p:Player) = {
+    p.processForces(tc)
+  }
 
   def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     val (tryP, gs, ws) = pp.update
 
     val (tc, drops, oldPl) = updateShovel(tcache, tryP)
     val (movePl, dir) = oldPl.getMove
-    val pl = processFall(tc, updateFacing(movePl.instDir, movePl).toMassive)
+    val pl1 = processFall(tc, updateFacing(movePl.instDir, movePl).toMassive)
+    val pl = processForces(tc, pl1)
     val specPos = dir.map {pl.pos --> _}.getOrElse(pl.pos)
     val newP = if (specPos == pl.pos || tc.isSolid(specPos)) {
       pl

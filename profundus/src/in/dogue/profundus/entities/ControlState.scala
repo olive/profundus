@@ -7,13 +7,15 @@ case class ControlState(isShovelling:Boolean,
                         isBombing:Boolean,
                         isRoping:Boolean,
                         isDropping:Boolean,
-                        isFlaring:Boolean) {
+                        isFlaring:Boolean,
+                        isKicking:Boolean) {
   def update(canUseTool:Boolean) = {
     copy(isShovelling=Controls.Space.justPressed && canUseTool,
          isClimbing=Controls.Action.justPressed,
          isBombing=Controls.Capsule.justPressed,
          isRoping=Controls.Rope.justPressed,
          isDropping=Controls.Drop.justPressed,
-         isFlaring=Controls.Action.justPressed && Controls.Up.isPressed)
+         isFlaring=Controls.Action.justPressed && Controls.Up.isPressed,
+         isKicking=Controls.Kick.justPressed)
   }
 }

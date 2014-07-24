@@ -8,7 +8,7 @@ import Direction.Down
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.{Particle, DeathParticle}
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, Spike, WorldTile}
+import in.dogue.profundus.world._
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.entities.pickups._
 import in.dogue.profundus.entities.pickups.Herb
@@ -17,6 +17,10 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.ui.HudTool
 import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.{Profundus, Game}
+import in.dogue.profundus.entities.pickups.Herb
+import in.dogue.profundus.entities.pickups.Toadstool
+import in.dogue.profundus.entities.pickups.Bark
+import in.dogue.profundus.world.WorldTile
 
 
 object PlayerLog {
@@ -79,7 +83,8 @@ object Player {
            Attributes.create, NoBuff,
            StaminaBar.create(100), HealthBar.create(200),
            shovel, getLive,
-           ControlState(false, false, false, false, false, false),
+           Seq(),
+           ControlState(false, false, false, false, false, false, false),
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
            PlayerLight.create(smallLight, largeLight),
@@ -91,6 +96,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                            attr:Attributes, buff:Buff,
                            stam:StaminaBar, health:HealthBar,
                            shovel:ToolSprite, t:Direction => Tile,
+                           forces:Seq[Force],
                            ctrl:ControlState,
                            inv:Inventory, log:PlayerLog,
                            fall:FallState, state:LivingState, justKilled:Boolean,
@@ -200,7 +206,9 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   def chooseFace(dx:Int, dy:Int):Direction = {
-    if (dx == Direction.Left.dx) {
+    if (forces.length > 0) {
+      face
+    } else if (dx == Direction.Left.dx) {
       Direction.Left
     } else if (dx == Direction.Right.dx) {
       Direction.Right
@@ -214,8 +222,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def getMove:(Player, Option[Direction]) = {
     state match {
-      case Alive => computeMove
-      case Dead => (this, None)
+      case Alive if forces.length == 0 => computeMove
+      case _ => (this, None)
     }
   }
 
@@ -346,6 +354,31 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+ (ij, t(face)) <+< drawShovel
+  }
+
+  def processForces(tc:TerrainCache) = {
+    val newFs = if (ctrl.isKicking && tc.isSolid(pos --> face)) {
+      Seq(Force.constForce(2, 5, face.opposite, 0))
+    } else {
+      Seq()
+    }
+    val fs = if (fall == Grounded) {
+      Seq()
+    } else {
+      forces.filter{!_.isDone} ++ newFs
+    }
+    val (newPl, newForces) = fs.foldLeft((this, Seq[Force]())) { case ((pl, forces), force) =>
+      force.affect(pl.pos, tc).map { case (newPos, dir) =>
+        if (tc.isSolid(newPos)) {
+          pl @@ forces
+        } else {
+          pl.move(newPos, dir, tc.getTouching(newPos)) @@ (force +: forces)
+        }
+
+      }.getOrElse((pl, force +: forces))
+
+    }
+    newPl.copy(forces=newForces.map{_.update})
   }
 
 
