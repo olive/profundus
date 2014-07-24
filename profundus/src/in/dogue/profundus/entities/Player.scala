@@ -349,26 +349,19 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   private def drawShovel(tr:TileRenderer):TileRenderer = {
-    ctrl.isShovelling.select(
-      tr,
-      tr <+< shovel.draw(face)(ij)
-    )
+    tr <+?< (shovel.draw(face)(ij) _).onlyIf(ctrl.isShovelling)
   }
 
-  private def getIcon(fall:Int) = {
-    if (fall > 2*attr.fallDistance) CP437.`‼` else CP437.!
-  }
+
   private def getFall:Int = fall match {
     case Falling(_, tiles) => tiles
     case _ => 0
   }
-  private def getColor(fall:Int):Color = {
-    Color.White.mix(Color.Red.dim(2), ((fall - attr.fallDistance)/(2*attr.fallDistance.toDouble)).clamp(0,1))
-  }
+
 
   private def drawIndicator(tr:TileRenderer):TileRenderer = {
     val fall = getFall
-    tr <|? (ij -| 1, getIcon(fall).mkTile(Color.Black, getColor(fall))).onlyIf(fall >= attr.fallDistance)
+    tr <|? new FallIndicator(ij, fall, attr.fallDistance).render
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
