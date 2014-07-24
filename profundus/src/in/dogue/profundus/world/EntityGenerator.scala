@@ -22,14 +22,14 @@ object EntityGenerator {
         Lurker.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
 
       }.flatten
-      val casques:Seq[Entity[_]] = (0 until 1).map { _ =>
+      val casques:Seq[Entity[_]] = (0 until 100).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
 
         Obelisk.create(pos +| (i * rows), r).onlyIf(!isSolid(pos)
                                                  && !isSolid(pos --> Down)
                                                  && isSolid(pos --> Down --> Down))
 
-      }.flatten
+      }.headOption.toSeq.flatten
       val bats:Seq[Entity[_]] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bat.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
@@ -62,7 +62,7 @@ object EntityGenerator {
 
       val all = Vector(lurkers, casques, bats, bee, wasp, witness, beezles, midas)
       val (a, b) = ts.color.ways2(all)
-      a ++ b
+      a ++ b ++ casques
     }
     s.gs
   }

@@ -148,7 +148,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     SoundManager.item.play()
     copy(attr=attr.collectItem(it))
   }
-  def toolPos = (ctrl.isShovelling && canUseTool).select(None, ((x, y)-->face).some)
+  def toolPos = ((ctrl.isShovelling || Game.hasDrill) && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = hasStamina
 
@@ -180,10 +180,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
   def hitTool(dmg:Int, tileBroken:Boolean) = {
-    if (dmg > 0) {
-      SoundManager.dig.play()
-    } else {
-      SoundManager.swish.play()
+    if (!Game.hasDrill) {
+      if (dmg > 0) {
+        SoundManager.dig.play()
+      } else {
+        SoundManager.swish.play()
+      }
     }
     val prevDur = inv.tool.dura
     val newInv1 = inv.useTool(dmg)

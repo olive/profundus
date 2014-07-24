@@ -81,11 +81,11 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
   def update = {
     if (Controls.Story.justPressed) {
       val f = () => StoryMode.create(cols, rows, getLoadout).toMode
-      CircleTransition.create(cols, rows, this.toMode, f, None).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, "LoadoutMode=>StoryMode").toMode
     } else if (Controls.Space.justPressed) {
       val seed = Game.getSeed
       val f = () => GameMode.create(cols, rows, getLoadout, seed).toMode
-      CircleTransition.create(cols, rows, this.toMode, f, Some(seed)).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, "GameMode, Seed: " + seed).toMode
     } else {
       val (newMode, newS, newP) = sliders(ptr).update(this.toMode, points)
       newMode match {

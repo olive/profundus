@@ -28,7 +28,7 @@ case class StoryMode private (cols:Int, rows:Int, b:Rect, lo:Loadout, arrow:Tile
   def update:Mode[_] = mb.update match {
     case MessageBoxContinue(mb) => copy(mb=mb, t=t+1).toMode
     case MessageBoxComplete(mode) =>
-      CircleTransition.create(cols, rows, this.toMode, mode, None).toMode
+      CircleTransition.create(cols, rows, this.toMode, mode, "StoryMode=>LoadoutMode").toMode
   }
 
   def drawArrow(ij:Cell) = {

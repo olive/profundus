@@ -8,11 +8,12 @@ import in.dogue.antiqua.data.{FutureError, FutureFinished, FutureComputing, Futu
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.utils.FormatExc
 import in.dogue.profundus.audio.SoundManager
+import com.deweyvm.gleany.logging.Logger
 
 object CircleTransition {
-  def create(cols:Int, rows:Int, old:Mode[_], `new`:() => Mode[_], seed:Option[Int]) = {
+  def create(cols:Int, rows:Int, old:Mode[_], `new`:() => Mode[_], msg:String) = {
     val tf = Profundus.tf
-    CircleTransition(cols, rows, old, new Future(`new`), tf.create("LOADING"), 30, CircleIn(0), seed)
+    CircleTransition(cols, rows, old, new Future(`new`), tf.create("LOADING"), 30, CircleIn(0), msg)
   }
 }
 
@@ -26,7 +27,7 @@ case class WaitLoad(t:Int, wlt:Int) extends CircleState { override def getT = t 
 case class CircleOut(t:Int) extends CircleState { override def getT = t }
 case class CircleDone(max:Int) extends CircleState { override def getT = max }
 case class CircleFail(msg:TileGroup) extends CircleState { override def getT = 0 }
-case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Future[Mode[_]], text:Text, max:Int, state:CircleState, seed:Option[Int]) {
+case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Future[Mode[_]], text:Text, max:Int, state:CircleState, msg:String) {
   def update = {
     val newState: CircleState = state match {
       case CircleIn(t) =>
@@ -44,7 +45,8 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Futu
           case FutureComputing => WaitLoad(t, wlt+1)
           case FutureError(e) => {
             val fmt = FormatExc.smallFormat(cols, e)
-            val pre = "Oops, an error occurred.\n\nSeed: %d.\n\n".format(seed.getOrElse(-1))
+            Logger.writeCrashToFile(".", e)
+            val pre = "Oops, an error occurred.\n\n%s\n\n".format(msg)
             val post = "\n\nA detailed log of this error\nhas been saved.\n\nPlease restart profundus."
             CircleFail(Profundus.tf.multiline(pre + fmt + post))
           }

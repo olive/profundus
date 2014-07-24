@@ -35,7 +35,7 @@ case class TitleMode private (cols:Int, rows:Int, border:Border, r:Rect, disclai
   def update:Mode[_] = {
     if (Controls.Space.justPressed) {
       val f = () => LoadoutMode.create(cols, rows, None).toMode
-      CircleTransition.create(cols, rows, this.toMode, f, None).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, "TitleMode=>LoadoutMode").toMode
     } else {
       this.toMode
     }

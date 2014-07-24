@@ -11,10 +11,9 @@ import in.dogue.profundus.Profundus
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.particles.{RingParticle, DeathParticle, Particle, ExplosionParticle}
-import in.dogue.profundus.entities.pickups.ItemPickup
+import in.dogue.profundus.entities.pickups.{ToolPickup, ItemPickup}
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.world.WorldTile
-import in.dogue.profundus.entities.pickups.ItemPickup
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 
@@ -27,7 +26,7 @@ object Obelisk {
     ))
     val light = LightSource.createCircle(ij, 3, 4, 0.5)
     val obelisk = Obelisk(tg, 0)
-    StandardEntity.create[Obelisk](_.update, _.draw, obelisk, light, true, None, 50, r).toEntity(ij)
+    StandardEntity.create[Obelisk](_.update, _.draw, obelisk, light, true, DamageType.Obelisk.some, 50, r).toEntity(ij)
 
   }
 }
@@ -45,7 +44,7 @@ case class Obelisk private (tg:TileGroup, mixAmt:Double) {
       Seq()
     }
     val pickups = if (health <= 0){
-      Seq(ItemPickup(pos, Trampoline).toPickup)
+      Seq(ItemPickup(pos, Trampoline).toPickup, ToolPickup.create(pos |+ 1, Gouge.toTool))
     } else {
       Seq()
     }

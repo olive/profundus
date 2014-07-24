@@ -236,7 +236,12 @@ object GreatWorld {
   def create(worldCols:Int, worldRows:Int, screenCols:Int, screenRows:Int, lo:Loadout, r:Random) = {
     val (cache, spawn, spawnFace, gs1) = TerrainCache.create(worldCols, worldRows, r)
     val (tc, gs2) = cache.checkPositions(spawn)
-    val p = Player.create(spawn, spawnFace, lo)
+    val loadout = if (Game.hasDrill) {
+      lo.copy(`type`=Drill)
+    } else {
+      lo
+    }
+    val p = Player.create(spawn, spawnFace, loadout)
     val em = EntityManager.create(r)
     val tm = new TerrainManager()
     val pm = ParticleManager.create

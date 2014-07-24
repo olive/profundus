@@ -51,7 +51,7 @@ case class ResultMode private (cols:Int, rows:Int, pl:PlayerLog, r:Rect, b:Borde
   def update = {
     if (Controls.Space.justPressed) {
       val f = () => LoadoutMode.create(cols, rows, pl.lo.some).toMode
-      CircleTransition.create(cols, rows, this.toMode, f, None).toMode
+      CircleTransition.create(cols, rows, this.toMode, f, "LoadoutMode=>ResultMode").toMode
     } else {
       this.toMode
     }

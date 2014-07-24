@@ -42,6 +42,19 @@ case object BareHands extends ToolType {
 
 }
 
+case object Drill extends ToolType {
+  override val durability = 50000
+  override val digDamage = 100
+  override val stamCost = 1
+  override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock)
+  override val icon = Tile.makeGroup(Vector(
+    (1, 0, CP437.`[`, Black, Grey),
+    (2, 0, CP437.≡, Black, Grey),
+    (3, 0, CP437.►, Black, Grey)
+  ))
+
+}
+
 case object Gouge extends ToolType {
   override val durability = 5000
   override val digDamage = 1
