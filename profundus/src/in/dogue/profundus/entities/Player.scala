@@ -276,6 +276,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (fpl, ps.gss)
   }
 
+  def setForce(f:Force) = copy(forces=Seq(f))
+
   def updateDropTool(p:Player, tc:TerrainCache):(Player, Seq[Pickup]) = {
     if (ctrl.isDropping && !inv.tool.isBare && face.isHorizontal && !tc.isSolid(pos --> face.opposite)) {
       SoundManager.drop.play()
@@ -353,23 +355,36 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     )
   }
 
+  private def getIcon(fall:Int) = {
+    if (fall > 2*attr.fallDistance) CP437.`‼` else CP437.!
+  }
+  private def getFall:Int = fall match {
+    case Falling(_, tiles) => tiles
+    case _ => 0
+  }
+  private def getColor(fall:Int):Color = {
+    Color.White.mix(Color.Red.dim(2), ((fall - attr.fallDistance)/(2*attr.fallDistance.toDouble)).clamp(0,1))
+  }
+
+  private def drawIndicator(tr:TileRenderer):TileRenderer = {
+    val fall = getFall
+    tr <|? (ij -| 1, getIcon(fall).mkTile(Color.Black, getColor(fall))).onlyIf(fall >= attr.fallDistance)
+  }
+
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+ (ij, t(face)) <+< drawShovel
+    tr <+ (ij, t(face)) <+< drawShovel <+< drawIndicator
   }
 
   def processForces(tc:TerrainCache) = {
     val newFs = if (ctrl.isKicking && tc.isSolid(pos --> face)) {
-      Seq(Force.constForce(2, 15, face.opposite, 0))
+      Seq(Force.constForce(3, 15, face.opposite, 0))
     } else {
       Seq()
     }
-    val fs = if (fall == Grounded) {
-      Seq()
-    } else {
-      forces.filter{!_.isDone} ++ newFs
-    }
+
+    val fs = forces.filter{!_.isDone(fall)} ++ newFs
     val (newPl, newForces) = fs.foldLeft((this, Seq[Force]())) { case ((pl, forces), force) =>
-      force.affect(pl.pos, tc).map { case (newPos, dir) =>
+      force.affect(pl.fall, pl.pos, tc).map { case (newPos, dir) =>
         if (tc.isSolid(newPos)) {
           pl @@ forces
         } else {
@@ -383,6 +398,13 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def resetFall = copy(fall=Grounded)
 
 
-  def toMassive:Massive[Player] = Massive(_.pos, _.move, _.setFallState, fall, this)
+  def toMassive:Massive[Player] = {
+    val f = if (forces.length > 0) {
+      Floating
+    } else {
+      fall
+    }
+    Massive(_.pos, _.move, _.setFallState, f, this)
+  }
   def toLight:LightSource = light.toLightSource(pos)
 }

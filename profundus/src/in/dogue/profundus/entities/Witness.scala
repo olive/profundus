@@ -91,7 +91,7 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     }
     val kz = if (killT == 90) {
 
-      val kill = SingleTileZone(ppos, 150, DamageType.Witness).toZone
+      val kill = SingleTileZone(ppos, 1000, DamageType.Witness).toZone
       Seq(kill).gss
     } else {
       Seq()

@@ -20,7 +20,7 @@ class TerrainManager {
       case None => (tc, Seq(), pl)
     }
   }
-
+  private val climbTime = 5
   private def updateFacing(dir:Direction, pl:Player):Player = {
     pl.setFacing(dir)
   }
@@ -31,13 +31,11 @@ class TerrainManager {
       if (       pl.face == Left
               && tc.isSolid(pl.pos --> Left)
               && !tc.isSolid(pl.pos --> Left --> Up)) {
-        val newPos = pl.pos --> Left --> Up
-        pl.move(newPos, Left, tc.getTouching(newPos))
+        pl.setForce(Force.mkClimbForce(Vector(Up, Left), climbTime))
       } else if (pl.face == Right
               && tc.isSolid(pl.pos --> Right)
               && !tc.isSolid(pl.pos --> Up --> Right)) {
-        val newPos = pl.pos --> Right --> Up
-        pl.move(newPos, Right, tc.getTouching(newPos))
+        pl.setForce(Force.mkClimbForce(Vector(Up, Right), climbTime))
       } else {
         if (pl.hasLongArms) {
           updateLongClimb(tc, pl)
@@ -57,14 +55,12 @@ class TerrainManager {
             && tc.isSolid(pl.pos --> Left)
             && tc.isSolid(pl.pos --> Left --> Up)
             && !tc.isSolid(pl.pos --> Left --> Up --> Up)) {
-      val newPos = pl.pos --> Left --> Up --> Up
-      pl.move(newPos, Left, tc.getTouching(newPos))
+      pl.setForce(Force.mkClimbForce(Vector(Up, Up, Left), climbTime))
     } else if (pl.face == Right
             && tc.isSolid(pl.pos --> Right)
             && tc.isSolid(pl.pos --> Right --> Up)
             && !tc.isSolid(pl.pos --> Right --> Up --> Up)) {
-      val newPos = pl.pos --> Right --> Up --> Up
-      pl.move(newPos, Right, tc.getTouching(newPos))
+      pl.setForce(Force.mkClimbForce(Vector(Up, Up, Right), climbTime))
 
     } else {
       pl
