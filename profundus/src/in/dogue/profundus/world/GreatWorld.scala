@@ -17,6 +17,7 @@ import in.dogue.profundus.input.Controls
 import in.dogue.profundus.audio.{MusicManager, SoundManager}
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.profundus.entities.pickups.Pickup
+import com.deweyvm.gleany.data.Recti
 
 sealed trait WorldSpawn
 case class NewParticles(s:Seq[Particle]) extends WorldSpawn
@@ -207,6 +208,21 @@ object GreatWorld {
     gw.addLights(lights).setDoodads(doods)
   }
 
+  private def filterOffscreen : Update[Unit] = stdName("filterOffscreen") { case (gw, ()) =>
+    val pl = gw.p
+    val r = Recti(0, pl.y, gw.cols, gw.rows)
+    val height = r.height
+    val leeway = 10
+    val rect = Recti(r.x, r.y - (leeway-1)*height, r.width, r.height*10*leeway)
+    val filter = new WorldFilter()
+
+    def f[T]: (Seq[T], (T) => Unloadable[T]) => Seq[T] = filter.filter(rect)
+    val doods = f[Doodad](gw.doodads, _.toUnloadable)
+    val em = gw.em
+    val newEm = em.filter(filter, rect)
+    gw.setDoodads(doods).setEm(newEm)
+  }
+
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
         #+ updateItemUse
@@ -224,6 +240,7 @@ object GreatWorld {
         #+ playerSelfQuit
         #+ updateMusicManager
         #+ addDoodadLights
+        #+ filterOffscreen
       )
   }
 
@@ -246,11 +263,23 @@ object GreatWorld {
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
+    val gw = GreatWorld(worldCols, worldRows, p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], doodads:Seq[Doodad], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager, gb:Option[GameBox]) {
+case class GreatWorld(cols:Int, rows:Int,
+                      p:Player,
+                      em:EntityManager,
+                      mgr:TerrainManager,
+                      pm:ParticleManager,
+                      lm:LightManager,
+                      cache:TerrainCache,
+                      kz:Seq[DamageZone] ,
+                      ds:Seq[Deformation],
+                      doodads:Seq[Doodad],
+                      updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}],
+                      mm:MusicManager,
+                      gb:Option[GameBox]) {
   import GreatWorld._
 
   def setPlayer(pl:Player) = copy(p=pl)

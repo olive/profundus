@@ -12,6 +12,7 @@ import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.audio.SoundManager
+import com.deweyvm.gleany.data.Recti
 
 object EntityManager {
 
@@ -34,6 +35,15 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
                      picks=picks.map{_.update} ++ pickups.flatten,
                      ropes=newRopes.flatten)
     (explode, newEm)
+  }
+
+  def filter(wf:WorldFilter, recti:Recti) = {
+    def f[T]: (Seq[T], (T) => Unloadable[T]) => Seq[T] = wf.filter(recti)
+    val newCaps = f[Capsule](caps, _.toUnloadable)
+    val newRopes = f[Rope](ropes, _.toUnloadable)
+    val newCreatures = f[Entity[_]](cr, _.toUnloadable)
+    val newPickups = f[Pickup](picks, _.toUnloadable)
+    copy(caps=newCaps, cr=newCreatures, picks=newPickups, ropes=newRopes)
   }
 
   def hitRopes(pos:Cell) = {

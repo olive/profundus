@@ -6,6 +6,7 @@ import in.dogue.antiqua.graphics.{Tile, TileRenderer}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.lighting.LightSource
+import com.deweyvm.gleany.data.Recti
 
 object Moon {
   def create(cols:Int, rows:Int, xy:Cell, r:Int) = {
@@ -28,7 +29,7 @@ case class Moon private (ij:Cell, r:Int, light:LightSource, tg:TileGroup, t:Int)
   def update = copy(t=t+1)
 
   def getLight:Option[LightSource] = light.some
-
+  def getPos = ij
   def drawBright(tr:TileRenderer):TileRenderer = {
     val max = r*4
     val draws = for (h <- 0 to r*4; k <- 0 to r*4) yield {
@@ -51,5 +52,5 @@ case class Moon private (ij:Cell, r:Int, light:LightSource, tg:TileGroup, t:Int)
     tr <++ (tg |++| ij) <+< drawBright
   }
 
-  def toDoodad:Doodad = Doodad[Moon](_.update, _.draw, _.getLight, this)
+  def toDoodad:Doodad = Doodad[Moon](_.update, _.draw, _.getLight, _.getPos, this)
 }

@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.world.{WorldSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{Unloadable, WorldSpawn, TerrainCache, WorldTile}
 import in.dogue.antiqua.Antiqua.Cell
 import scala.util.Random
 import in.dogue.profundus.particles.{Particle, DeathParticle}
@@ -52,4 +52,5 @@ case class Entity[T](ij:Cell,
   def getLight = light(self)(pos)
   def getDeathParticle = deathPart(self)(pos)
   def toMassive:Massive[Entity[T]] = Massive(_.pos, _.move, (f:Entity[T]) => f.setFall, getFall, this)
+  def toUnloadable = Unloadable.fromPos[Entity[_]](this, _.pos)
 }

@@ -5,7 +5,7 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.world.TerrainCache
+import in.dogue.profundus.world.{Unloadable, TerrainCache}
 import in.dogue.antiqua.algebra.Monoid
 import in.dogue.profundus.entities.pickups.{Pickup, RopePickup}
 import in.dogue.profundus.audio.SoundManager
@@ -147,6 +147,13 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     tr <+~ top <++ mid <+~ bot
   }
 
+  private def getPos = {
+    state match {
+      case f@FlyUp(src,l,_) => src
+      case d@DropDown(top,_,_) => top
+      case s@Steady(top,_) => top
+    }
+  }
 
   def draw(tr:TileRenderer):TileRenderer = {
     val draw = state match {
@@ -156,4 +163,6 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     }
     tr <+< draw
   }
+
+  def toUnloadable = Unloadable.fromPos[Rope](this, _.getPos)
 }

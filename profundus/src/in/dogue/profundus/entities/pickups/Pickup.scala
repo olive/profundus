@@ -2,7 +2,7 @@ package in.dogue.profundus.entities.pickups
 
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua.Cell
-import in.dogue.profundus.world.WorldTile
+import in.dogue.profundus.world.{Unloadable, WorldTile}
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.{Grounded, Massive, Player, FallState}
 
@@ -70,5 +70,6 @@ trait Pickup   {
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+< dr(self)(ij)
   }
+  def toUnloadable = Unloadable.fromPos[Pickup](this, _.getPos)
 
 }

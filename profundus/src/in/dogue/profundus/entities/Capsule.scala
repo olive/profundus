@@ -7,7 +7,7 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.profundus.particles.{ExplosionParticle, Particle}
 import in.dogue.profundus.deformations.{Deformation, ExplosionDeformation}
-import in.dogue.profundus.world.{WorldSpawn, WorldTile}
+import in.dogue.profundus.world.{Unloadable, WorldSpawn, WorldTile}
 import in.dogue.profundus.entities.damagezones.{DamageZone, ExplosionZone}
 import in.dogue.profundus.Profundus
 
@@ -88,5 +88,5 @@ case class Capsule private (ij:Cell, a:AnimationGroup, fall:FallState, t:Int){
   }
 
   def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, fall, this)
-
+  def toUnloadable = Unloadable.fromPos[Capsule](this, _.pos)
 }

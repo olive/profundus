@@ -26,7 +26,6 @@ class Shop(x:Int, y:Int) {
         WorldTile(scheme.makeEmpty(r))
       }
     }
-    println(yy)
     val sk = Seq(Shopkeeper.create((x, y) |+| ((6, 10)) +| yy, r)).gss
     (newTiles, sk)
   }
