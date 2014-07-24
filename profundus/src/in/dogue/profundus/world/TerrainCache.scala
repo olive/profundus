@@ -17,7 +17,7 @@ object TerrainCache {
   def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
     val copy = new Random(r.nextInt())
     val biome = Stratum.createSurface(r)
-    val (biomep, first, _, _): (Stratum, Terrain, Seq[WorldSpawn], Seq[GlobalSpawn]) = biome.generate(cols, rows, 0, copy)
+    val (biomep, first, _, _) = biome.generate(cols, rows, 0, copy)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
     (cache, first.spawn, first.spawnFace)
   }
@@ -101,7 +101,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
     val index = getIndex(ij)
     val seed = (this, Seq[WorldSpawn](), Seq[GlobalSpawn]())
-    Seq(index+2, index+1, index-1).foldLeft(seed) { case ((map, cs, gs), i) =>
+    Seq(index-1, index+1, index+2).foldLeft(seed) { case ((map, cs, gs), i) =>
       val (next, newCs, newGs) = map.check(i)
       (next, cs ++ newCs, gs ++ newGs)
     }

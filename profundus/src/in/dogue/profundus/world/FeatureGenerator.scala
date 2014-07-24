@@ -154,12 +154,13 @@ object FeatureGenerator {
 
 case class FeatureGenerator[T](private val f:(Int, Int, Int, TerrainScheme, Random, T) => Seq[Feature]) {
   def assemble(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, t:T) = {
+    val screenRect = Recti(2, 2, cols-4, rows-4)
     val feats = f(cols, rows, y, ts, r, t)
     val result = ArrayBuffer[Feature]()
     for (feat <- feats) {
       var foundCollision = false
       for (r <- result) {
-        if (r.intersects(feat)) {
+        if (r.intersects(feat) || !screenRect.containsRect(feat.rect)) {
           foundCollision = true
         }
       }

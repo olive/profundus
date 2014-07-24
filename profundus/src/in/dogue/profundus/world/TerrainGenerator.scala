@@ -11,7 +11,9 @@ object TerrainGenerator {
     val vs:Vector[Double] = (0 until 8).map { (i:Int) => 0.2 * (i/8.toDouble) - 0.2 }.toVector
     val base = ts.color.ways1(vs)
     val incr = 0.2
-    if (d.inRange(base, 1)) {
+    if (ij.x < 2 || ij.x > cols - 3) {
+      ts.makeShaft _
+    } else if (d.inRange(base, 1)) {
       ts.makeEmpty _
     } else if (d.inRange(base - incr, base)) {
       ts.makeDirt _
