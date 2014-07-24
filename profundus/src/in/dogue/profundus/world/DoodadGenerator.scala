@@ -9,6 +9,6 @@ object DoodadGenerator {
   val empty = DoodadGenerator(dummyFunc)
 }
 
-case class DoodadGenerator(f: (TerrainScheme, Array2d[WorldTile], Random) => Seq[Doodad[_]]) {
+case class DoodadGenerator(f: (TerrainScheme, Array2d[WorldTile], Random) => Seq[Doodad]) {
   def generate(ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = f(ts,tiles,r)
 }

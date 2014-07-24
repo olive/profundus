@@ -30,5 +30,5 @@ case class Campfire(ij:Cell, a:Animation, light:LightSource, t:Int) {
     tr <+< a.drawFg(ij)
   }
 
-  def toDoodad:Doodad[Campfire] = Doodad(_.update, _.draw, _.getLight, this)
+  def toDoodad:Doodad = Doodad[Campfire](_.update, _.draw, _.getLight, this)
 }

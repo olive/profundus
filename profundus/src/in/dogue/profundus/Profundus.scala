@@ -61,11 +61,11 @@ object Profundus {
   }
   implicit def creature2NewEntitys(s:Seq[Entity[_]]) = new AugNewEntitys(s)
 
-  class AugNewDoodads(s:Seq[Doodad[_]]) {
+  class AugNewDoodads(s:Seq[Doodad]) {
     def gs = NewDoodads(s)
     def gss = Seq(gs)
   }
-  implicit def doodad2NewDoodads(s:Seq[Doodad[_]]) = new AugNewDoodads(s)
+  implicit def doodad2NewDoodads(s:Seq[Doodad]) = new AugNewDoodads(s)
 
 
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)

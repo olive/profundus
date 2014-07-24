@@ -51,5 +51,5 @@ case class Moon private (ij:Cell, r:Int, light:LightSource, tg:TileGroup, t:Int)
     tr <++ (tg |++| ij) <+< drawBright
   }
 
-  def toDoodad:Doodad[Moon] = Doodad(_.update, _.draw, _.getLight, this)
+  def toDoodad:Doodad = Doodad[Moon](_.update, _.draw, _.getLight, this)
 }

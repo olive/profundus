@@ -24,7 +24,7 @@ case class NewEmitters(s:Seq[Emitter]) extends WorldSpawn
 case class NewDamageZones(s:Seq[DamageZone]) extends WorldSpawn
 case class NewDeformations(s:Seq[Deformation]) extends WorldSpawn
 case class NewMessageBox(mb:GameBox) extends WorldSpawn
-case class NewDoodads(s:Seq[Doodad[_]]) extends WorldSpawn
+case class NewDoodads(s:Seq[Doodad]) extends WorldSpawn
 
 case class NewEntities(s:Seq[Entity[_]]) extends WorldSpawn
 case class NewPickups(s:Seq[Pickup]) extends WorldSpawn
@@ -245,7 +245,7 @@ object GreatWorld {
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], doodads:Seq[Doodad[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager, gb:Option[GameBox]) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], doodads:Seq[Doodad], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager, gb:Option[GameBox]) {
   import GreatWorld._
 
   def setPlayer(pl:Player) = copy(p=pl)
@@ -260,8 +260,8 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setMm(m:MusicManager) = copy(mm=m)
   def addEms(ems:Seq[Emitter]) = copy(pm=pm.addEmitters(ems))
   def setGb(b:GameBox) = copy(gb=b.some)
-  def addDoodads(doods:Seq[Doodad[_]]) = copy(doodads = doodads ++ doods)
-  def setDoodads(doods:Seq[Doodad[_]]) = copy(doodads = doods)
+  def addDoodads(doods:Seq[Doodad]) = copy(doodads = doodads ++ doods)
+  def setDoodads(doods:Seq[Doodad]) = copy(doodads = doods)
   def resetLm = copy(lm = lm.reset)
   def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
