@@ -65,7 +65,7 @@ object Profundus {
 
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
-
+  def seq = Seq()
 
 
   import Monoid._

@@ -80,9 +80,10 @@ class TerrainManager {
   }
 
   def update(tcache:TerrainCache, pp:Player):(TerrainCache, Player, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+    import Profundus._
     val (tryP, gs, ws) = pp.update
-
-    val (tc, drops, oldPl) = updateShovel(tcache, tryP)
+    val (dropP, tool) = tryP.updateDropTool(tryP, tcache)
+    val (tc, drops, oldPl) = updateShovel(tcache, dropP)
     val (movePl, dir) = oldPl.getMove
     val pl1 = processFall(tc, updateFacing(movePl.instDir, movePl).toMassive)
     val pl = processForces(tc, pl1)
@@ -101,6 +102,6 @@ class TerrainManager {
       pl.move(newPos, face, tc.getTouching(newPos))
     }
     val plResult = updateClimb(tc, newP)
-    (tc, plResult, gs, drops ++ ws)
+    (tc, plResult, gs, drops ++ ws ++ tool.wss)
   }
 }

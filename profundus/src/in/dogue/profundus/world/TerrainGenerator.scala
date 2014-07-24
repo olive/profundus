@@ -6,7 +6,9 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object TerrainGenerator {
-
+  def mkEmpty(ts:TerrainScheme, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) = {
+    ts.makeEmpty _
+  }
   def test(ts:TerrainScheme, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) = {
     val vs:Vector[Double] = (0 until 8).map { (i:Int) => 0.2 * (i/8.toDouble) - 0.2 }.toVector
     val base = ts.color.ways1(vs)
@@ -28,6 +30,7 @@ object TerrainGenerator {
   }
 
   def dummy(ts:TerrainScheme) = TerrainGenerator(test)
+  def empty(ts:TerrainScheme) = TerrainGenerator(mkEmpty)
   type Generate = (TerrainScheme, Cell,Int,Int,Int,Double,Random) => (Random => TileType)
 }
 case class TerrainGenerator(mkTile:TerrainGenerator.Generate) {

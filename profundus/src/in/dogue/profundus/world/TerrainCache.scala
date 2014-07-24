@@ -4,7 +4,7 @@ import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.antiqua.data.Direction
+import in.dogue.antiqua.data.{Future, Direction}
 import in.dogue.profundus.entities.{ToolType, Obelisk, Lurker}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
@@ -109,6 +109,7 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   //fixme -- code clones
   private def check(i:Int):(TerrainCache, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
+
     val range = {
       if (i > max) {
         (max+1) to i
@@ -118,6 +119,8 @@ case class TerrainCache private (cols:Int, rows:Int,
         Seq()
       }
     }
+
+
 
     val (newBiome, newMap, newMin, newMax, ws, gs) = {
       val seed = (biome, tMap, Seq[WorldSpawn](), Seq[GlobalSpawn]())

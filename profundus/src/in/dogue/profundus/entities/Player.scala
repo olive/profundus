@@ -259,12 +259,11 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                  health=health.update(newAttr),
                  light=light.update,
                  fall=if(attr.hasWings) Floating else fall)
-    val (newP, drops) = updateDropTool(p)
     val (jkP, ps) = if (justKilled) {
       SoundManager.dead.play()
-      (newP.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
+      (p.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
     } else {
-      (newP, Seq())
+      (p, Seq())
     }
     val fpl = if (ctrl.isFlaring && inv.hasFlare && light.lt <= 0) {
       SoundManager.flare.play()
@@ -272,11 +271,11 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else {
       jkP
     }
-    (fpl, Seq(ps.gs), Seq(drops.ws))
+    (fpl, Seq(ps.gs), Seq())
   }
 
-  private def updateDropTool(p:Player):(Player, Seq[Pickup]) = {
-    if (ctrl.isDropping && !inv.tool.isBare && face.isHorizontal) {
+  def updateDropTool(p:Player, tc:TerrainCache):(Player, Seq[Pickup]) = {
+    if (ctrl.isDropping && !inv.tool.isBare && face.isHorizontal && !tc.isSolid(pos --> face.opposite)) {
       SoundManager.drop.play()
       val newInv = inv.setTool(BareHands.toTool)
       val pickup = ToolPickup.create(pos --> face.opposite, inv.tool)

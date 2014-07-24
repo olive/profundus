@@ -13,7 +13,7 @@ object Game {
   val debug = true
   val fixedSeed = false && debug
   val flyMode   = false && debug
-  val invMode   = false && debug
+  val invMode   = true && debug
   var lightsOff  = false && debug
   val version = "Version 0.0.15"
   val updatePerf = new PerfTrack("World Update")

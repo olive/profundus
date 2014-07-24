@@ -17,7 +17,7 @@ import in.dogue.antiqua.geometry.Circle
 object FeatureGenerator {
 
   private def makeSpikes(num:Int, cols:Int, rows:Int)(ts:TerrainScheme,  r:Random) = {
-    val recti = Recti(0,0,0,0)
+    val recti = Recti(cols/2,rows/2,0,0)
     Seq(Feature(recti, spikes(num)))
 
   }
@@ -34,8 +34,10 @@ object FeatureGenerator {
       val up = get(ij -| 1)
       val (next, isDown) = if (!isDone && r.nextDouble > 0.9) {
         if (down && !up && t.isWalkable) {
+          done += 1
           (WorldTile(ts.makeSpike(Direction.Down)(r)), true)
         } else if (!isDone && up && !down && t.isWalkable) {
+          done += 1
           (WorldTile(ts.makeSpike(Direction.Up)(r)), false)
         } else {
           (t, false)
@@ -131,6 +133,12 @@ object FeatureGenerator {
 
   val dummy = FeatureGenerator[Unit](simple)
 
+
+  private def mkSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:Unit) = {
+    Seq(CaveMouth.skyFeature(cols, rows))
+  }
+  val sky = FeatureGenerator(mkSky)
+
   //(Vector[Seq[Cell]], Circle)
   private def mkSurface(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:(Direction, Vector[Seq[Cell]], Circle)) = {
     Seq(Feature(Recti(0, 0, cols, rows), CaveMouth.createMouth(args._1, args._2, args._3)))
@@ -160,7 +168,7 @@ case class FeatureGenerator[T](private val f:(Int, Int, Int, TerrainScheme, Rand
     for (feat <- feats) {
       var foundCollision = false
       for (r <- result) {
-        if (r.intersects(feat) || !screenRect.containsRect(feat.rect)) {
+        if (feat.rect.area > 0 && (r.intersects(feat) || screenRect.containsRect(feat.rect))) {
           foundCollision = true
         }
       }

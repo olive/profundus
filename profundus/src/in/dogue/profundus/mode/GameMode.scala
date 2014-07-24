@@ -9,6 +9,8 @@ import in.dogue.profundus.world.GreatWorld
 import in.dogue.profundus.input.Controls
 import in.dogue.profundus.lighting.LightManager
 import in.dogue.profundus.{Profundus, Game}
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object GameMode {
   def create(cols:Int, rows:Int, lo:Loadout, seed:Int) = {
@@ -18,11 +20,12 @@ object GameMode {
     val hudHeight = 6
     val gw = GreatWorld.create(worldCols, worldRows, cols, rows, lo, r)
     val hud = Hud.create(cols, hudHeight, gw.p.inv, gw.p.getStamBar, gw.p.getHealthBar)
-    GameMode(cols, rows, gw, hud, r)
+    val help = HelpScreen.create
+    GameMode(cols, rows, gw, hud, help, r)
   }
 }
 
-case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Random) {
+case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, help:HelpScreen, r:Random) {
 
   def update = {
     if (Controls.Pause.justPressed) {
@@ -49,7 +52,7 @@ case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, r:Rando
   def draw(tr:TileRenderer):TileRenderer = {
     tr.withMove(0, hud.height){ t =>
       t <+< gw.draw
-    }.<+<(hud.draw)
+    }.<+<(hud.draw) <+?< (help.draw _).onlyIf(Controls.Help.isPressed)
 
   }
 

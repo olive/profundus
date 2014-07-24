@@ -7,6 +7,7 @@ import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.particles.{DeathParticle, Particle}
 import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.profundus.lighting.LightSource
+import in.dogue.profundus.audio.SoundManager
 
 object StandardEntity {
   def create[T](up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]),
@@ -56,7 +57,12 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cel
     this
   }
 
-  def kill = copy(live=Dead)
+  def kill = {
+    if (live == Alive) {
+      SoundManager.enedie.play()
+    }
+    copy(live=Dead)
+  }
   def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

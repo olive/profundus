@@ -46,7 +46,16 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
     }
     val (newPos, kz) = if (isClose) {
       val isAdjacent = diff.x.abs + diff.y.abs == 1
-      if (isAdjacent) {
+      val inside = diff.x.abs + diff.y.abs == 0
+      if (inside) {
+        val newPos = if (t % 15 == 0) {
+          val found = Direction.All.find(d => !cache.isSolid(pos -->d))
+          found.map { d => pos --> d}.getOrElse(pos)
+        } else {
+          pos
+        }
+        (newPos, Seq())
+      } else if (isAdjacent) {
         val kz = if (t %5 == 0) {
           Seq(SingleTileZone(pos |+| diff, 30, DamageType.Bee).toZone)
         } else {
