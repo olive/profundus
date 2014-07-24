@@ -133,7 +133,7 @@ object FeatureGenerator {
 
   //(Vector[Seq[Cell]], Circle)
   private def mkSurface(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:(Direction, Vector[Seq[Cell]], Circle)) = {
-    Seq(Feature(Recti(0, 0, cols, rows), Terrain.createMouth(args._1, args._2, args._3)))
+    Seq(Feature(Recti(0, 0, cols, rows), CaveMouth.createMouth(args._1, args._2, args._3)))
   }
 
   val surface = FeatureGenerator(mkSurface)
