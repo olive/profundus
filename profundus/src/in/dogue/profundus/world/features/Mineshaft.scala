@@ -4,7 +4,6 @@ import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import com.deweyvm.gleany.data.Recti
-import com.badlogic.gdx.physics.box2d.World
 
 case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
   val rect = Recti(x, y, width, height)
