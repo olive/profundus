@@ -23,11 +23,12 @@ case class WaterDrop private (ij:Cell, j0:Double, j:Double, up:Tile, mid:Tile, d
   import WaterDrop._
   def update(tc:TerrainCache) = {
     val newJ = j0 + 0.5*a*t*t
-    val newIj = (ij.x, (j + (newJ - j).clamp(0,1)).toInt)
+    val newJnorm = j + (newJ - j).clamp(0,1)
+    val newIj = (ij.x, newJnorm.toInt)
     if (tc.isSolid(newIj)) {
       copy(dead=true)
     } else {
-      copy(t=t+1, j=newJ, ij = newIj)
+      copy(t=t+1, j=newJnorm, ij = newIj)
     }
 
   }

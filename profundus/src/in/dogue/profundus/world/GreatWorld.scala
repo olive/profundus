@@ -128,7 +128,6 @@ object GreatWorld {
   private def updateCache : Update[Unit] = stdName("updateTerrain") { case (gw, ()) =>
     val ppos = gw.p.pos
     val cache = gw.cache
-    val em = gw.em
     val (tc, gs) = cache.checkPositions(ppos)
 
     gw.setTc(tc).insertSpawns(gs)
