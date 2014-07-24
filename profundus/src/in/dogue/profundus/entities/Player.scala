@@ -374,9 +374,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
         } else {
           pl.move(newPos, dir, tc.getTouching(newPos)) @@ (force +: forces)
         }
-
       }.getOrElse((pl, force +: forces))
-
     }
     newPl.copy(forces=newForces.map{_.update})
   }
