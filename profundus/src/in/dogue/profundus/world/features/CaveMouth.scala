@@ -14,6 +14,7 @@ import in.dogue.profundus.world.Empty
 import in.dogue.profundus.world.Feature
 import in.dogue.profundus.world.Scheme
 import in.dogue.profundus.Profundus
+import in.dogue.antiqua.data.Direction.Down
 
 object CaveMouth {
   def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
@@ -96,11 +97,21 @@ object CaveMouth {
       val rock = scheme.makeRock _
       val dirt = scheme.makeDirt _
       val pt = (i, j+y)
+      def isLine(p:Cell) = {
+        lines.exists{_.contains(p)}
+      }
+      def lineNear(p:Cell) = {
+        (isLine(p --> Direction.Down)
+          || isLine(p --> Direction.Down --> Direction.Down)
+          || isLine(p --> Direction.Up)
+          || isLine(p --> Direction.Up --> Direction.Up)
+          )
+      }
       val state =
         if (lines.exists{_.contains(pt)} && y == 0) {
           empty
-        } else if (circle.contains((i, j)) && y == 0) {
-          dirt
+        } else if ((lineNear(pt) || circle.contains((i, j))) && y == 0) {
+          rock
         } else if (j + y > rows/2) {
           if (d > 0 || j + y < rows/2 + 4) {
             grass
