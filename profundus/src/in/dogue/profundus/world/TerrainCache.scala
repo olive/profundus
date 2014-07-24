@@ -49,13 +49,13 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   def isRock(ij:Cell):Boolean ={
-    get(ij).map{_.isRock(convert(ij))}.getOrElse(false)
+    get(ij).exists{_.isRock(convert(ij))}
   }
 
-  def mineralize(ij:Cell):TerrainCache = {
+  def mineralize(ij:Cell, seed:Int):TerrainCache = {
     val index = getIndex(ij)
     val converted = convert(ij)
-    val mineraled = tMap(index).mineralize(converted)
+    val mineraled = tMap(index).mineralize(converted, seed)
     copy(tMap=tMap.updated(index, mineraled))
   }
 

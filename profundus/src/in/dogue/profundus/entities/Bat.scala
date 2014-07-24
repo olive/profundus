@@ -53,7 +53,7 @@ case class Bat(a:AnimationGroup) {
         !cache.isSolid(pos --> d)
       }
       move.map{pos --> _}.getOrElse(pos)
-    } else if (!isAdjacent && t % 5 == 0 && cache.hasLineOfSight(pos, ppos)) {
+    } else if (!isAdjacent && t % 14 == 0 && cache.hasLineOfSight(pos, ppos)) {
       val move =  dd.signum
       val res = pos |+| move
       if (!cache.isSolid(res)) {

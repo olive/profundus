@@ -129,7 +129,7 @@ trait Stratum {
     val doodads = dg.generate(ts, newTiles, r) ++ ds
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
     val newBiome = modBiome(yIndex+1, r)
-    (newBiome, Terrain(yIndex*rows, newTiles, doodads, spawn, face), Seq(entities) ++ pickups, gs)
+    (newBiome, Terrain(yIndex*rows, ts, newTiles, doodads, spawn, face), Seq(entities) ++ pickups, gs)
   }
 
 }

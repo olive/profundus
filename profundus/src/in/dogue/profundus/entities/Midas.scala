@@ -14,13 +14,13 @@ import in.dogue.profundus.Profundus
 
 object Midas {
   def create(ij:Cell, r:Random) = {
-    val self = Midas(CP437.`;`.mkTile(Color.Black, Color.Yellow))
+    val self = Midas(CP437.`;`.mkTile(Color.Black, Color.Yellow), r.nextInt())
     val light = LightSource.createCircle(ij, 0, 2, 0.2)
     StandardEntity.create[Midas](_.update, _.draw, self, light, false, None, 1).toEntity(ij)
   }
 }
 
-case class Midas(t:Tile) {
+case class Midas(t:Tile, seed:Int) {
   def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Midas, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
     import Profundus._
     val newPos = if (t % 120 == 0) {
@@ -35,7 +35,7 @@ case class Midas(t:Tile) {
     }
 
     val dz = if (cache.isRock(pos --> Direction.Down)) {
-      Seq(MineralDeformation.create(pos --> Direction.Down).toDeformation).gss
+      Seq(MineralDeformation.create(pos --> Direction.Down, seed).toDeformation).gss
     } else {
       Seq()
     }

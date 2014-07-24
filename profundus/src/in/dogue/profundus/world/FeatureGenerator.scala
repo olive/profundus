@@ -17,39 +17,50 @@ import in.dogue.antiqua.geometry.Circle
 object FeatureGenerator {
 
   private def makeSpikes(num:Int, cols:Int, rows:Int)(ts:TerrainScheme,  r:Random) = {
-    (0 until num) map { i =>
-      val x = r.nextInt(cols)
-      val y = r.nextInt(rows)
-      val recti = Recti(x, y, 1, 1)
+    val recti = Recti(0,0,0,0)
+    Seq(Feature(recti, spikes(num)))
 
-      Feature(recti, spike((x, y)))
-    }
   }
-  private def spike(ij:Cell)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+  private def spikes(num:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+    var done = 0
     import Profundus._
     def get(ij:Cell):Boolean = terrain.getOption(ij
     ).exists{_.isWalkable}
-    val t = terrain.get(ij)
-    val down = get(ij +| 1)
-    val up = get(ij -| 1)
-    val (next, isDown) = if (r.nextDouble > 0.9) {
-      if (down && !up && t.isWalkable) {
-        (WorldTile(ts.makeSpike(Direction.Down)(r)), true)
-      } else if (up && !down && t.isWalkable) {
-        (WorldTile(ts.makeSpike(Direction.Up)(r)), false)
+    val tiles = r.shuffle(terrain.flatten)
+    val tmap = tiles.map { case (ij, t) =>
+      val isDone = done > num
+      val t = terrain.get(ij)
+      val down = get(ij +| 1)
+      val up = get(ij -| 1)
+      val (next, isDown) = if (!isDone && r.nextDouble > 0.9) {
+        if (down && !up && t.isWalkable) {
+          (WorldTile(ts.makeSpike(Direction.Down)(r)), true)
+        } else if (!isDone && up && !down && t.isWalkable) {
+          (WorldTile(ts.makeSpike(Direction.Up)(r)), false)
+        } else {
+          (t, false)
+        }
+
       } else {
         (t, false)
       }
+      val ems = if (r.nextDouble > 0.5 && isDown) {
+        Seq(DropEmitter.create(ij +| y --> Direction.Down, 60 + r.nextInt(60), math.abs(r.nextInt(10000))).toEmitter)
+      } else {
+        Seq()
+      }
+      (ij, (next, ems))
+    }.toMap
 
-    } else {
-      (t, false)
+    val ems = (for ((_, em) <- tmap.values) yield {
+      em
+    }).flatten.toVector
+
+    val newTiles = Array2d.tabulate(cols, rows) { case c =>
+      tmap(c)._1
     }
-    val ems = if (r.nextDouble > 0.5 && isDown) {
-      Seq(DropEmitter.create(ij +| y --> Direction.Down, 60 + r.nextInt(60), math.abs(r.nextInt(10000))).toEmitter)
-    } else {
-      Seq()
-    }
-    (terrain.updated(ij, next), Seq(), Seq(ems.gs))
+
+    (newTiles, Seq(), Seq(ems.gs))
 
   }
 
@@ -113,9 +124,9 @@ object FeatureGenerator {
     val shafts = makeShafts(2, cols, rows)(ts, r)
     val camps = makeCampsites(1, cols, rows)(ts, r)
     val cavern = makeCaverns(1, cols, rows)(ts, r)
-    val all = Vector(spikeWaves, cavern, pits, shafts, camps, spikes)
+    val all = Vector(spikeWaves, cavern, pits, shafts, camps)
     val (a, b, c) = ts.color.ways3(all)
-    a ++ b ++ c
+    a ++ b ++ c ++ spikes
   }
 
   val dummy = FeatureGenerator[Unit](simple)

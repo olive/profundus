@@ -123,7 +123,7 @@ object Terrain {
 
 }
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSome {type T}], spawn:Cell, spawnFace:Direction) {
+case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSome {type T}], spawn:Cell, spawnFace:Direction) {
 
   def getRect = Recti(0, y, tiles.cols, tiles.rows)
   def update = {
@@ -146,9 +146,10 @@ case class Terrain(y:Int, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSom
     t.exists{_.isRock}
   }
 
-  def mineralize(s:Cell):Terrain = {
-    val t = CP437.n.mkTile(Color.Red, Color.Black)
-    val newTiles = tiles.updated(s, WorldTile(Mineral.create(t, t, t.fgColor)))
+  def mineralize(s:Cell, seed:Int):Terrain = {
+    val r = new Random(seed)
+    val t = WorldTile(ts.makeMineral(r))
+    val newTiles = tiles.updated(s, t)
     copy(tiles=newTiles)
   }
 
