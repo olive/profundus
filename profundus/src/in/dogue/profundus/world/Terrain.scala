@@ -18,14 +18,10 @@ import in.dogue.profundus.entities.ToolType
 
 
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], doodads:Seq[Doodad[T] forSome {type T}], spawn:Cell, spawnFace:Direction) {
+case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], spawn:Cell, spawnFace:Direction) {
 
   def getRect = Recti(0, y, tiles.cols, tiles.rows)
-  def update = {
-    val ds = doodads.map{_.update}
-    val lights = doodads.map{_.getLight}
-    (copy(doodads=ds), lights)
-  }
+
   def isSolid(s:Cell):Boolean = {
     val t = tiles.getOption(s)
     !t.exists{_.state.isWalkable}
@@ -49,7 +45,7 @@ case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], doodads:Se
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[GlobalSpawn], Int, Boolean) = {
     val to = tiles.getOption(ij)
     if (!to.exists{_.canBreakBy(ttype.breakable)}) {
       (this, Seq(), 0, false)

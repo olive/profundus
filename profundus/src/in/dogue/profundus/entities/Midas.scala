@@ -5,7 +5,7 @@ import scala.util.Random
 import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -16,12 +16,12 @@ object Midas {
   def create(ij:Cell, r:Random) = {
     val self = Midas(CP437.`;`.mkTile(Color.Black, Color.Yellow), r.nextInt())
     val light = LightSource.createCircle(ij, 0, 2, 0.2)
-    StandardEntity.create[Midas](_.update, _.draw, self, light, false, None, 1).toEntity(ij)
+    StandardEntity.create[Midas](_.update, _.draw, self, light, false, None, 1, r).toEntity(ij)
   }
 }
 
 case class Midas(t:Tile, seed:Int) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Midas, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Midas, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val newPos = if (t % 120 == 0) {
       val dir = Vector(Direction.Left, Direction.Right).randomR(r)
@@ -40,7 +40,7 @@ case class Midas(t:Tile, seed:Int) {
       Seq()
     }
 
-    this @@ newPos @@ dz @@ Seq()
+    this @@ newPos @@ dz
 
   }
 

@@ -26,30 +26,31 @@ object Obelisk {
       (0, 1, CP437.↑.toCode, Color.Black, Color.White)
     ))
     val light = LightSource.createCircle(ij, 3, 4, 0.5)
-    StandardEntity.create[Obelisk](_.update, _.draw, Obelisk(tg, 0), light, true, None, 50).toEntity(ij)
+    val obelisk = Obelisk(tg, 0)
+    StandardEntity.create[Obelisk](_.update, _.draw, obelisk, light, true, None, 50, r).toEntity(ij)
 
   }
 }
 case class Obelisk private (tg:TileGroup, mixAmt:Double) {
   import Profundus._
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Obelisk, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Obelisk, Cell, Seq[GlobalSpawn]) = {
 
     val spawns = if (t > 0 && t % Obelisk.attackTime == 0) {
       SoundManager.pop.play()
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3, DamageType.Obelisk).toZone
-      Seq(Seq(ps).gs, Seq(ex).gs)
+      Seq(ps).gss ++ Seq(ex).gss
     } else {
       Seq()
     }
     val pickups = if (health <= 0){
-      (Seq(ItemPickup(pos, Trampoline).toPickup))
+      Seq(ItemPickup(pos, Trampoline).toPickup)
     } else {
-      (Seq())
+      Seq()
     }
     val mixAmt = (t % Obelisk.attackTime)/Obelisk.attackTime.toDouble
-    (copy(mixAmt = mixAmt), pos, spawns, Seq(pickups.ws))
+    (copy(mixAmt = mixAmt), pos, spawns ++ pickups.gss)
   }
 
   def getTg = {

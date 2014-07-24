@@ -29,9 +29,9 @@ object PickupGenerator {
 }
 
 case class PickupGenerator(private val f:(Int,Int,Int,Array2d[WorldTile], TerrainScheme, Random) => Seq[Pickup]) {
-  def generate(cols:Int, rows:Int, y:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random):Seq[WorldSpawn] = {
+  def generate(cols:Int, rows:Int, y:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random):Seq[GlobalSpawn] = {
     import Profundus._
     val picks = f(cols, rows, y, cache, ts, r)
-    Seq(picks.ws)
+    picks.gss
   }
 }

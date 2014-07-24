@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
 import scala.util.Random
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.data.CP437
@@ -18,12 +18,12 @@ object Beezle {
     val tile = CP437.*.mkTile(Color.Black, Color.Red)
     val hp = 30
     val self = Beezle(tile, hp, false)
-    StandardEntity.create[Beezle](_.update, _.draw, self, light, true, None, hp).toEntity(ij)
+    StandardEntity.create[Beezle](_.update, _.draw, self, light, true, None, hp, r).toEntity(ij)
   }
 }
 
 case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Beezle, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Beezle, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val close = dd.mag < 10
@@ -52,7 +52,7 @@ case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
       (Seq(), false)
     }
 
-    copy(exploded=hasExploded) @@ newPos @@ gs @@ Seq()
+    copy(exploded=hasExploded) @@ newPos @@ gs
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

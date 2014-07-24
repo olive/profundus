@@ -46,10 +46,11 @@ sealed trait LurkerState {
 }
 
 object Lurker {
-  def create(ij:Cell) = {
+  def create(ij:Cell, r:Random) = {
     val tile = CP437.a.mkTile(Color.Black, Color.Yellow)
     val light = LightSource.createCircle(ij, 0, 5, 0.5)
-    StandardEntity.create[Lurker](_.update, _.draw, Lurker(tile, Wander.create), light, false, None, 10).toEntity(ij)
+    val lurker = Lurker(tile, Wander.create)
+    StandardEntity.create[Lurker](_.update, _.draw, lurker, light, false, None, 10, r).toEntity(ij)
   }
 }
 
@@ -124,7 +125,7 @@ case class Lurker private (tile:Tile, state:LurkerState) {
   }
 
 
-  private def update(health:Int, gt:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Lurker, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  private def update(health:Int, gt:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Lurker, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val hasLos = cache.hasLineOfSight(pos, ppos)
     val ns = state match {
@@ -139,7 +140,7 @@ case class Lurker private (tile:Tile, state:LurkerState) {
       case l@LostSight(p, t) => updateLost(pos, l)
       case w@Wander(t) => updateWander(pos, w, cache, r)
     }
-    (newSelf.copy(state = newState), newPos, Seq(attacks.gs), Seq())
+    (newSelf.copy(state = newState), newPos, attacks.gss)
   }
 
   def draw(pos:Cell)(tr:TileRenderer):TileRenderer = {

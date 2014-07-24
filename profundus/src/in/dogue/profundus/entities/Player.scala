@@ -249,7 +249,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (dx != 0 || dy != 0).select(face, chooseFace(dx, dy))
   }
 
-  def update: (Player, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update: (Player, Seq[GlobalSpawn]) = {
     import Profundus._
     val newAttr = buff.process(attr)
     val p = copy(ctrl=ctrl.update(canUseTool),
@@ -271,7 +271,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else {
       jkP
     }
-    (fpl, Seq(ps.gs), Seq())
+    (fpl, ps.gss)
   }
 
   def updateDropTool(p:Player, tc:TerrainCache):(Player, Seq[Pickup]) = {
@@ -357,7 +357,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def processForces(tc:TerrainCache) = {
     val newFs = if (ctrl.isKicking && tc.isSolid(pos --> face)) {
-      Seq(Force.constForce(2, 5, face.opposite, 0))
+      Seq(Force.constForce(2, 15, face.opposite, 0))
     } else {
       Seq()
     }
@@ -371,12 +371,14 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
         if (tc.isSolid(newPos)) {
           pl @@ forces
         } else {
-          pl.move(newPos, dir, tc.getTouching(newPos)) @@ (force +: forces)
+          pl.resetFall.move(newPos, dir, tc.getTouching(newPos)) @@ (force +: forces)
         }
       }.getOrElse((pl, force +: forces))
     }
     newPl.copy(forces=newForces.map{_.update})
   }
+
+  def resetFall = copy(fall=Grounded)
 
 
   def toMassive:Massive[Player] = Massive(_.pos, _.move, _.setFallState, fall, this)

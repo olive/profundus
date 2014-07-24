@@ -10,10 +10,7 @@ import in.dogue.profundus.world._
 import scala.util.Random
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.world.EntitySpawn
 import in.dogue.profundus.particles.Particle
-import in.dogue.profundus.world.PickupSpawn
-import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 
 object EntityManager {
@@ -62,17 +59,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     copy(cr=newCr)
   }
 
-  def addSpawns(spawns:Seq[WorldSpawn]) = {
-    spawns.foldLeft(this) { case (man, sp) =>
-      sp match {
-        case EntitySpawn(cs) => man.spawnEntities(cs)
-        case PickupSpawn(fs) => man.addDrops(fs)
-      }
 
-    }
-  }
-
-  private def spawnEntities(cs:Seq[Entity[_]]) = {
+  def spawnEntities(cs:Seq[Entity[_]]) = {
     copy(cr=cr++cs)
   }
 
@@ -87,7 +75,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     (copy(cr=newCr), ps)
   }
 
-  private def addDrops(gs:Seq[Pickup]) = {
+  def addDrops(gs:Seq[Pickup]) = {
     copy(picks=picks ++ gs)
   }
 
@@ -121,12 +109,12 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     (newPl, copy(picks=newPicks))
   }
 
-  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
-    val (newCr, glob, worl) = cr.map { c =>
-      val thing: ((Entity[T] forSome {type T}, Seq[GlobalSpawn], Seq[WorldSpawn])) = c.update(w, ppos, pState, r)
+  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[GlobalSpawn]) = {
+    val (newCr, glob) = cr.map { c =>
+      val thing: ((Entity[T] forSome {type T}, Seq[GlobalSpawn])) = c.update(w, ppos, pState, r)
       thing
-    }.unzip3
-    (copy(cr=newCr), glob.flatten, worl.flatten)
+    }.unzip
+    (copy(cr=newCr), glob.flatten)
   }
 
   def doGravity(tr:TerrainCache) = {

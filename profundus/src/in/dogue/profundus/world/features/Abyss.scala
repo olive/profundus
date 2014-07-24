@@ -5,7 +5,8 @@ import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import com.deweyvm.gleany.data.Recti
-
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object Abyss {
   val tmx = new TmxMap("abyss", "tiles")
@@ -22,7 +23,7 @@ class Abyss {
 
     }
 
-    (newTiles, Seq(), Seq())
+    newTiles @@ Seq()
   }
 
   def toFeature(cols:Int, rows:Int):Feature = {

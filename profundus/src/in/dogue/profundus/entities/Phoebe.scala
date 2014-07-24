@@ -1,6 +1,6 @@
 package in.dogue.profundus.entities
 
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
 import scala.util.Random
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
@@ -16,14 +16,14 @@ import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.entities.damagezones.DelayedExplosion
 
 object Phoebe {
-  def create(ij:Cell, tbs:Vector[Vector[String]]) = {
+  def create(ij:Cell, tbs:Vector[Vector[String]], r:Random) = {
     val light = LightSource.createCircle(ij, 0, 25, 0.5)
     val mbox = tbs.map{tb => MessageBox.create(Profundus.tf, tb, () => ()) }
     val tile = CP437.P.mkTile(Color.Black, Color.White)
     val arrow = CP437.↑.mkTile(Color.Black, Color.White)
     val hp = 100
     val npc = Phoebe(tile, arrow, mbox, 0, false, false, hp, 0)
-    StandardEntity.create[Phoebe](_.update, _.draw, npc, light, true, DamageType.Phoebe.some, hp).toEntity(ij)
+    StandardEntity.create[Phoebe](_.update, _.draw, npc, light, true, DamageType.Phoebe.some, hp, r).toEntity(ij)
   }
 }
 
@@ -31,7 +31,7 @@ object Phoebe {
 case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, close:Boolean, aggroed:Boolean, maxHealth:Int, t:Int) {
 
   private def getBox = boxes(ptr)
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Phoebe, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Phoebe, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val isClose = (pos |-| ppos).mag < 5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose
@@ -71,7 +71,7 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
       Seq()
     }
     val newSelf = copy(t=t+1, close=isClose, ptr = newPtr, aggroed = health<maxHealth)
-    newSelf @@ newPos @@ (spawn ++ attacks) @@ Seq()
+    newSelf @@ newPos @@ (spawn ++ attacks)
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

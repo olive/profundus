@@ -9,9 +9,11 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.geometry.{Line, Circle}
 import com.deweyvm.gleany.data.Recti
+import in.dogue.profundus.Profundus
 
 case class Campsite(center:Cell, radius:Int) {
   def placeSite(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+    import Profundus._
     val fillDepth = center +| (radius/2)
     val circle = Circle(center, radius)
     val line = Line.bresenham(center.x, center.y, center.x + radius, center.y)
@@ -33,7 +35,7 @@ case class Campsite(center:Cell, radius:Int) {
 
     }
     val siteSpot = center +| yy +| radius/2
-    (newTiles, Seq(Campfire.create(siteSpot).toDoodad), Seq())
+    (newTiles, Seq(Campfire.create(siteSpot).toDoodad).gss)
   }
   def toFeature(cols:Int, rows:Int):Feature = {
     val rect = Recti(center.x - radius/2, center.y - radius/2, radius*2, radius*2)

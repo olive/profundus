@@ -5,12 +5,10 @@ import in.dogue.profundus.particles.{Emitter, Particle}
 import in.dogue.profundus.deformations.Deformation
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
-import sun.io.CharToByteCp437
 import in.dogue.profundus.world._
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.entities.{GameBox, Entity, Obelisk, Lurker}
-import in.dogue.profundus.world.PickupSpawn
 import in.dogue.antiqua.graphics.Border
 import in.dogue.profundus.world.NewParticles
 import in.dogue.profundus.world.NewDeformations
@@ -49,23 +47,29 @@ object Profundus {
     def gs = NewEmitters(s)
     def gss = Seq(gs)
   }
-  implicit def deformations2NewEmitters(s:Seq[Emitter]) = new AugNewEmitters(s)
+  implicit def emitters2NewEmitters(s:Seq[Emitter]) = new AugNewEmitters(s)
 
-  class AugPickupSpawn(s:Seq[Pickup]) {
-    def ws = PickupSpawn(s)
-    def wss = Seq(ws)
+  class AugNewPickups(s:Seq[Pickup]) {
+    def gs = NewPickups(s)
+    def gss = Seq(gs)
   }
-  implicit def pickup2PickupSpawn(s:Seq[Pickup])  = new AugPickupSpawn(s)
+  implicit def pickup2NewPickups(s:Seq[Pickup])  = new AugNewPickups(s)
 
-  class AugEntitySpawn(s:Seq[Entity[_]]) {
-    def ws = EntitySpawn(s)
-    def wss = Seq(ws)
+  class AugNewEntitys(s:Seq[Entity[_]]) {
+    def gs = NewEntities(s)
+    def gss = Seq(gs)
   }
-  implicit def creature2EntitySpawn(s:Seq[Entity[_]]) = new AugEntitySpawn(s)
+  implicit def creature2NewEntitys(s:Seq[Entity[_]]) = new AugNewEntitys(s)
+
+  class AugNewDoodads(s:Seq[Doodad[_]]) {
+    def gs = NewDoodads(s)
+    def gss = Seq(gs)
+  }
+  implicit def doodad2NewDoodads(s:Seq[Doodad[_]]) = new AugNewDoodads(s)
+
 
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
-  def seq = Seq()
 
 
   import Monoid._

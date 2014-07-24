@@ -15,6 +15,8 @@ import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.lighting.{LightSource, LightManager}
 import in.dogue.profundus.input.Controls
 import in.dogue.profundus.audio.{MusicManager, SoundManager}
+import in.dogue.profundus.doodads.Doodad
+import in.dogue.profundus.entities.pickups.Pickup
 
 sealed trait GlobalSpawn
 case class NewParticles(s:Seq[Particle]) extends GlobalSpawn
@@ -22,6 +24,10 @@ case class NewEmitters(s:Seq[Emitter]) extends GlobalSpawn
 case class NewDamageZones(s:Seq[DamageZone]) extends GlobalSpawn
 case class NewDeformations(s:Seq[Deformation]) extends GlobalSpawn
 case class NewMessageBox(mb:GameBox) extends GlobalSpawn
+case class NewDoodads(s:Seq[Doodad[_]]) extends GlobalSpawn
+
+case class NewEntities(s:Seq[Entity[_]]) extends GlobalSpawn
+case class NewPickups(s:Seq[Pickup]) extends GlobalSpawn
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
@@ -114,9 +120,8 @@ object GreatWorld {
     val tm = gw.mgr
     val pp = gw.p
     val cache = gw.cache
-    val (newCache, newP, gs, ws) = tm.update(cache, pp)
-    val newEm = gw.em.addSpawns(ws)
-    gw.setTc(newCache).setPlayer(newP).setEm(newEm).insertSpawns(gs)
+    val (newCache, newP, gs) = tm.update(cache, pp)
+    gw.setTc(newCache).setPlayer(newP).insertSpawns(gs)
   }
 
 
@@ -124,12 +129,9 @@ object GreatWorld {
     val ppos = gw.p.pos
     val cache = gw.cache
     val em = gw.em
-    val (tc, spawns, gs) = cache.checkPositions(ppos)
-    val newEm = em.addSpawns(spawns)
-    val (newTc, newLights) = tc.update(ppos)
-    val lm = gw.lm
+    val (tc, gs) = cache.checkPositions(ppos)
 
-    gw.setTc(newTc).setEm(newEm).setLm(lm.addLights(newLights)).insertSpawns(gs)
+    gw.setTc(tc).insertSpawns(gs)
   }
 
   private def updateEs : Update[Unit] = withName("entityManager") { case (gw, ()) =>
@@ -150,22 +152,20 @@ object GreatWorld {
   private def updateCreatures : Update[Unit] = withName("entities") { case (gw, ()) =>
     val pl = gw.p
     val cache = gw.cache
-    val (newEm, glob, worl) = gw.em.updateCreatures(cache, pl.pos, pl.state)
-    val insertedEm = newEm.addSpawns(worl)
-    (gw.setEm(insertedEm), glob)
+    val (newEm, glob) = gw.em.updateCreatures(cache, pl.pos, pl.state)
+    (gw.setEm(newEm), glob)
   }
 
   private def updateDeformations : Update[Unit] = stdName("deformations") { case (gw, ()) =>
     val ds = gw.ds
     val cache = gw.cache
-    val seed = (cache, Seq[WorldSpawn]())
+    val seed = (cache, Seq[GlobalSpawn]())
     val (deformed, mins) = ds.foldLeft(seed){case ((tc, mins), d) =>
       val (nc, drop, _/*damage from deformations is void*/) = d.apply(tc)
       (nc, drop ++ mins)
     }
-    val newEm = gw.em.addSpawns(mins)
     val newDs = ds.map{_.update}.flatten
-    gw.setDs(newDs).setTc(deformed).setEm(newEm)
+    gw.setDs(newDs).setTc(deformed).insertSpawns(mins)
   }
 
   private def updateParticles : Update[Unit] = stdName("particles") { case (gw, ()) =>
@@ -202,6 +202,12 @@ object GreatWorld {
     gw.setMm(newMm)
   }
 
+  private def addDoodadLights : Update[Unit] = stdName("doodadLights") { case (gw, ()) =>
+    val doods = gw.doodads.map{_.update}
+    val lights = doods.map{_.getLight}.flatten
+    gw.addLights(lights).setDoodads(doods)
+  }
+
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
         #+ updateItemUse
@@ -218,6 +224,7 @@ object GreatWorld {
         #+ killEntities
         #+ playerSelfQuit
         #+ updateMusicManager
+        #+ addDoodadLights
       )
   }
 
@@ -228,18 +235,18 @@ object GreatWorld {
 
 
   def create(worldCols:Int, worldRows:Int, screenCols:Int, screenRows:Int, lo:Loadout, r:Random) = {
-    val (cache, spawn, spawnFace) = TerrainCache.create(worldCols, worldRows, r)
-    val (tc, cs, gs) = cache.checkPositions(spawn)
+    val (cache, spawn, spawnFace, gs1) = TerrainCache.create(worldCols, worldRows, r)
+    val (tc, gs2) = cache.checkPositions(spawn)
     val p = Player.create(spawn, spawnFace, lo)
-    val em = EntityManager.create(r).addSpawns(cs)
+    val em = EntityManager.create(r)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs)
+    val gw = GreatWorld(p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
     allUpdates(gw)
   }
 }
-case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager, gb:Option[GameBox]) {
+case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:ParticleManager, lm:LightManager, cache:TerrainCache, kz:Seq[DamageZone] , ds:Seq[Deformation], doodads:Seq[Doodad[_]], updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}], mm:MusicManager, gb:Option[GameBox]) {
   import GreatWorld._
 
   def setPlayer(pl:Player) = copy(p=pl)
@@ -254,7 +261,10 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
   def setMm(m:MusicManager) = copy(mm=m)
   def addEms(ems:Seq[Emitter]) = copy(pm=pm.addEmitters(ems))
   def setGb(b:GameBox) = copy(gb=b.some)
+  def addDoodads(doods:Seq[Doodad[_]]) = copy(doodads = doodads ++ doods)
+  def setDoodads(doods:Seq[Doodad[_]]) = copy(doodads = doods)
   def resetLm = copy(lm = lm.reset)
+  def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
     gb match {
       case Some(mb) => copy(gb = gb.map(_.update).flatten)
@@ -303,6 +313,9 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
       case NewDeformations(s) => copy(ds=ds++s)
       case NewEmitters(s) => addEms(s)
       case NewMessageBox(gb) => setGb(gb)
+      case NewDoodads(ds) => addDoodads(ds)
+      case NewEntities(cs) => copy(em=em.spawnEntities(cs))
+      case NewPickups(fs) => copy(em=em.addDrops(fs))
     }
   }
 
@@ -352,6 +365,7 @@ case class GreatWorld(p:Player, em:EntityManager,  mgr:TerrainManager, pm:Partic
         <+< em.draw
         <+< p.draw
         <+< pm.draw
+        <++< doodads.map {_.draw _}
     )
   }
 }

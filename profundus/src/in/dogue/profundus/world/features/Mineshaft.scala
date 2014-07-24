@@ -4,6 +4,8 @@ import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import com.deweyvm.gleany.data.Recti
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
   val rect = Recti(x, y, width, height)
@@ -33,7 +35,7 @@ case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
 
     }
 
-    (newTiles, Seq(), Seq())
+    newTiles @@ Seq()
   }
 
   def toFeature(cols:Int, rows:Int):Feature = {

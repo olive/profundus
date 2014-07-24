@@ -62,7 +62,7 @@ object FeatureGenerator {
       tmap(c)._1
     }
 
-    (newTiles, Seq(), Seq(ems.gs))
+    (newTiles, ems.gss)
 
   }
 
@@ -126,9 +126,10 @@ object FeatureGenerator {
     val shafts = makeShafts(2, cols, rows)(ts, r)
     val camps = makeCampsites(1, cols, rows)(ts, r)
     val cavern = makeCaverns(1, cols, rows)(ts, r)
+    val shop = mkShop(cols, rows, y, ts, r, u)
     val all = Vector(spikeWaves, cavern, pits, shafts, camps)
     val (a, b, c) = ts.color.ways3(all)
-    a ++ b ++ c ++ spikes
+    a ++ b ++ c ++ spikes ++ shop
   }
 
   val dummy = FeatureGenerator[Unit](simple)
@@ -145,6 +146,16 @@ object FeatureGenerator {
   }
 
   val surface = FeatureGenerator(mkSurface)
+
+
+  private def mkShop(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:Unit) = {
+    (0 until 10).map { case i =>
+      val x = r.nextInt(cols - 16)
+      val y = r.nextInt(rows - 14)
+      new Shop(x, y).toFeature(cols, rows)
+    }
+
+  }
 
 
   private def mkLair(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:Unit) = {

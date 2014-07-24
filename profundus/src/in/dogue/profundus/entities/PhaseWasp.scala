@@ -6,7 +6,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Animation, TileFactory}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.{Direction, CP437}
 import in.dogue.profundus.lighting.LightSource
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache, WorldTile}
 import in.dogue.profundus.particles.{RingParticle, DeathParticle, Particle}
 import in.dogue.profundus.entities.damagezones.ExplosionZone
 import in.dogue.profundus.Profundus
@@ -32,7 +32,8 @@ object PhaseWasp {
       ((1,0), rightWing)
     )
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    StandardEntity.create[PhaseWasp](_.update, _.draw, PhaseWasp(anim), light, true, DamageType.PhaseWasp.some, 3).toEntity(ij)
+    val wasp = PhaseWasp(anim)
+    StandardEntity.create[PhaseWasp](_.update, _.draw, wasp, light, true, DamageType.PhaseWasp.some, 3, r).toEntity(ij)
   }
 }
 
@@ -43,11 +44,11 @@ case class PhaseWasp(a:AnimationGroup) {
   final val attackTime = 60
 
   private def updateAnim = copy(a=a.smap {_.update})
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (PhaseWasp, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (PhaseWasp, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val diff = ppos |-| pos
     if (diff.mag2 > range*range || pState == Dead) {
-      return (updateAnim, pos, Seq(), Seq())
+      return (updateAnim, pos, Seq())
     }
     val d = diff.signum
     val (newPos, canAttack) = if (t % moveTime == 0) {
@@ -64,12 +65,12 @@ case class PhaseWasp(a:AnimationGroup) {
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3, DamageType.PhaseWasp).toZone
       val df = ExplosionDeformation.create(pos, 5, 8, 3).toDeformation
-      Seq(Seq(ps).gs, Seq(ex).gs, Seq(df).gs)
+      ps.seq.gss ++ ex.seq.gss ++ df.seq.gss
     } else {
       Seq()
     }
 
-    (updateAnim, newPos, gs, Seq())
+    (updateAnim, newPos, gs)
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

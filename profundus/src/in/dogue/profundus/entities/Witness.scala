@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Tile, TileFactory, Animation}
 import scala.util.Random
 import in.dogue.antiqua.Antiqua.{AnimationGroup, Cell}
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -55,7 +55,7 @@ object Witness {
     val (norm, kill) = makeAnims(r)
     val w = Witness(norm, kill, 0)
     val light = LightSource.createCircle(ij, 0, 7, 1)
-    StandardEntity.create[Witness](_.update, _.draw, w, light, true, DamageType.Witness.some, 50).toEntity(ij)
+    StandardEntity.create[Witness](_.update, _.draw, w, light, true, DamageType.Witness.some, 50, r).toEntity(ij)
   }
 }
 
@@ -67,7 +67,7 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     normalAnim
   }
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Witness, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Witness, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val killer = if (dd.mag < 10 && cache.hasLineOfSight(ppos, pos)) {
@@ -98,7 +98,7 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     }
 
     val newSelf = killer.copy(normalAnim.smap { _.update }, killAnim=killAnim.smap { _.update })
-    newSelf @@ newPos @@ kz @@ Seq()
+    newSelf @@ newPos @@ kz
   }
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     tr <++< getAnim.map{ case (c, anim) => anim.drawFg(c |+| ij) _}

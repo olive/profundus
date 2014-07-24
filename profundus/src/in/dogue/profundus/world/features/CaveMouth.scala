@@ -13,11 +13,13 @@ import in.dogue.profundus.world.WorldTile
 import in.dogue.profundus.world.Empty
 import in.dogue.profundus.world.Feature
 import in.dogue.profundus.world.Scheme
+import in.dogue.profundus.Profundus
 
 object CaveMouth {
   def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
 
   def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
+    import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
 
     def skyScheme(dim:Double) = Scheme(
@@ -37,7 +39,7 @@ object CaveMouth {
       WorldTile(night(r))
     }
 
-    (tiles, Seq(), Seq())
+    tiles @@ Seq()
   }
 
 
@@ -62,7 +64,8 @@ object CaveMouth {
   }
 
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
-  : (Array2d[WorldTile], Seq[Doodad[_]], Seq[GlobalSpawn]) = {
+  : (Array2d[WorldTile], Seq[GlobalSpawn]) = {
+    import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     val scheme = TerrainScheme.dummy
     val grassScheme = Scheme(
@@ -114,6 +117,6 @@ object CaveMouth {
     val moon = Moon.create(cols, rows, (3*cols/4-5, -5), 4)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))
-    (tiles, Seq(moon.toDoodad, campfire.toDoodad), Seq())
+    (tiles, Seq(moon.toDoodad, campfire.toDoodad).gss)
   }
 }

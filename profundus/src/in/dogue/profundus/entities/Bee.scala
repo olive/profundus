@@ -6,7 +6,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Animation, TileFactory}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.{Direction, CP437}
 import in.dogue.profundus.lighting.LightSource
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache, WorldTile}
 import in.dogue.profundus.Profundus
 import in.dogue.profundus.particles.{DeathParticle, Particle, RingParticle}
 import in.dogue.profundus.entities.damagezones.{SingleTileZone, ExplosionZone}
@@ -21,7 +21,8 @@ object Bee {
   def create(ij:Cell, r:Random) = {
 
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    StandardEntity.create[Bee](_.update, _.draw, Bee(passive, attacking, passive), light, true, None, 1).toEntity(ij)
+    val bee = Bee(passive, attacking, passive)
+    StandardEntity.create[Bee](_.update, _.draw, bee, light, true, None, 1, r).toEntity(ij)
   }
 }
 
@@ -31,7 +32,7 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
   final val innerRange = 4
   final val attackTime = 60
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Bee, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Bee, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
 
     val newSelf = copy(a = a.update, b = b.update)
@@ -91,7 +92,7 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
 
       //random walk
     }
-    (newSelf.copy(drawAnim=anim), newPos, Seq(kz.gs), Seq())
+    (newSelf.copy(drawAnim=anim), newPos, kz.gss)
   }
 
 

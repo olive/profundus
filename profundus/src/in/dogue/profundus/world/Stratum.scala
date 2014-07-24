@@ -107,7 +107,7 @@ trait Stratum {
 
 
 
-  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
+  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[GlobalSpawn]) = {
     import Profundus._
 
     val (spawn, face, t) = sg.gen(cols, rows, r)
@@ -119,17 +119,17 @@ trait Stratum {
     }
 
 
-    val (newTiles, ds, gs) = fold3(tiles, features) { case (ft, tiles) =>
+    val (newTiles, gs) = fold2(tiles, features) { case (ft, tiles) =>
       ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
     }
 
 
     val pickups = pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
 
-    val doodads = dg.generate(ts, newTiles, r) ++ ds
+    val doodads = dg.generate(ts, newTiles, r).gss
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
     val newBiome = modBiome(yIndex+1, r)
-    (newBiome, Terrain(yIndex*rows, ts, newTiles, doodads, spawn, face), Seq(entities) ++ pickups, gs)
+    (newBiome, Terrain(yIndex*rows, ts, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
   }
 
 }

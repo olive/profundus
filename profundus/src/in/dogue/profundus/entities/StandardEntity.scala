@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{WorldTile, WorldSpawn, GlobalSpawn, TerrainCache}
+import in.dogue.profundus.world.{WorldTile, GlobalSpawn, TerrainCache}
 import scala.util.Random
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.particles.{DeathParticle, Particle}
@@ -10,19 +10,21 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 
 object StandardEntity {
-  def create[T](up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]),
+  def create[T](up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn]),
                 dr:T => Cell => TileRenderer => TileRenderer,
                 self:T,
                 light:LightSource,
                 canFly:Boolean,
                 selfType:Option[DamageType],
-                health:Int) = {
-    StandardEntity[T](up, dr, self, light, Alive, canFly, selfType, health, 0)
+                health:Int,
+                r:Random) = {
+    val startT = r.nextInt.abs
+    StandardEntity[T](up, dr, self, light, Alive, canFly, selfType, health, startT)
   }
 }
 
 
-case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]),
+case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[GlobalSpawn]),
                                       dr:T => Cell => TileRenderer => TileRenderer,
                                       self:T,
                                       light:LightSource,
@@ -31,18 +33,18 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cel
                                       selfType:Option[DamageType],
                                       health:Int,
                                       t:Int) {
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(StandardEntity[T], Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(StandardEntity[T], Cell, Seq[GlobalSpawn]) = {
     if (pState == Dead) {
-      return (copy(t=t+1), pos, Seq(), Seq())
+      return (copy(t=t+1), pos, Seq())
     }
-    val (newSelf, newPos, gs, ws) = up(self)(health, t, pos, cache, ppos, pState, r)
+    val (newSelf, newPos, gs) = up(self)(health, t, pos, cache, ppos, pState, r)
     val newThis = copy(self=newSelf, t=t+1)
     val killed = if (health <= 0) {
       newThis.kill
     } else {
       newThis
     }
-    (killed, newPos, gs, ws)
+    (killed, newPos, gs)
   }
 
   def damage(dmg:Damage) = {

@@ -7,7 +7,8 @@ import in.dogue.profundus.world.{TileType, Feature, WorldTile, TerrainScheme}
 import scala.util.Random
 import com.deweyvm.gleany.data.Recti
 import in.dogue.antiqua.utils.TmxMap
-
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object Lair {
   val tmx = new TmxMap("lair", "tiles")
@@ -24,7 +25,7 @@ class Lair {
 
     }
 
-    (newTiles, Seq(), Seq())
+    newTiles @@ Seq()
   }
 
   def toFeature(cols:Int, rows:Int):Feature = {

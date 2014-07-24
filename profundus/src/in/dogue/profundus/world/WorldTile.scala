@@ -23,7 +23,7 @@ sealed trait TileType {
   val tileClass:TileClass
   val bg:Tile
   val isWalkable:Boolean = false
-  type Update= (TileType, Seq[WorldSpawn], Int, Boolean)
+  type Update= (TileType, Seq[GlobalSpawn], Int, Boolean)
   def hit:(Cell, Int) => Update
   def standard(f:(Cell, Int) => (TileType, Int, Boolean)): (Cell, Int) => Update = { case (ij, dmg) =>
     val (tt, toolDmg, broke) = f(ij, dmg)
@@ -114,7 +114,7 @@ case class Mineral(override val tile:Tile, override val bg:Tile, c:Color, hp:Int
     } else {
       Empty(bg, true)
     }
-    (newTile, Seq(Seq(MineralPickup.create(ij, c).toPickup).ws), toolDamage, newHp <= 0)
+    (newTile, Seq(MineralPickup.create(ij, c).toPickup).gss, toolDamage, newHp <= 0)
   }
 }
 

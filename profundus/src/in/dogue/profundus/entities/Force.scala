@@ -10,9 +10,9 @@ object Force {
   def constForce(amt:Int, time:Int, dir:Direction, t:Int):Force = {
     new Force {
       override def affect(pos: Cell, cache: TerrainCache): Option[(Cell, Direction)] = {
-          (pos --> dir, dir).onlyIf(t % time == 0)
+          (pos --> dir, dir).onlyIf(t % time == 0 && !isDone)
       }
-      override def isDone: Boolean = t > time*amt
+      override def isDone: Boolean = t >= time*amt
       override def update: Force = constForce(amt, time, dir, t+1)
     }
   }

@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.data.{CP437, Direction}
-import in.dogue.profundus.world.{WorldSpawn, GlobalSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache, WorldTile}
 import scala.util.Random
 import in.dogue.profundus.particles.{DeathParticle, Particle, RingParticle}
 import in.dogue.profundus.entities.damagezones.{SingleTileZone, ExplosionZone}
@@ -35,7 +35,7 @@ object Bat {
   def create(ij:Cell, r:Random) = {
     val anim = mkAnim
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    StandardEntity.create[Bat](_.update, _.draw, Bat(anim), light, true, None, 12).toEntity(ij)
+    StandardEntity.create[Bat](_.update, _.draw, Bat(anim), light, true, DamageType.HellBat.some, 12, r).toEntity(ij)
   }
 
 }
@@ -44,7 +44,7 @@ object Bat {
 case class Bat(a:AnimationGroup) {
 
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[GlobalSpawn], Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[GlobalSpawn]) = {
     import Profundus._
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
@@ -81,7 +81,7 @@ case class Bat(a:AnimationGroup) {
     val updated = copy(a=a.smap{_.update})
 
 
-    (updated, newPos, Seq(attack.gs), Seq())
+    (updated, newPos, attack.gss)
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

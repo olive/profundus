@@ -1,7 +1,7 @@
 package in.dogue.profundus.deformations
 
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalSpawn, TerrainCache}
 import in.dogue.profundus.entities.Mattock
 
 object MineralDeformation {
@@ -15,7 +15,7 @@ case class MineralDeformation private (ij:Cell, seed:Int) {
   def update = this
   def isDone = true
 
-  def deform(tc:TerrainCache): (TerrainCache, Seq[WorldSpawn], Int) = {
+  def deform(tc:TerrainCache): (TerrainCache, Seq[GlobalSpawn], Int) = {
     tc.mineralize(ij, seed) @@ Seq() @@ 0
   }
 

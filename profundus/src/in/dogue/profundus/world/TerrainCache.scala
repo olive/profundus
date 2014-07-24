@@ -14,12 +14,12 @@ import in.dogue.profundus.Game
 
 
 object TerrainCache {
-  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction) = {
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction, Seq[GlobalSpawn]) = {
     val copy = new Random(r.nextInt())
     val biome = Stratum.createSurface(r)
-    val (biomep, first, _, _) = biome.generate(cols, rows, 0, copy)
+    val (biomep, first, gs) = biome.generate(cols, rows, 0, copy)
     val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
-    (cache, first.spawn, first.spawnFace)
+    (cache, first.spawn, first.spawnFace, gs)
   }
 }
 case class TerrainCache private (cols:Int, rows:Int,
@@ -85,7 +85,7 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[GlobalSpawn], Int, Boolean) = {
     val index = getIndex(ij)
     val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg, ttype)
     val updated = tMap.updated(index, broke)
@@ -98,17 +98,17 @@ case class TerrainCache private (cols:Int, rows:Int,
     yy/rows
   }
 
-  def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
+  def checkPositions(ij:Cell):(TerrainCache, Seq[GlobalSpawn]) = {
     val index = getIndex(ij)
-    val seed = (this, Seq[WorldSpawn](), Seq[GlobalSpawn]())
-    Seq(index-1, index+1, index+2).foldLeft(seed) { case ((map, cs, gs), i) =>
-      val (next, newCs, newGs) = map.check(i)
-      (next, cs ++ newCs, gs ++ newGs)
+    val seed = (this, Seq[GlobalSpawn]())
+    Seq(index-1, index+1, index+2).foldLeft(seed) { case ((map, gs), i) =>
+      val (next, newGs) = map.check(i)
+      (next, gs ++ newGs)
     }
   }
 
   //fixme -- code clones
-  private def check(i:Int):(TerrainCache, Seq[WorldSpawn], Seq[GlobalSpawn]) = {
+  private def check(i:Int):(TerrainCache, Seq[GlobalSpawn]) = {
 
     val range = {
       if (i > max) {
@@ -122,28 +122,19 @@ case class TerrainCache private (cols:Int, rows:Int,
 
 
 
-    val (newBiome, newMap, newMin, newMax, ws, gs) = {
-      val seed = (biome, tMap, Seq[WorldSpawn](), Seq[GlobalSpawn]())
+    val (newBiome, newMap, newMin, newMax, gs) = {
+      val seed = (biome, tMap, Seq[GlobalSpawn]())
       //fixme -- use fold3
-      val (b, mm, cs, gs) = range.foldLeft(seed) { case ((bm, map, ws, gs), k) =>
-        val (newBiome, next, moreWs, moreGs) = bm.generate(cols, rows, k, r)
-        (newBiome, map.updated(k, next), moreWs ++ ws, moreGs ++ gs)
+      val (b, mm, gs) = range.foldLeft(seed) { case ((bm, map, gs), k) =>
+        val (newBiome, next, moreGs) = bm.generate(cols, rows, k, r)
+        (newBiome, map.updated(k, next), moreGs ++ gs)
       }
-      (b, mm, math.min(min, i), math.max(max, i), cs, gs)
+      (b, mm, math.min(min, i), math.max(max, i), gs)
     }
 
     val newTc = copy(biome = newBiome, tMap=newMap, min=newMin, max=newMax)
-    (newTc, ws, gs)
+    (newTc, gs)
 
-  }
-
-  def update(ij:Cell):(TerrainCache, Seq[LightSource]) = {
-    val seed = (tMap, Seq[LightSource]())
-    val (newTMap, newLights) = Seq(getIndex(ij)-1, getIndex(ij), getIndex(ij)+1).foldLeft(seed) { case ((acc, lights), i) =>
-      val (updated, ls) = acc(i).update
-      (acc.updated(i, updated), lights ++ ls.flatten)
-    }
-    (copy(tMap=newTMap), newLights)
   }
 
   private def get(ij:Cell):Option[Terrain] = {
@@ -160,9 +151,8 @@ case class TerrainCache private (cols:Int, rows:Int,
     )
 
     val onScreen = things.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
-    val doodads = onScreen.map{_.doodads}
     Game.drawPerf.track("terrain") {
-      onScreen.foldLeft(t) { _ <+< _.draw } <++< doodads.flatten.map { _.draw _ }
+      onScreen.foldLeft(t) { _ <+< _.draw }
     }
   }
 }

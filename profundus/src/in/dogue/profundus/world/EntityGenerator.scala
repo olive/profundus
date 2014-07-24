@@ -19,7 +19,7 @@ object EntityGenerator {
     } else {
       val lurkers:Seq[Entity[_]] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
-        Lurker.create(pos +| (i * rows)).onlyIf(!isSolid(pos))
+        Lurker.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
 
       }.flatten
       val casques:Seq[Entity[_]] = (0 until 1).map { _ =>
@@ -62,9 +62,9 @@ object EntityGenerator {
 
       val all = Vector(lurkers, casques, bats, bee, wasp, witness, beezles, midas)
       val (a, b) = ts.color.ways2(all)
-      a ++ b ++ bee
+      a ++ b
     }
-    s.ws
+    s.gs
   }
 
   private def lairFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
@@ -73,11 +73,11 @@ object EntityGenerator {
       val name = "fakeending" + i
       MessageBoxReader.load(name)
     }
-    EntitySpawn(Seq(Phoebe.create(pos, tbs.toVector)))
+    NewEntities(Seq(Phoebe.create(pos, tbs.toVector, r)))
   }
 
   private def emptyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
-    EntitySpawn(Seq())
+    NewEntities(Seq())
   }
 
 
@@ -87,8 +87,8 @@ object EntityGenerator {
   val empty = EntityGenerator(emptyFunc)
 }
 
-case class EntityGenerator(f: (Int,Int,Int,TerrainScheme, Array2d[WorldTile], Random) => EntitySpawn) {
-  def generate(cols:Int, rows:Int, i:Int, ts:TerrainScheme,tiles:Array2d[WorldTile], r:Random):EntitySpawn = {
+case class EntityGenerator(f: (Int,Int,Int,TerrainScheme, Array2d[WorldTile], Random) => GlobalSpawn) {
+  def generate(cols:Int, rows:Int, i:Int, ts:TerrainScheme,tiles:Array2d[WorldTile], r:Random):GlobalSpawn = {
     f(cols, rows, i, ts, tiles, r)
   }
 }
