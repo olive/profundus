@@ -34,7 +34,7 @@ class Spikes(num:Int) {
         if (down && !up && t.isWalkable) {
           done += 1
           tf.mkSpike(ij, Direction.Down) @@ true
-        } else if (false && !isDone && up && !down && t.isWalkable) {
+        } else if (!isDone && up && !down && t.isWalkable) {
           done += 1
           tf.mkSpike(ij, Direction.Up) @@ false
         } else {

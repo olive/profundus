@@ -4,7 +4,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
-import in.dogue.profundus.entities.pickups.{Pickup, MineralPickup}
+import in.dogue.profundus.entities.pickups.MineralPickup
 import in.dogue.profundus.entities.Damage
 import scala.util.Random
 import in.dogue.profundus.Profundus
