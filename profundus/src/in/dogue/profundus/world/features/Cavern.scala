@@ -1,6 +1,6 @@
 package in.dogue.profundus.world.features
 
-import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
+import in.dogue.profundus.world._
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import in.dogue.antiqua.geometry.Circle
@@ -12,22 +12,23 @@ import in.dogue.profundus.world.Feature
 
 case class Cavern(center:Cell, radius:Int) {
   def placeSite(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+    val tf = scheme.toFactory(r)
     val fillDepth = center -| (3*radius/4)
     val circle = Circle(center, radius)
-    val newTiles = terrain.map { case (p, t) =>
+    val (nt, gen) = terrain.map { case (p, t) =>
       val contains = circle.contains(p)
       if (contains && (center |-| p).mag > radius) {
-        WorldTile(scheme.makeDirt(r))
+        tf.mkDirt
       } else if (contains && p.y > fillDepth.y) {
-        WorldTile(scheme.makeEmpty(r))
-        //WorldTile(scheme.makeDirt(r))
+        tf.mkEmpty
       } else if (contains){
-        WorldTile(scheme.makeEmpty(r))
+        tf.mkEmpty
       } else {
-        t
+        t @@ None
       }
 
-    }
+    }.unzip
+    val newTiles = Terrain.merge(nt, gen)
     newTiles @@ Seq()
   }
   def toFeature(cols:Int, rows:Int):Feature = {

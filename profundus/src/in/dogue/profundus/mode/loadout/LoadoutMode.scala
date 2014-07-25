@@ -67,7 +67,7 @@ case class LoadoutMove(nm:Loadout => Mode[_]) extends LoadoutUpdate
 case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:IndexedSeq[LoadoutButton[_]], ptr:Int, ptText:Text, points:Int, r:Rect, pi:PlayerInfo, los:Seq[LoadoutSection]) {
 
   private def move:LoadoutMode = {
-    def play() = SoundManager.blap.play()
+    def play() = SoundManager.blap.playFull()
     Controls.AxisX.zip(15,5) match {
       case 1 if ptr < sliders.length - 1 =>
         play()
@@ -79,10 +79,7 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
     }
   }
   def update = {
-    if (Controls.Story.justPressed) {
-      val f = () => StoryMode.create(cols, rows, getLoadout).toMode
-      CircleTransition.create(cols, rows, this.toMode, f, "LoadoutMode=>StoryMode").toMode
-    } else if (Controls.Space.justPressed) {
+    if (Controls.Space.justPressed) {
       val seed = Game.getSeed
       val f = () => GameMode.create(cols, rows, getLoadout, seed).toMode
       CircleTransition.create(cols, rows, this.toMode, f, "GameMode, Seed: " + seed).toMode

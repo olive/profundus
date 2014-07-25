@@ -15,7 +15,7 @@ case class PlayerLight(small:LightSource, large:LightSource, t:Int, lt:Int) {
   final val flareTime = 60*60
   def update = {
     if (lt == 1) {
-      SoundManager.fdown.play()
+      SoundManager.fdown.playFull()
     }
     copy(t=t+1, lt=lt.drop1)
   }

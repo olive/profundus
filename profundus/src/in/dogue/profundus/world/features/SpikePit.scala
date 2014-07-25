@@ -5,28 +5,28 @@ import in.dogue.antiqua.data.{Array2d, Direction}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
+import in.dogue.profundus.world.{Terrain, Feature, WorldTile, TerrainScheme}
 
 case class SpikePit(x:Int, y:Int, width:Int, height:Int) {
   def placeShaft(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+    val tf = scheme.toFactory(r)
     val shaftStart = yy + r.nextInt(rows/4)
-    val newTiles = terrain.map { case ((i, j), t) =>
+    val (nt, gen) = terrain.map { case ((i, j), t) =>
       val jSpan = j >= y && j <= y + height
       val inShaft = x > i && x < i + width && jSpan
-      val tt = if ((i == x || i  + width - 1 == x) && j + yy > shaftStart && jSpan) {
-        scheme.makeRock2(r).some
+      if ((i == x || i  + width - 1 == x) && j + yy > shaftStart && jSpan) {
+        tf.mkRock2
       } else if (inShaft && j == y + height) {
-        scheme.makeRock(r).some
+        tf.mkRock1
       } else if (inShaft && j == (y + height) - 1) {
-        scheme.makeSpike(Direction.Up)(r).some
+        tf.mkSpike((i, j), Direction.Up)
       } else if (inShaft) {
-        scheme.makeEmpty(r).some
+        tf.mkEmpty
       } else {
-        None
+        t @@ None
       }
-      tt.map(WorldTile.apply).getOrElse(t)
-    }
-
+    }.unzip
+    val newTiles = Terrain.merge(nt, gen)
     newTiles @@ Seq()
   }
   def toFeature(cols:Int, rows:Int):Feature = {

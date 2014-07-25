@@ -15,8 +15,9 @@ class TerrainManager {
 
     pl.toolPos match {
       case Some(p) =>
-        val (wHit, drops, damage, broken) = tc.hit(p, pl.inv.tool.`type`.digDamage/*fixme*/, pl.inv.tool.`type`)
-        (wHit, drops, pl.hitTool(damage, broken))
+        val dmg = Damage(pl.inv.tool.`type`.digDamage/*fixme*/, DamageType.Tool)
+        val (wHit, drops, result) = tc.hit(p, dmg, pl.inv.tool.`type`)
+        (wHit, drops, pl.hitTool(result))
       case None => (tc, Seq(), pl)
     }
   }

@@ -4,14 +4,14 @@ import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.entities.Mattock
+import in.dogue.profundus.entities.{Damage, Mattock}
 
 object ExplosionDeformation {
-  def create(ij:Cell, tickDamage:Int, radius:Int, speed:Int) = {
+  def create(ij:Cell, tickDamage:Damage, radius:Int, speed:Int) = {
     ExplosionDeformation(ij, tickDamage, radius, speed, 0)
   }
 }
-case class ExplosionDeformation private (ij:Cell, tickDamage:Int, radius:Int, speed:Int, t:Int) {
+case class ExplosionDeformation private (ij:Cell, tickDamage:Damage, radius:Int, speed:Int, t:Int) {
   final val i = ij.x
   final val j = ij.y
   def update = copy(t=t+1)
@@ -31,7 +31,7 @@ case class ExplosionDeformation private (ij:Cell, tickDamage:Int, radius:Int, sp
       val seed = (tc, Seq[WorldSpawn]())
       val (newTc, mins) = indices.flatten.foldLeft(seed) { case ((ttc, mins), ij) =>
 
-        val (newTc, drops, _, _) = ttc.hit(ij, tickDamage, Mattock)
+        val (newTc, drops, _) = ttc.hit(ij, tickDamage, Mattock)
         (newTc, mins ++ drops)
 
       }

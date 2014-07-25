@@ -13,6 +13,9 @@ object DamageType {
   case object Player extends DamageType {
     def message = "your own hand"
   }
+  case object Tool extends DamageType {
+    def message = "some tool"
+  }
   val Lurker = Creature("a", "Lurker")
   val HellBat = Creature("a", "Hell Bat")
   val PhaseWasp = Creature("a", "Phase Wasp")

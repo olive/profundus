@@ -41,7 +41,7 @@ case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
     }
 
     val (gs, hasExploded) = if (!exploded && health < maxHealth && pState == Alive) {
-      val `def` = ExplosionDeformation.create(pos, 50, 8, 3).toDeformation
+      val `def` = ExplosionDeformation.create(pos, Damage(50, DamageType.Explosion), 8, 3).toDeformation
 
       val par = ExplosionParticle.create(pos, 8, 3).toParticle
 

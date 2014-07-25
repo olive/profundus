@@ -14,7 +14,7 @@ object MessageBox {
       val lines = tf.textLines(s)
       def play() {
         SoundManager.blip.stop()
-        SoundManager.blip.play()
+        SoundManager.blip.playFull()
       }
       def mkLine(l:Text) = TextLine.create(l, play, c => c != CP437.` `.toCode)
       val textLines = lines.map(mkLine)

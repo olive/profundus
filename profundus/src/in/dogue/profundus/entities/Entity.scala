@@ -38,7 +38,7 @@ case class Entity[T](ij:Cell,
 
   def damage(d:Damage) = {
     if (d.amount > 0 && Game.t - Entity.lastPlayed > 7) {
-      SoundManager.enehit.play()
+      SoundManager.enehit.play(pos)
       Entity.lastPlayed = Game.t
     }
     copy(self=dmg(self)(d))

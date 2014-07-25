@@ -8,7 +8,7 @@ class StepMachine {
   def increment() = {
     i += 1
     if (i % 7 == 0) {
-      SoundManager.step.play()
+      SoundManager.step.playFull()
       i += 1
     }
   }

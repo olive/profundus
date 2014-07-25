@@ -1,35 +1,58 @@
 package in.dogue.profundus.world
 
 import in.dogue.antiqua.graphics.{Tile, TileRenderer}
-import in.dogue.antiqua.data.{Direction,CP437, Array2d}
+import in.dogue.antiqua.data.{Direction,Array2d}
 import scala.util.Random
-import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.antiqua.procgen.PerlinNoise
-import in.dogue.antiqua.geometry.{Circle, Line}
-import in.dogue.profundus.doodads.{Campfire, Doodad, Moon}
-import in.dogue.profundus.entities.pickups.Pickup
 import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.lighting.LightSource
-import in.dogue.profundus.world.features.SpikePit
-import in.dogue.profundus.entities.ToolType
-
-
+import in.dogue.profundus.entities.{Damage, ToolType}
+import in.dogue.profundus.Profundus
+import Profundus._
+object Terrain {
+  def merge(tiles:Array2d[WorldTile], deps:Array2d[Option[Cell]]):Array2d[WorldTile] = {
+    val depMap = deps.flatten.map { case (cell, optCell) =>
+      optCell map { dest => (cell, dest)}
+    }.flatten.toMap
+    val myMap = collection.mutable.Map[Cell,WorldTile]()
+    for (i <- 0 until tiles.cols; j <- 0 until tiles.rows) yield {
+      val p = (i,j)
+      depMap.get(p) match {
+        case Some(dep) =>
+          val tt: WorldTile = myMap.get(dep) match {
+            case Some(t) => t.addDep(p)
+            case None => tiles.getOption(dep).map { _.addDep(p)}.getOrElse(tiles.get(p))
+          }
+          myMap(dep) = tt
+        case None =>
+          if (!myMap.contains(p)) {
+            myMap(p) = tiles.get(p)
+          }
+      }
+    }
+    Array2d.tabulate(tiles.cols, tiles.rows) { case p =>
+      myMap.get(p).getOrElse(tiles.get(p))
+    }
+  }
+}
 
 /* DONT FORGET TO ADD y TO SPAWN VALUES! */
-case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], spawn:Cell, spawnFace:Direction) {
+case class Terrain(y:Int, tf:WorldTileFactory, tiles:Array2d[WorldTile], spawn:Cell, spawnFace:Direction) {
 
   def getRect = Recti(0, y, tiles.cols, tiles.rows)
 
+  private def updated(ij:Cell, wt:WorldTile) = {
+    copy(tiles = tiles.updated(ij, wt))
+  }
+
   def isSolid(s:Cell):Boolean = {
     val t = tiles.getOption(s)
-    !t.exists{_.state.isWalkable}
+    !t.exists{_.isWalkable}
   }
 
   def isBackgroundSolid(s:Cell):Boolean = {
     val t = tiles.getOption(s)
-    t.exists{_.state.bgSolid}
+    t.exists{_.isBgSolid}
   }
 
   def isRock(s:Cell):Boolean = {
@@ -37,23 +60,34 @@ case class Terrain(y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], spawn:Cell
     t.exists{_.isRock}
   }
 
-  def mineralize(s:Cell, seed:Int):Terrain = {
-    val r = new Random(seed)
-    val t = WorldTile(ts.makeMineral(r))
+  def mineralize(s:Cell):Terrain = {
+
+    val t = tf.mkMineral._1//fixme
     val newTiles = tiles.updated(s, t)
     copy(tiles=newTiles)
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(Terrain, Seq[WorldSpawn], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Damage, ttype:ToolType):(Terrain, Seq[WorldSpawn], HitResult) = {
     val to = tiles.getOption(ij)
     if (!to.exists{_.canBreakBy(ttype.breakable)}) {
-      (this, Seq(), 0, false)
+      (this, Seq(), HitResult(false, 0, 0))
     } else {
       val t = to.get//fixme
-      val (newState, drops, damage, broken) = t.state.hit(ij +| y, dmg)
-      val newT = copy(tiles=tiles.update(ij, _.copy(state=newState)))
-      (newT, drops, damage, broken)
+      println(t.dependents.length)
+      val (newTile, drops, result) = t.hit(tf, ij +| y, dmg)
+      val newT = copy(tiles=tiles.updated(ij, newTile))
+      if (result.broken) {
+        val (newTiles, gs) = fold2[Terrain, Seq[WorldSpawn], Cell](newT, t.dependents) { case (dep, terrain: Terrain) =>
+          val t = terrain.tiles.get(dep)
+          val (mod, gs) = t.notifyTile(tf, dep)
+          (terrain.updated(dep, mod), gs)
+        }
+        (newTiles, drops ++ gs, result)
+      } else {
+        (newT, drops, result)
+
+      }
     }
 
   }

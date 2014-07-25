@@ -60,7 +60,7 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
 
 
     val attacks = if (aggroed && t % 5 == 0) {
-      SoundManager.pew.play()
+      SoundManager.pew.play(pos)
       val x = r.nextInt(30) - 15
       val y = r.nextInt(30) - 15
       val dst = (x, y) |+| pos

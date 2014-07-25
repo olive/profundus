@@ -60,10 +60,7 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cel
   }
 
   def kill = {
-    if (live == Alive) {
-      SoundManager.enedie.play()
-    }
-    copy(live=Dead)
+    copy(live= Dead)
   }
   def getDeathParticle(ij:Cell):Particle = DeathParticle.create(ij, 60).toParticle
 

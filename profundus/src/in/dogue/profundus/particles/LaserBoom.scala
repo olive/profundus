@@ -21,7 +21,10 @@ object LaserBoom {
 case class LaserBoom private (poses:Vector[Cell], tile:Tile, speed:Int, t:Int) {
   def update(tc:TerrainCache) = {
     if (t == speed* poses.length) {
-      SoundManager.pow.play()
+      poses.lastOption.foreach { cell =>
+        SoundManager.pow.play(cell)
+      }
+
     }
     copy(t=t+1)
   }

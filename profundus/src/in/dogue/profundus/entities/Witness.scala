@@ -87,7 +87,7 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
       pos
     }
     if (killT == 70) {
-      SoundManager.petrify.play()
+      SoundManager.petrify.playFull()
     }
     val kz = if (killT == 90) {
 

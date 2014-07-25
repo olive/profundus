@@ -1,6 +1,6 @@
 package in.dogue.profundus.world.features
 
-import in.dogue.profundus.world.{Feature, WorldTile, TerrainScheme}
+import in.dogue.profundus.world.{Terrain, Feature, WorldTile, TerrainScheme}
 import in.dogue.antiqua.data.{Direction, Array2d}
 import scala.util.Random
 import in.dogue.antiqua.geometry.{Line, Circle}
@@ -9,32 +9,35 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 case class SpikeWave(xy:Cell, width:Int, height:Int, wave:Int => Int) {
   def placeSite(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
+    val tf = scheme.toFactory(r)
     val x = xy.x
     val y = xy.y
-    val newTiles = terrain.map { case ((i, j), t) =>
+    val (nt, deps) = terrain.map { case ((i, j), t) =>
       val wv = wave(i) + y
       val iRange = i > x && i < x + width
       if (!iRange) {
-        t
+        t @@ None
       } else if (wv == j - 1) {
-        WorldTile(scheme.makeRock(r))
+        tf.mkRock1
       } else if (wv == j) {
-        WorldTile(scheme.makeSpike(Direction.Up)(r))
+        tf.mkSpike((i,j), Direction.Up)
       } else if (wv == j + height + 1) {
-        WorldTile(scheme.makeRock(r))
+        tf.mkRock1
       } else if (wv == j + height) {
-        WorldTile(scheme.makeSpike(Direction.Down)(r))
+        tf.mkSpike((i,j), Direction.Down)
       } else if (wv > j && wv < j + height) {
         if (r.nextDouble < 0.1 && wv > j + 3 && wv < j + height - 3) {
-          WorldTile(scheme.makeRock(r))
+          tf.mkRock1
         } else {
-          WorldTile(scheme.makeEmpty(r))
+          tf.mkEmpty
         }
       } else  {
-        t
+        t @@ None
       }
 
-    }
+    }.unzip
+
+    val newTiles = Terrain.merge(nt, deps)
 
     newTiles @@ Seq()
   }

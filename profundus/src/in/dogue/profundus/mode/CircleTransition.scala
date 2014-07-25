@@ -32,7 +32,7 @@ case class CircleTransition private (cols:Int, rows:Int, old:Mode[_], `new`:Futu
     val newState: CircleState = state match {
       case CircleIn(t) =>
         if (t == 0) {
-          SoundManager.wipe.play()
+          SoundManager.wipe.playFull()
         }
         if (t > max/2) {
           WaitLoad(t+1, 0)

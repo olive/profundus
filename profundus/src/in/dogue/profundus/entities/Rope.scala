@@ -27,7 +27,7 @@ case class FlyUp private (private val src:Cell, len:Int, t:Int) extends RopeStat
 
 object DropDown {
   def create(top:Cell) = {
-    SoundManager.stuck.play()
+    SoundManager.stuck.play(top)
     DropDown(top, 0, 0)
   }
 }

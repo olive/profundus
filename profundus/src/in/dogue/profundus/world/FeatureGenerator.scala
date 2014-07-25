@@ -16,55 +16,7 @@ import in.dogue.antiqua.geometry.Circle
 
 object FeatureGenerator {
 
-  private def makeSpikes(num:Int, cols:Int, rows:Int)(ts:TerrainScheme,  r:Random) = {
-    val recti = Recti(cols/2,rows/2,0,0)
-    Seq(Feature(recti, spikes(num)))
 
-  }
-  private def spikes(num:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
-    var done = 0
-    import Profundus._
-    def get(ij:Cell):Boolean = terrain.getOption(ij
-    ).exists{_.isWalkable}
-    val tiles = r.shuffle(terrain.flatten)
-    val tmap = tiles.map { case (ij, t) =>
-      val isDone = done > num
-      val t = terrain.get(ij)
-      val down = get(ij +| 1)
-      val up = get(ij -| 1)
-      val (next, isDown) = if (!isDone && r.nextDouble > 0.9) {
-        if (down && !up && t.isWalkable) {
-          done += 1
-          (WorldTile(ts.makeSpike(Direction.Down)(r)), true)
-        } else if (!isDone && up && !down && t.isWalkable) {
-          done += 1
-          (WorldTile(ts.makeSpike(Direction.Up)(r)), false)
-        } else {
-          (t, false)
-        }
-
-      } else {
-        (t, false)
-      }
-      val ems = if (r.nextDouble > 0.5 && isDown) {
-        Seq(DropEmitter.create(ij +| y --> Direction.Down, 60 + r.nextInt(60), math.abs(r.nextInt(10000))).toEmitter)
-      } else {
-        Seq()
-      }
-      (ij, (next, ems))
-    }.toMap
-
-    val ems = (for ((_, em) <- tmap.values) yield {
-      em
-    }).flatten.toVector
-
-    val newTiles = Array2d.tabulate(cols, rows) { case c =>
-      tmap(c)._1
-    }
-
-    (newTiles, ems.gss)
-
-  }
 
   private def makePits(num:Int, cols:Int, rows:Int)(ts:TerrainScheme, r:Random) = {
     val width = 13
@@ -122,7 +74,7 @@ object FeatureGenerator {
   def simple(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, u:Unit) = {
     val spikeWaves = makeSpikeWaves(1, cols, rows)(ts, r)
     val pits = makePits(3, cols, rows)(ts, r)
-    val spikes = makeSpikes(1000, cols, rows)(ts, r)
+    val spikes = Seq(new Spikes(1000).toFeature(cols, rows))
     val shafts = makeShafts(2, cols, rows)(ts, r)
     val camps = makeCampsites(1, cols, rows)(ts, r)
     val cavern = makeCaverns(1, cols, rows)(ts, r)

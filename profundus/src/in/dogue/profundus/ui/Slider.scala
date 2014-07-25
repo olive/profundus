@@ -33,7 +33,7 @@ case class Slider private (ij:Cell,
   final val j = ij.y
   val realCost = cost*incr
   def update(m:Mode[_], rem:Int):(LoadoutUpdate, Slider, Int) = {
-    def play() = SoundManager.clack.play()
+    def play() = SoundManager.clack.playFull()
     val (slide, remaining) = Controls.AxisY.zip(15,3) match {
       case -1 if rem >= realCost && value < max =>
         play()

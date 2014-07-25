@@ -64,7 +64,7 @@ case class PhaseWasp(a:AnimationGroup) {
     val gs = if (canAttack && t % attackTime == 0) {
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3, DamageType.PhaseWasp).toZone
-      val df = ExplosionDeformation.create(pos, 5, 8, 3).toDeformation
+      val df = ExplosionDeformation.create(pos, Damage(1, DamageType.PhaseWasp), 8, 3).toDeformation
       ps.seq.gss ++ ex.seq.gss ++ df.seq.gss
     } else {
       Seq()

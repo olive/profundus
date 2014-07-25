@@ -4,36 +4,37 @@ import scala.util.Random
 import in.dogue.antiqua.Antiqua.Cell
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.antiqua.Antiqua.Cell
 
 object TerrainGenerator {
-  def mkEmpty(ts:TerrainScheme, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) = {
-    ts.makeEmpty _
+  def mkEmpty(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random):(WorldTile, Option[Cell]) = {
+    tf.mkEmpty
   }
-  def test(ts:TerrainScheme, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) = {
+  def test(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random): (WorldTile, Option[Cell]) = {
     val vs:Vector[Double] = (0 until 8).map { (i:Int) => 0.2 * (i/8.toDouble) - 0.2 }.toVector
     val base = ts.color.ways1(vs)
     val incr = 0.2
     if (ij.x < 2 || ij.x > cols - 3) {
-      ts.makeShaft _
+      tf.mkShaft
     } else if (d.inRange(base, 1)) {
-      ts.makeEmpty _
+      tf.mkEmpty
     } else if (d.inRange(base - incr, base)) {
-      ts.makeDirt _
+      tf.mkDirt
     } else if (d.inRange(base - incr*2, base - incr)) {
-      ts.makeClay _
+      tf.mkClay
     } else if (d.inRange(base - incr*3, base - incr*2)) {
-      ts.makeRock _
+      tf.mkRock1
     } else {
-      ts.makeRock2 _
+      tf.mkRock2
     }
 
   }
 
   def dummy(ts:TerrainScheme) = TerrainGenerator(test)
   def empty(ts:TerrainScheme) = TerrainGenerator(mkEmpty)
-  type Generate = (TerrainScheme, Cell,Int,Int,Int,Double,Random) => (Random => TileType)
+  type Generate = (TerrainScheme, WorldTileFactory, Cell,Int,Int,Int,Double,Random) => (WorldTile, Option[Cell])
 }
 case class TerrainGenerator(mkTile:TerrainGenerator.Generate) {
-  def generate(ts:TerrainScheme, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) =
-    mkTile(ts, ij, y, cols, rows, d, r)
+  def generate(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) =
+    mkTile(ts, tf, ij, y, cols, rows, d, r)
 }

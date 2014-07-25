@@ -5,7 +5,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.{Future, Direction}
-import in.dogue.profundus.entities.{ToolType, Obelisk, Lurker}
+import in.dogue.profundus.entities.{Damage, ToolType, Obelisk, Lurker}
 import in.dogue.antiqua.geometry.Line
 import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
 import in.dogue.profundus.lighting.LightSource
@@ -52,10 +52,10 @@ case class TerrainCache private (cols:Int, rows:Int,
     get(ij).exists{_.isRock(convert(ij))}
   }
 
-  def mineralize(ij:Cell, seed:Int):TerrainCache = {
+  def mineralize(ij:Cell):TerrainCache = {
     val index = getIndex(ij)
     val converted = convert(ij)
-    val mineraled = tMap(index).mineralize(converted, seed)
+    val mineraled = tMap(index).mineralize(converted)
     copy(tMap=tMap.updated(index, mineraled))
   }
 
@@ -85,11 +85,11 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
 
-  def hit(ij:Cell, dmg:Int, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], Int, Boolean) = {
+  def hit(ij:Cell, dmg:Damage, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], HitResult) = {
     val index = getIndex(ij)
-    val (broke, dropped, damage, broken) = tMap(index).hit(convert(ij), dmg, ttype)
+    val (broke, dropped, result) = tMap(index).hit(convert(ij), dmg, ttype)
     val updated = tMap.updated(index, broke)
-    (copy(tMap=updated), dropped, damage, broken)
+    (copy(tMap=updated), dropped, result)
   }
 
   private def getIndex(ij:Cell) = {

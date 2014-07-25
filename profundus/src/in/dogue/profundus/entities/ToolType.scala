@@ -46,7 +46,7 @@ case object Drill extends ToolType {
   override val durability = 50000
   override val digDamage = 100
   override val stamCost = 1
-  override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock)
+  override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock1, TileClass.Rock2, TileClass.Rock3)
   override val icon = Tile.makeGroup(Vector(
     (1, 0, CP437.`[`, Black, Grey),
     (2, 0, CP437.≡, Black, Grey),
@@ -84,7 +84,7 @@ case object Mallet extends ToolType {
   override val durability = 2000
   override val digDamage = 5
   override val stamCost = 15
-  override val breakable = Seq(TileClass.Dirt, TileClass.Rock)
+  override val breakable = Seq(TileClass.Dirt, TileClass.Rock1, TileClass.Rock2)
   override val icon = Tile.makeGroup(Vector(
     (1, 0, CP437.`─`, Black, Brown),
     (2, 0, CP437.`─`, Black, Brown),
@@ -95,7 +95,7 @@ case object Mattock extends ToolType {
   override val durability = 500
   override val digDamage = 5
   override val stamCost = 10
-  override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock)
+  override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock1, TileClass.Rock2, TileClass.Rock3)
   override val icon = Tile.makeGroup(Vector(
     (1, 0, CP437.`─`, Black, Brown),
     (2, 0, CP437.`─`, Black, Brown),

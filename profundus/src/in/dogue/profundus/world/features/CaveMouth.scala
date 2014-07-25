@@ -15,11 +15,13 @@ import in.dogue.profundus.world.Feature
 import in.dogue.profundus.world.Scheme
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.data.Direction.Down
+import scala.collection.immutable.Stream
+import in.dogue.antiqua.graphics.Tile
 
 object CaveMouth {
   def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
 
-  def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
+  def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random): (Array2d[WorldTile], Seq[WorldSpawn]) = {
     import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
 
@@ -29,15 +31,14 @@ object CaveMouth {
     )
     def makeSky(dim:Double)(r:Random) = {
       val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
-      val night = skyScheme(dim).mkTile(r, skyCode)
-      Empty(night, false)
+      val night: Tile = skyScheme(dim).mkTile(r, skyCode)
+      WorldTile(night, Empty(false), TileClass.Invincible, 1, 0, 0, _ => Seq(), Seq())
     }
 
     val tiles = noise.map { case ((i, j), d) =>
       val dim = (j + y*rows) / (cols*2).toDouble
-      val night = makeSky(dim) _
+       makeSky(dim)(r)
 
-      WorldTile(night(r))
     }
 
     tiles @@ Seq()
@@ -68,7 +69,7 @@ object CaveMouth {
   : (Array2d[WorldTile], Seq[WorldSpawn]) = {
     import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
-    val scheme = TerrainScheme.dummy
+    //val scheme = TerrainScheme.dummy
     val grassScheme = Scheme(
       (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),
       (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(1 + r.nextDouble)
@@ -81,21 +82,19 @@ object CaveMouth {
     def makeSky(dim:Double)(r:Random) = {
       val skyCode = Vector((1, CP437.`.`), (1, CP437.`'`), (50, CP437.` `)).expand.randomR(r)
       val night = skyScheme(dim).mkTile(r, skyCode)
-      Empty(night, false)
+      WorldTile(night, Empty(false), TileClass.Invincible, 1, 0, 0, _ => Seq(), Seq())
     }
 
     def makeGrass(yj:Int, rows:Int)(r:Random) = {
       val grassTile = grassScheme.mkTile(r, CP437.█)
-      val empty = scheme.emptyTile(r)
-      Dirt.create(grassTile, empty)
+      WorldTile(grassTile, Dirt, TileClass.Dirt, 1, 1, 0, _ => Seq(), Seq())
+
     }
-    val tiles = noise.map { case ((i, j), d) =>
+    val tf = ts.toFactory(r)
+    val (nt, gen) = noise.map { case ((i, j), d) =>
       val dim = (j + y) / (cols*2).toDouble
       val night = makeSky(dim) _
       val grass = makeGrass(j + y, rows) _
-      val empty = scheme.makeEmpty _
-      val rock = scheme.makeRock _
-      val dirt = scheme.makeDirt _
       val pt = (i, j+y)
       def isLine(p:Cell) = {
         lines.exists{_.contains(p)}
@@ -107,24 +106,24 @@ object CaveMouth {
           || isLine(p --> Direction.Up --> Direction.Up)
           )
       }
-      val state =
-        if (lines.exists{_.contains(pt)} && y == 0) {
-          empty
-        } else if ((lineNear(pt) || circle.contains((i, j))) && y == 0) {
-          rock
-        } else if (j + y > rows/2) {
-          if (d > 0 || j + y < rows/2 + 4) {
-            grass
-          } else if (d < -0.4) {
-            rock
-          } else {
-            dirt
-          }
+      if (lines.exists{_.contains(pt)} && y == 0) {
+        tf.mkEmpty
+      } else if ((lineNear(pt) || circle.contains((i, j))) && y == 0) {
+        tf.mkRock1
+      } else if (j + y > rows/2) {
+        if (d > 0 || j + y < rows/2 + 4) {
+          grass(r) @@ None
+        } else if (d < -0.4) {
+          tf.mkRock1
         } else {
-          night
+          tf.mkDirt
         }
-      WorldTile(state(r))
-    }
+      } else {
+        night(r) @@ None
+      }
+
+    }.unzip
+    val tiles = Terrain.merge(nt, gen)
     val moon = Moon.create(cols, rows, (3*cols/4-5, -5), 4)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))

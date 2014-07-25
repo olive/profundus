@@ -64,7 +64,7 @@ case class Capsule private (ij:Cell, a:AnimationGroup, fall:FallState, t:Int){
   }
 
   private def makeDeformation = {
-    ExplosionDeformation.create(ij, 1, 8, 3).toDeformation
+    ExplosionDeformation.create(ij, Damage(1, DamageType.Explosion), 8, 3).toDeformation
   }
 
   private def makeParticle = {

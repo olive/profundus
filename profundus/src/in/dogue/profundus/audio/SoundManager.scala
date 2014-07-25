@@ -1,9 +1,23 @@
 package in.dogue.profundus.audio
 
 import com.deweyvm.gleany.AssetLoader
+import in.dogue.antiqua.Antiqua.Cell
+import in.dogue.antiqua.Antiqua
+import Antiqua._
+
+trait Sfx {
+  def play(ij:Cell):Unit
+  def playFull():Unit
+  def stop():Unit
+}
 
 object SoundManager {
 
+  private val max = 25
+  private var ear:Option[Cell] = None
+  def setEar(ij:Cell) = {
+    ear = ij.some
+  }
   val dig = load("dig", 0.5)
   val swish = load("swish", 1.0)
   val land = load("land", 0.5)
@@ -31,6 +45,22 @@ object SoundManager {
   def load(s:String, adj:Double) = {
     val sound = AssetLoader.loadSound(s)
     sound.setAdjustVolume(adj.toFloat)
-    sound
+    new Sfx {
+      def play(ij:Cell) = {
+        val adjust = ear.map { e =>
+          ((1 - (ij |-| e).mag)/max.toDouble).clamp(0,1)
+        }.getOrElse(1.0)
+        sound.setVolume(adjust.toFloat)
+        sound.play()
+      }
+      def playFull() = {
+        sound.setVolume(1)
+        sound.play()
+      }
+      def stop() {
+        sound.stop()
+      }
+    }
+    //sound
   }
 }

@@ -102,18 +102,19 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                            fall:FallState, state:LivingState, justKilled:Boolean,
                            light:PlayerLight,
                            moveT:Int, stepMachine:StepMachine) {
+  SoundManager.setEar(ij)
   @inline def x = ij.x
   @inline def y = ij.y
   def collectRope(g:RopePickup) = {
-    SoundManager.item.play()
+    SoundManager.item.play(ij)
     copy(inv=inv.collectRope(g))
   }
   def collectMineral(g:MineralPickup) = {
-    SoundManager.item.play()
+    SoundManager.item.play(ij)
     copy(inv=inv.collectMineral(g), log=log.getGem)
   }
   def collectFood(typ:FoodType) = {
-    SoundManager.item.play()
+    SoundManager.item.play(ij)
     val newLog = log.eatFood(typ)
     val np = typ match {
       case Toadstool(seed) =>
@@ -140,12 +141,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   def collectTool(t:Tool) = {
-    SoundManager.item.play()
+    SoundManager.item.play(ij)
     copy(inv=inv.setTool(t))
   }
 
   def collectItem(it:Item) = {
-    SoundManager.item.play()
+    SoundManager.item.play(ij)
     copy(attr=attr.collectItem(it))
   }
   def toolPos = ((ctrl.isShovelling || Game.hasDrill) && canUseTool).select(None, ((x, y)-->face).some)
@@ -163,9 +164,11 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
       stepMachine.increment()
     }
     val newP = copy(prev = ij, ij=newPos)
-    if (newTouching(Direction.Down).exists {
-      case WorldTile(Spike(_,_,dir,_)) if dir == Direction.Up => true
-      case a => false
+    if (newTouching(Direction.Down).exists { t =>
+      t.ttype match {
+        case Spike(d) if d == Direction.Up => true
+        case _ => false
+      }
 
     }) {
       newP.kill(DamageType.Spikes.some)
@@ -179,12 +182,14 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def spendRope = copy(inv = inv.spendRope, log = log.useRope)
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
-  def hitTool(dmg:Int, tileBroken:Boolean) = {
+  def hitTool(result:HitResult) = {
+    val dmg = result.toolHurt
+    val tileBroken = result.broken
     if (!Game.hasDrill) {
       if (dmg > 0) {
-        SoundManager.dig.play()
+        SoundManager.dig.play(ij)
       } else {
-        SoundManager.swish.play()
+        SoundManager.swish.play(ij)
       }
     }
     val prevDur = inv.tool.dura
@@ -196,7 +201,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     }
     val hurtAmt = newInv.tool.`type`.healthHurt
     if (hurtAmt > 0 && dmg > 0) {
-      SoundManager.hurt.play()
+      SoundManager.hurt.play(ij)
     }
 
     val newHealth = (dmg > 0).select(health, health.permaHurt(hurtAmt))
@@ -262,13 +267,13 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                  light=light.update,
                  fall=if(attr.hasWings) Floating else fall)
     val (jkP, ps) = if (justKilled) {
-      SoundManager.dead.play()
+      SoundManager.dead.play(ij)
       (p.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
     } else {
       (p, Seq())
     }
     val fpl = if (ctrl.isFlaring && inv.hasFlare && light.lt <= 0) {
-      SoundManager.flare.play()
+      SoundManager.flare.play(ij)
       jkP.useFuel
     } else {
       jkP
@@ -280,7 +285,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def updateDropTool(p:Player, tc:TerrainCache):(Player, Seq[Pickup]) = {
     if (ctrl.isDropping && !inv.tool.isBare && face.isHorizontal && !tc.isSolid(pos --> face.opposite)) {
-      SoundManager.drop.play()
+      SoundManager.drop.play(ij)
       val newInv = inv.setTool(BareHands.toTool)
       val pickup = ToolPickup.create(pos --> face.opposite, inv.tool)
       (p.copy(inv=newInv), Seq(pickup))
@@ -304,7 +309,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (fall, s) match {
       case (Falling(_, num), Grounded)  =>
         if (num > 1) {
-          SoundManager.land.play()
+          SoundManager.land.play(ij)
         }
         val dmg = fallDamage(num)
         dmg.map { value => newPl.damage(value)}.getOrElse(newPl)
@@ -316,7 +321,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def damage(dmg:Damage):Player = {
     if (state == Alive && dmg.amount > 0 && Game.t - Player.lastHurt > 7) {
       Player.lastHurt = Game.t
-      SoundManager.hurt.play()
+      SoundManager.hurt.play(ij)
     }
     val newHealth = if (dmg.amount > 0) {
       health.remove(dmg)

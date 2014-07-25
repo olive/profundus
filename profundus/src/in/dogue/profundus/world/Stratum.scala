@@ -3,6 +3,8 @@ package in.dogue.profundus.world
 import scala.util.Random
 import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.profundus.Profundus
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object Stratum {
   def createDummy(r:Random) = {
@@ -113,11 +115,13 @@ trait Stratum {
     val (spawn, face, t) = sg.gen(cols, rows, r)
     val features = fg.assemble(cols, rows, yIndex, ts, r, t)
     val noise = new PerlinNoise().generate(cols, rows, 0, yIndex, r.nextInt())
-    val tiles = noise.map { case (ij, d) =>
-      val state = tg.mkTile(ts, ij, yIndex, cols, rows, d, r)
-      WorldTile(state(r))
-    }
+    val tf = ts.toFactory(r)
+    val (nt, gen) = noise.map { case (ij, d) =>
 
+      tg.mkTile(ts, tf, ij, yIndex, cols, rows, d, r)
+
+    }.unzip
+    val tiles = Terrain.merge(nt, gen)
 
     val (newTiles, gs) = fold2(tiles, features) { case (ft, tiles) =>
       ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
@@ -129,7 +133,7 @@ trait Stratum {
     val doodads = dg.generate(ts, newTiles, r).gss
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
     val newBiome = modBiome(yIndex+1, r)
-    (newBiome, Terrain(yIndex*rows, ts, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
+    (newBiome, Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
   }
 
 }

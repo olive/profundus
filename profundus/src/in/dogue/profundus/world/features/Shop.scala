@@ -1,6 +1,6 @@
 package in.dogue.profundus.world.features
 
-import in.dogue.profundus.world.{WorldTile, TerrainScheme, Feature}
+import in.dogue.profundus.world.{Terrain, WorldTile, TerrainScheme, Feature}
 import com.deweyvm.gleany.data.Recti
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
@@ -16,16 +16,18 @@ class Shop(x:Int, y:Int) {
   val tiles = new TmxMap("shop", "tiles")
   def placeSite(cols:Int, rows:Int, yy:Int, scheme:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {
     import Profundus._
-    val newTiles = terrain.map { case (p, t) =>
+    val tf = scheme.toFactory(r)
+    val (nt, gen) = terrain.map { case (p, t) =>
       val g = tiles.getOption(p |-| ((x, y)))
       if (!g.isDefined || g.get > 252) {
-        t
+        t @@ None
       } else if (g.get > 1) {
-        WorldTile(scheme.makeRock3(r))
+        tf.mkRock3
       } else {
-        WorldTile(scheme.makeEmpty(r))
+        tf.mkEmpty
       }
-    }
+    }.unzip
+    val newTiles = Terrain.merge(nt, gen)
     val sk = Seq(Shopkeeper.create((x, y) |+| ((6, 10)) +| yy, r)).gss
     (newTiles, sk)
   }

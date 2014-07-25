@@ -77,7 +77,7 @@ object GreatWorld {
       }
     } else if (pp.ctrl.isRoping && pp.inv.hasRope) {
       val state = if (pp.face.isVertical && !tc.isSolid(pp.pos --> Direction.Up)) {
-        SoundManager.`throw`.play()
+        SoundManager.`throw`.play(pp.pos)
         Rope.create(FlyUp.create(pp.pos)).some
       } else if (!tc.isSolid(pp.pos --> pp.face)){
         Rope.create(DropDown.create(pp.pos --> pp.face)).some
