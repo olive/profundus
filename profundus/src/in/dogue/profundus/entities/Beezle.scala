@@ -24,20 +24,18 @@ object Beezle {
 
 case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
   import Profundus._
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Beezle, Cell, Seq[GlobalMessage]) = {
-    val ppos = pi.pos
-    val pState = pi.live
-    val dd = ppos |-| pos
-    val close = dd.mag < 10
-    val adjacent = dd.x.abs + dd.y.abs == 1
-    val inside = dd.x.abs + dd.y.abs == 0
+  def update(health:Int, t:Int, args:EntityArgs):(Beezle, Cell, Seq[GlobalMessage]) = {
+    val pState = args.pi.live
+    val pos = args.pos
+    val close = args.distance2 < 10*10
+    val adjacent = args.isAdjacent
+    val inside = args.isOnTop
     val newPos = if (inside) {
       pos -| 1
     } else if (adjacent) {
       pos
-    } else if (cache.hasLineOfSight(ppos, pos) && close && t % 12 == 0) {
-      val move = dd.signum
-      pos |+| move
+    } else if (args.hasLos && close && t % 12 == 0) {
+      pos |+| args.toward
     } else {
       pos
     }

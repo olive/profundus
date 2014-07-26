@@ -34,14 +34,14 @@ case class Stalactite(tile:Tile, destroy:Boolean, killT:Int) {
     }
   }
 
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Stalactite, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs):(Stalactite, Cell, Seq[GlobalMessage]) = {
+    val pos = args.pos
     val kz = SingleTileZone(pos --> Direction.Down, 100, DamageType.Spikes).toZone
     if (killT == 1) {
       SoundManager.enehit.play(pos)
     }
     val sk = if (killT > 6) {
-      println("destroy! " + killT)
-      id.gss
+      args.id.gss
     } else {
       Seq()
     }

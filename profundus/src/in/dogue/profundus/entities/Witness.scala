@@ -67,32 +67,25 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     normalAnim
   }
 
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Witness, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs): (Witness, Cell, Seq[GlobalMessage]) = {
     import Profundus._
-    val ppos = pi.pos
-    val dd = ppos |-| pos
-    val killer = if (dd.mag < 10 && cache.hasLineOfSight(ppos, pos)) {
+    val killer = if (args.distance2 < 10*10 && args.hasLos) {
       copy(killT=killT+1)
     } else {
       copy(killT=0)
     }
 
     val newPos = if (killT == 0 && t % 120 == 0) {
-      val d = Direction.All.randomR(r)
-      if (!cache.isSolid(pos --> d)) {
-        pos --> d
-      } else {
-        pos
-      }
+      args.moveRandom
     } else {
-      pos
+      args.pos
     }
     if (killT == 70) {
       SoundManager.petrify.playFull()
     }
     val kz = if (killT == 90) {
 
-      val kill = SingleTileZone(ppos, 1000, DamageType.Witness).toZone
+      val kill = SingleTileZone(args.ppos, 1000, DamageType.Witness).toZone
       Seq(kill).gss
     } else {
       Seq()

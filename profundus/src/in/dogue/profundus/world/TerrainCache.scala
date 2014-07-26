@@ -153,7 +153,6 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
       if (ntc.tMap.contains(index) || ntc.fs.contains(index)) {
         ntc
       } else {
-        println("future for " + index)
         val f = new Future(() => TerrainCache.gen(cols, rows, ntc, index, r.nextLong()))
         ntc.addFuture(index, f)
 

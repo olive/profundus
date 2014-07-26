@@ -31,10 +31,10 @@ object Phoebe {
 case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, close:Boolean, aggroed:Boolean, maxHealth:Int, t:Int) {
 
   private def getBox = boxes(ptr)
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Phoebe, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs): (Phoebe, Cell, Seq[GlobalMessage]) = {
     import Profundus._
-    val ppos = pi.pos
-    val isClose = (pos |-| ppos).mag < 5 && !aggroed
+    val pos = args.pos
+    val isClose = args.distance2 < 5*5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose
     val (spawn, newPtr) = if (showMb) {
       val box = GameBox(pos |+| ((-19,10)), getBox).gss
@@ -44,9 +44,9 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
     }
 
     val newPos = if (aggroed) {
-      val dd = ppos |-| pos
-      val onTop = dd.mag == 0
-      val adjacent = dd.x.abs + dd.y.abs == 1
+      val dd = args.dd
+      val onTop = args.isOnTop
+      val adjacent = args.isAdjacent
       val dx = if (onTop) {
         -1
       } else if (!adjacent){
@@ -62,8 +62,8 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
 
     val attacks = if (aggroed && t % 5 == 0) {
       SoundManager.pew.play(pos)
-      val x = r.nextInt(30) - 15
-      val y = r.nextInt(30) - 15
+      val x = args.r.nextInt(30) - 15
+      val y = args.r.nextInt(30) - 15
       val dst = (x, y) |+| pos
       val boom = LaserBoom.create(pos, dst, 3)
       val hurt  = DelayedExplosion(dst, boom.timeToExplode, 30, 10, 0)

@@ -43,37 +43,28 @@ object Bat {
 case class Bat(a:AnimationGroup) {
 
 
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Bat, Cell, Seq[GlobalMessage]) = {
-    val ppos = pi.pos
+  def update(health:Int, t:Int, args:EntityArgs):(Bat, Cell, Seq[GlobalMessage]) = {
+    val pos = args.pos
     import Profundus._
-    val dd = ppos |-| pos
-    val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1
-    val newPos = if (dd == ((0,0))) {
-      val move = Direction.All.find { d =>
-        !cache.isSolid(pos --> d)
-      }
-      move.map{pos --> _}.getOrElse(pos)
-    } else if (!isAdjacent && t % 14 == 0 && cache.hasLineOfSight(pos, ppos)) {
-      val move =  dd.signum
+    val isAdjacent = args.isAdjacent
+    val newPos = if (args.isOnTop) {
+      args.moveRandom
+    } else if (!isAdjacent && t % 14 == 0 && args.hasLos) {
+      val move =  args.toward
       val res = pos |+| move
-      if (!cache.isSolid(res)) {
+      if (!args.tc.isSolid(res)) {
         res
       } else {
         pos
       }
 
     } else if (t % 15 == 0) {
-      val d = Direction.All.randomR(r)
-      if (!cache.isSolid(pos --> d)) {
-        pos --> d
-      } else {
-        pos
-      }
+      args.moveRandom
     } else {
       pos
     }
     val attack = if (isAdjacent && t % 15 == 0) {
-      Seq(SingleTileZone(ppos, 75, DamageType.HellBat).toZone)
+      Seq(SingleTileZone(args.ppos, 75, DamageType.HellBat).toZone)
     } else {
       Seq()
     }

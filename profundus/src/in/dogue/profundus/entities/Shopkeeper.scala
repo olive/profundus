@@ -45,9 +45,10 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
   private def mkBox(pos:Cell, box:MessageBox[Unit]) = {
     GameBox(pos |+| ((-6, 3)), box).gss
   }
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Shopkeeper, Cell, Seq[GlobalMessage]) = {
-    val ppos = pi.pos
-    val isClose = (pos |-| ppos).mag < 5 && !aggroed
+  def update(health:Int, t:Int, args:EntityArgs):(Shopkeeper, Cell, Seq[GlobalMessage]) = {
+    val ppos = args.ppos
+    val pos = args.pos
+    val isClose = args.distance2 < 5*5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose
     if (health <= 0) {
       return this @@ pos @@ mkBox(pos, attacked)
@@ -55,14 +56,14 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
     val (buy, spawns) = if (showMb) {
       (if (bought) {
         true @@ out
-      } else if (pi.numMinerals >= cost && !bought) {
+      } else if (args.pi.numMinerals >= cost && !bought) {
         true @@ enough
       } else {
         false @@ lacking
       }).doo{ case (doBuy, box) =>
-        val itemPos = if (!cache.isSolid(ppos --> Direction.Left)) {
+        val itemPos = if (!args.tc.isSolid(ppos --> Direction.Left)) {
           ppos --> Direction.Left
-        } else if (!cache.isSolid(ppos --> Direction.Right)) {
+        } else if (!args.tc.isSolid(ppos --> Direction.Right)) {
           ppos --> Direction.Right
         } else {
           ppos

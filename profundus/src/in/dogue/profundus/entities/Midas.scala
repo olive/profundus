@@ -21,20 +21,16 @@ object Midas {
 }
 
 case class Midas(t:Tile) {
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Midas, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs):(Midas, Cell, Seq[GlobalMessage]) = {
     import Profundus._
+    val pos = args.pos
     val newPos = if (t % 120 == 0) {
-      val dir = Vector(Direction.Left, Direction.Right).randomR(r)
-      if (!cache.isSolid(pos --> dir)) {
-        pos --> dir
-      } else {
-        pos
-      }
+      args.moveHorizontalRandom
     } else {
       pos
     }
 
-    val dz = if (cache.isRock(pos --> Direction.Down)) {
+    val dz = if (args.tc.isRock(pos --> Direction.Down)) {
       Seq(MineralDeformation.create(pos --> Direction.Down).toDeformation).gss
     } else {
       Seq()

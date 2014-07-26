@@ -125,10 +125,11 @@ case class Lurker private (tile:Tile, state:LurkerState) {
   }
 
 
-  private def update(id:EntityId, health:Int, gt:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Lurker, Cell, Seq[GlobalMessage]) = {
+  private def update(health:Int, t:Int, args:EntityArgs):(Lurker, Cell, Seq[GlobalMessage]) = {
     import Profundus._
-    val ppos = pi.pos
-    val hasLos = cache.hasLineOfSight(pos, ppos)
+    val ppos = args.ppos
+    val hasLos = args.hasLos
+    val pos = args.pos
     val ns = state match {
       case c@Chase(p, _) if !hasLos => LostSight.create(p)
       case c@Chase(p, _) if hasLos => c
@@ -137,9 +138,9 @@ case class Lurker private (tile:Tile, state:LurkerState) {
     }
     val (newState, newPos, newSelf, attacks) = ns match {
       case a@Attack(p, t) => updateAttack(pos, a, ppos)
-      case c@Chase(p, t) => updateChase(pos, c, cache, ppos)
+      case c@Chase(p, t) => updateChase(pos, c, args.tc, ppos)
       case l@LostSight(p, t) => updateLost(pos, l)
-      case w@Wander(t) => updateWander(pos, w, cache, r)
+      case w@Wander(t) => updateWander(pos, w, args.tc, args.r)
     }
     (newSelf.copy(state = newState), newPos, attacks.gss)
   }

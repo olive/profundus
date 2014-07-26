@@ -9,7 +9,7 @@ import in.dogue.antiqua.graphics.TileRenderer
 import in.dogue.profundus.lighting.LightSource
 
 object StandardEntity {
-  def create[T](up:T => (EntityId, Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage]),
+  def create[T](up:T => (Int, Int, EntityArgs) => (T, Cell, Seq[GlobalMessage]),
                 dr:T => Cell => TileRenderer => TileRenderer,
                 onMove:T => (Direction => Option[WorldTile]) => T,
                 self:T,
@@ -22,7 +22,7 @@ object StandardEntity {
     StandardEntity[T](up, dr, onMove, self, light, Alive, canFly, selfType, health, startT)
   }
 
-  def apply[A](aup:A => (EntityId, Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+  def apply[A](aup:A => (Int, Int, EntityArgs) => (A, Cell, Seq[GlobalMessage]),
                adr:A => Cell => TileRenderer => TileRenderer,
                aonMove:A => (Direction => Option[WorldTile]) => A,
                aself:A,
@@ -51,7 +51,7 @@ object StandardEntity {
 
 trait StandardEntity {
   type T
-  val up:T => (EntityId, Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage])
+  val up:T => (Int, Int, EntityArgs) => (T, Cell, Seq[GlobalMessage])
   val dr:T => Cell => TileRenderer => TileRenderer
   val onMove:T => (Direction => Option[WorldTile]) => T
   val self:T
@@ -66,11 +66,11 @@ trait StandardEntity {
     StandardEntity(up, dr, onMove, self, light, live, canFly, selfType, health, t)
   }
 
-  def update(id:EntityId, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(StandardEntity, Cell, Seq[GlobalMessage]) = {
-    if (pi.live == Dead) {
-      return (copy(t=t+1), pos, Seq())
+  def update(args:EntityArgs):(StandardEntity, Cell, Seq[GlobalMessage]) = {
+    if (args.pi.live == Dead) {
+      return (copy(t=t+1), args.pos, Seq())
     }
-    val (newSelf, newPos, gs) = up(self)(id, health, t, pos, cache, pi, r)
+    val (newSelf, newPos, gs) = up(self)(health, t, args)
 
     val newThis = copy(self=newSelf, t=t+1)
     val killed = if (health <= 0) {

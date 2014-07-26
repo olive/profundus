@@ -68,7 +68,6 @@ case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDa
    * @return the modified version of 'this'
    */
   def notifyTile(tf:WorldTileFactory, ij:Cell, y:Int):(WorldTile, Seq[GlobalMessage]) = {
-    println("Spawned at " + ij)
     (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, this)).gss)
   }
   def hit(tf:WorldTileFactory, ij:Cell, dmg:Damage):(WorldTile, Seq[GlobalMessage], HitResult) = {

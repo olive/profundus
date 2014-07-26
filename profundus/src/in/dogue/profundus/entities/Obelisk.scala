@@ -33,7 +33,8 @@ object Obelisk {
 case class Obelisk private (tg:TileGroup, mixAmt:Double) {
   import Profundus._
 
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Obelisk, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs):(Obelisk, Cell, Seq[GlobalMessage]) = {
+    val pos = args.pos
     val spawns = if (t > 0 && t % Obelisk.attackTime == 0) {
       SoundManager.pop.play(pos)
       val ps = RingParticle.create(pos, 8, 3).toParticle

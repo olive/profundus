@@ -44,17 +44,16 @@ case class PhaseWasp(a:AnimationGroup) {
   final val attackTime = 60
 
   private def updateAnim = copy(a=a.smap {_.update})
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (PhaseWasp, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs): (PhaseWasp, Cell, Seq[GlobalMessage]) = {
     import Profundus._
-    val ppos = pi.pos
-    val pState = pi.live
-    val diff = ppos |-| pos
-    if (diff.mag2 > range*range || pState == Dead) {
+    val pos = args.pos
+    val pState = args.pi.live
+    if (args.distance2 > range*range || pState == Dead) {
       return (updateAnim, pos, Seq())
     }
-    val d = diff.signum
+    val d = args.toward
     val (newPos, canAttack) = if (t % moveTime == 0) {
-      if (diff.mag2 > innerRange*innerRange) {
+      if (args.distance2 > innerRange*innerRange) {
         (pos |+| d, false)
       } else {
         (pos, true)

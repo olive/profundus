@@ -32,41 +32,38 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
   final val innerRange = 4
   final val attackTime = 60
 
-  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Bee, Cell, Seq[GlobalMessage]) = {
+  def update(health:Int, t:Int, args:EntityArgs): (Bee, Cell, Seq[GlobalMessage]) = {
     import Profundus._
-    val ppos = pi.pos
     val newSelf = copy(a = a.update, b = b.update)
-
-    val diff = ppos |-| pos
-    val isClose = diff.mag2 < range * range
-    val hasLos = cache.hasLineOfSight(pos, ppos)
+    val pos = args.pos
+    val isClose = args.distance2 < range * range
+    val hasLos = args.hasLos
     val anim = if (isClose && hasLos) {
       b
     } else {
       a
     }
     val (newPos, kz) = if (isClose) {
-      val isAdjacent = diff.x.abs + diff.y.abs == 1
-      val inside = diff.x.abs + diff.y.abs == 0
+      val isAdjacent = args.isAdjacent
+      val inside = args.isOnTop
       if (inside) {
         val newPos = if (t % 15 == 0) {
-          val found = Direction.All.find(d => !cache.isSolid(pos -->d))
-          found.map { d => pos --> d}.getOrElse(pos)
+          args.moveRandom
         } else {
           pos
         }
         (newPos, Seq())
       } else if (isAdjacent) {
         val kz = if (t %5 == 0) {
-          Seq(SingleTileZone(pos |+| diff, 30, DamageType.Bee).toZone)
+          Seq(SingleTileZone(pos |+| args.toward, 30, DamageType.Bee).toZone)
         } else {
           Seq()
         }
         (pos, kz)
       } else {
         val newPos = if (t % 15 == 0) {
-          val tryPos = pos |+| diff.signum
-          if (!cache.isSolid(tryPos)) {
+          val tryPos = pos |+| args.toward
+          if (!args.tc.isSolid(tryPos)) {
             tryPos
           } else {
             pos
@@ -78,19 +75,10 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
       }
     } else {
       if (t % 30 == 0) {
-        val dir = Direction.All.randomR(r)
-        val newPos = if (!cache.isSolid(pos --> dir)) {
-          pos --> dir
-        } else {
-          pos
-        }
-        (newPos, Seq())
+        (args.moveRandom, Seq())
       } else {
         (pos, Seq())
       }
-
-
-      //random walk
     }
     (newSelf.copy(drawAnim=anim), newPos, kz.gss)
   }

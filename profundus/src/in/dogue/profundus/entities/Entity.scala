@@ -10,7 +10,9 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.Game
 import in.dogue.profundus.entities.pickups.PickupId
-
+import in.dogue.antiqua.Antiqua.Cell
+import in.dogue.antiqua.Antiqua
+import Antiqua._
 
 object EntityId {
   var id:BigInt = 0
@@ -23,14 +25,46 @@ object EntityId {
     result
   }
 }
-case class EntityId private (id:BigInt) {
+case class EntityId private (id:BigInt)
 
+case class EntityArgs(id:EntityId, pos:Cell, tc:TerrainCache, pi:PlayerInfo, r:Random) {
+  val dd = pi.pos |-| pos
+  def distance2 = dd.mag2
+  @inline def ppos = pi.pos
+  def isAdjacent = {
+    math.abs(dd.x) + math.abs(dd.y) == 1
+  }
+
+  def isOnTop = {
+    math.abs(dd.x) + math.abs(dd.y) == 0
+  }
+
+  def hasLos = {
+    tc.hasLineOfSight(pos, pi.pos)
+  }
+
+  def moveRandom:Cell = {
+    val move = Direction.All.find { d =>
+      !tc.isSolid(pos --> d)
+    }
+    move.map{pos --> _}.getOrElse(pos)
+  }
+
+  def moveHorizontalRandom:Cell = {
+    val move = Vector(Direction.Left, Direction.Right).find { d =>
+      !tc.isSolid(pos --> d)
+    }
+    move.map{pos --> _}.getOrElse(pos)
+  }
+
+  def toward = dd.signum
 }
+
 object Entity {
   var lastPlayed = 0
   private def apply[A](aij:Cell,
                        afall:FallState,
-                       aup: A => (EntityId, Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+                       aup: A => EntityArgs => (A, Cell, Seq[GlobalMessage]),
                        amv: A => (Cell, Direction, (Direction => Option[WorldTile])) => A,
                        admg: A => Damage => A,
                        adoKill: A => A,
@@ -58,7 +92,7 @@ object Entity {
 
   def create[A](ij:Cell,
                 fall:FallState,
-                up: A => (EntityId, Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+                up: A => EntityArgs => (A, Cell, Seq[GlobalMessage]),
                 mv: A => (Cell, Direction, (Direction => Option[WorldTile])) => A,
                 dmg: A => Damage => A,
                 doKill: A => A,
@@ -75,7 +109,7 @@ trait Entity {
   type T
   val ij:Cell
   val fall:FallState
-  val up: T => (EntityId, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage])
+  val up: T => EntityArgs => (T, Cell, Seq[GlobalMessage])
   val mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T
   val dmg: T => Damage => T
   val doKill: T => T
@@ -94,7 +128,7 @@ trait Entity {
   def isId(id:EntityId) = this.id == id
   def pos = ij
   def update(tc:TerrainCache, pi:PlayerInfo, r:Random): (Entity, Seq[GlobalMessage]) = {
-    val (t, newPos, glob) = up(self)(id, ij, tc, pi, r)
+    val (t, newPos, glob) = up(self)(EntityArgs(id, ij, tc, pi, r))
     (copy(self=t, ij=newPos), glob)
   }
 
