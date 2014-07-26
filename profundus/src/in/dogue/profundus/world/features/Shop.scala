@@ -4,8 +4,6 @@ import in.dogue.profundus.world.{Terrain, WorldTile, TerrainScheme, Feature}
 import com.deweyvm.gleany.data.Recti
 import in.dogue.antiqua.data.Array2d
 import scala.util.Random
-import in.dogue.antiqua.geometry.Circle
-import in.dogue.profundus.doodads.Campfire
 import in.dogue.antiqua.utils.TmxMap
 import in.dogue.antiqua.Antiqua
 import Antiqua._

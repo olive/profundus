@@ -34,7 +34,7 @@ object Shopkeeper {
     val cost = 20
     val trans = Transaction(-cost, item) _
     val sk = new Shopkeeper(tile, arrow, eBox, lBox, oBox, aBox, cost, trans, false, false, false, 0)
-    StandardEntity.create[Shopkeeper](_.update, _.draw, sk, light, false, None, 1, r).toEntity(ij)
+    StandardEntity.create[Shopkeeper](_.update, _.draw, StandardEntity.NoMove, sk, light, false, None, 1, r).toEntity(ij)
   }
 }
 case class Shopkeeper(tile:Tile, arrow:Tile,

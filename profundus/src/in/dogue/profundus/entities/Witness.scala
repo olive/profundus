@@ -55,7 +55,7 @@ object Witness {
     val (norm, kill) = makeAnims(r)
     val w = Witness(norm, kill, 0)
     val light = LightSource.createCircle(ij, 0, 7, 1)
-    StandardEntity.create[Witness](_.update, _.draw, w, light, true, DamageType.Witness.some, 50, r).toEntity(ij)
+    StandardEntity.create[Witness](_.update, _.draw, StandardEntity.NoMove, w, light, true, DamageType.Witness.some, 50, r).toEntity(ij)
   }
 }
 

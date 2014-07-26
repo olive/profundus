@@ -35,7 +35,7 @@ object Bat {
   def create(ij:Cell, r:Random) = {
     val anim = mkAnim
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
-    StandardEntity.create[Bat](_.update, _.draw, Bat(anim), light, true, DamageType.HellBat.some, 12, r).toEntity(ij)
+    StandardEntity.create[Bat](_.update, _.draw, StandardEntity.NoMove, Bat(anim), light, true, DamageType.HellBat.some, 12, r).toEntity(ij)
   }
 
 }

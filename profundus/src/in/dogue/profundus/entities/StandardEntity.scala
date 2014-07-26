@@ -12,6 +12,7 @@ import in.dogue.profundus.audio.SoundManager
 object StandardEntity {
   def create[T](up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
                 dr:T => Cell => TileRenderer => TileRenderer,
+                onMove:T => (Direction => Option[WorldTile]) => T,
                 self:T,
                 light:LightSource,
                 canFly:Boolean,
@@ -19,13 +20,16 @@ object StandardEntity {
                 health:Int,
                 r:Random) = {
     val startT = r.nextInt.abs
-    StandardEntity[T](up, dr, self, light, Alive, canFly, selfType, health, startT)
+    StandardEntity[T](up, dr, onMove, self, light, Alive, canFly, selfType, health, startT)
   }
+
+  def NoMove[T](t:T)(f:Direction => Option[WorldTile]):T = t
 }
 
 
 case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
                                       dr:T => Cell => TileRenderer => TileRenderer,
+                                      onMove:T => (Direction => Option[WorldTile]) => T,
                                       self:T,
                                       light:LightSource,
                                       live:LivingState,
@@ -38,12 +42,14 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Pla
       return (copy(t=t+1), pos, Seq())
     }
     val (newSelf, newPos, gs) = up(self)(health, t, pos, cache, pi, r)
+
     val newThis = copy(self=newSelf, t=t+1)
     val killed = if (health <= 0) {
       newThis.kill
     } else {
       newThis
     }
+
     (killed, newPos, gs)
   }
 
@@ -56,7 +62,7 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Pla
   }
   def getLive = live
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile])= {
-    this
+    copy(self=onMove(self)(newTouching))
   }
 
   def kill = {

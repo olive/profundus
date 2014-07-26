@@ -26,7 +26,7 @@ object Obelisk {
     ))
     val light = LightSource.createCircle(ij, 3, 4, 0.5)
     val obelisk = Obelisk(tg, 0)
-    StandardEntity.create[Obelisk](_.update, _.draw, obelisk, light, true, DamageType.Obelisk.some, 50, r).toEntity(ij)
+    StandardEntity.create[Obelisk](_.update, _.draw, StandardEntity.NoMove, obelisk, light, true, DamageType.Obelisk.some, 50, r).toEntity(ij)
 
   }
 }

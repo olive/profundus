@@ -22,7 +22,7 @@ object Bee {
 
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
     val bee = Bee(passive, attacking, passive)
-    StandardEntity.create[Bee](_.update, _.draw, bee, light, true, None, 1, r).toEntity(ij)
+    StandardEntity.create[Bee](_.update, _.draw, StandardEntity.NoMove, bee, light, true, None, 1, r).toEntity(ij)
   }
 }
 

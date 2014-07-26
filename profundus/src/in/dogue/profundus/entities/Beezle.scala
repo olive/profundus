@@ -18,7 +18,7 @@ object Beezle {
     val tile = CP437.*.mkTile(Color.Black, Color.Red)
     val hp = 30
     val self = Beezle(tile, hp, false)
-    StandardEntity.create[Beezle](_.update, _.draw, self, light, true, None, hp, r).toEntity(ij)
+    StandardEntity.create[Beezle](_.update, _.draw, StandardEntity.NoMove, self, light, true, None, hp, r).toEntity(ij)
   }
 }
 

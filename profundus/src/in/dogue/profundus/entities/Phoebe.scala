@@ -23,7 +23,7 @@ object Phoebe {
     val arrow = CP437.↑.mkTile(Color.Black, Color.White)
     val hp = 100
     val npc = Phoebe(tile, arrow, mbox, 0, false, false, hp, 0)
-    StandardEntity.create[Phoebe](_.update, _.draw, npc, light, true, DamageType.Phoebe.some, hp, r).toEntity(ij)
+    StandardEntity.create[Phoebe](_.update, _.draw, StandardEntity.NoMove, npc, light, true, DamageType.Phoebe.some, hp, r).toEntity(ij)
   }
 }
 

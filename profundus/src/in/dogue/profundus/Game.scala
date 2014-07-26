@@ -12,7 +12,7 @@ object Game {
   var t = 0
   val debug = true
   val fixedSeed  = true && debug
-  val flyMode    = true && debug
+  val flyMode    = false && debug
   val invMode    = true && debug
   val hasDrill   = false && debug
   var lightsOff  = false && debug

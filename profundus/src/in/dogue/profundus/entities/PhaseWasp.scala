@@ -33,7 +33,7 @@ object PhaseWasp {
     )
     val light = LightSource.createCircle(ij, 0, 3, 0.2)
     val wasp = PhaseWasp(anim)
-    StandardEntity.create[PhaseWasp](_.update, _.draw, wasp, light, true, DamageType.PhaseWasp.some, 3, r).toEntity(ij)
+    StandardEntity.create[PhaseWasp](_.update, _.draw, StandardEntity.NoMove, wasp, light, true, DamageType.PhaseWasp.some, 3, r).toEntity(ij)
   }
 }
 

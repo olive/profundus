@@ -50,7 +50,7 @@ object Lurker {
     val tile = CP437.a.mkTile(Color.Black, Color.Yellow)
     val light = LightSource.createCircle(ij, 0, 5, 0.5)
     val lurker = Lurker(tile, Wander.create)
-    StandardEntity.create[Lurker](_.update, _.draw, lurker, light, false, None, 10, r).toEntity(ij)
+    StandardEntity.create[Lurker](_.update, _.draw, StandardEntity.NoMove, lurker, light, false, None, 10, r).toEntity(ij)
   }
 }
 

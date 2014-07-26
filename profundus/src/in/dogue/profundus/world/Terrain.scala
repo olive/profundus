@@ -79,7 +79,7 @@ case class Terrain(y:Int, tf:WorldTileFactory, tiles:Array2d[WorldTile], spawn:C
       if (result.broken) {
         val (newTiles, gs) = fold2[Terrain, Seq[WorldSpawn], Cell](newT, t.dependents) { case (dep, terrain: Terrain) =>
           val t = terrain.tiles.get(dep)
-          val (mod, gs) = t.notifyTile(tf, dep)
+          val (mod, gs) = t.notifyTile(tf, dep, y)
           (terrain.updated(dep, mod), gs)
         }
         (newTiles, drops ++ gs, result)

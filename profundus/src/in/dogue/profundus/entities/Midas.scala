@@ -16,7 +16,7 @@ object Midas {
   def create(ij:Cell, r:Random) = {
     val self = Midas(CP437.`;`.mkTile(Color.Black, Color.Yellow))
     val light = LightSource.createCircle(ij, 0, 2, 0.2)
-    StandardEntity.create[Midas](_.update, _.draw, self, light, false, None, 1, r).toEntity(ij)
+    StandardEntity.create[Midas](_.update, _.draw, StandardEntity.NoMove, self, light, false, None, 1, r).toEntity(ij)
   }
 }
 

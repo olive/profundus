@@ -5,7 +5,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.entities.pickups.MineralPickup
-import in.dogue.profundus.entities.Damage
+import in.dogue.profundus.entities.{Stalactite, Damage}
 import scala.util.Random
 import in.dogue.profundus.Profundus
 import Profundus._
@@ -28,6 +28,7 @@ case object Clay extends TileType
 case object Rock1 extends TileType
 case object Rock2 extends TileType
 case object Rock3 extends TileType
+case object Mineral extends TileType
 case object Shaft extends TileType
 
 trait WorldTileFactory {
@@ -47,7 +48,7 @@ trait WorldTileFactory {
   def mkMineral:MkTile = {
     val (tile, color) = ts.mineral(r)
     val spawn = (ij:Cell) => Seq(MineralPickup.create(ij, color).toPickup).gss
-    WorldTile(tile, Rock1, TileClass.Rock1, 10, 5, 0, spawn, Seq()) @@ None
+    WorldTile(tile, Mineral, TileClass.Rock1, 10, 5, 0, spawn, Seq()) @@ None
   }
   def mkSpike(ij:Cell, d:Direction) = {
     val sp = Spike(d)
@@ -66,8 +67,9 @@ case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDa
    * Notify this tile that a tile it is dependent on has been destroyed
    * @return the modified version of 'this'
    */
-  def notifyTile(tf:WorldTileFactory, ij:Cell):(WorldTile, Seq[WorldSpawn]) = {
-    (tf.mkEmpty._1, Seq())
+  def notifyTile(tf:WorldTileFactory, ij:Cell, y:Int):(WorldTile, Seq[WorldSpawn]) = {
+    println("Spawned at " + ij)
+    (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, this)).gss)
   }
   def hit(tf:WorldTileFactory, ij:Cell, dmg:Damage):(WorldTile, Seq[WorldSpawn], HitResult) = {
     val amt = dmg.amount
