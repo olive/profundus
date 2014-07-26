@@ -11,14 +11,16 @@ import in.dogue.antiqua.data.FutureError
 import in.dogue.antiqua.geometry.{Circle, Line}
 import in.dogue.profundus.entities.{ToolType, Damage}
 import in.dogue.antiqua.procgen.PerlinNoise
+import scala.collection.script.Index
 
 object TerrainCache {
   def foldFutures(tc:TerrainCache) = {
-    tc.fs.foldLeft(tc) { case (ntc, f) =>
+    val seed = (tc, Map[Int,Future[(Stratum,Terrain, Seq[WorldSpawn])]]())
+    tc.fs.foldLeft(seed) { case ((ntc, fs), (i, f)) =>
       f.update match {
-        case FutureComputing => ntc
+        case FutureComputing => (ntc, fs.updated(i, f))
         case FutureError(msg) => throw new RuntimeException("Failed to load chunk.\n" + msg)
-        case FutureFinished((i, s, t, ws)) => ntc.insert(i, s, t, ws)
+        case FutureFinished((s, t, ws)) => (ntc.insert(i, s, t, ws), fs)
       }
     }
   }
@@ -34,11 +36,12 @@ object TerrainCache {
     tc.tMap(i)
   }
 
-  def gen(cols:Int, rows:Int, tc:TerrainCache, k:Int, r:Random) = {
+  def gen(cols:Int, rows:Int, tc:TerrainCache, k:Int, seed:Long) = {
+    val r = new Random(seed)
     val (prevS, _) = getAdjacent(tc, k)
-    val ns = prevS.modBiome(k, r) //FIXME WARNING this will cause the rng to be access asynchronously, causing seeds to diverge!
+    val ns = prevS.modBiome(k, r)
     val (terrain, spawns) = ns.generate(cols, rows, k, r)
-    (k, ns, terrain, spawns)
+    (ns, terrain, spawns)
   }
 
   def create(cols:Int, rows:Int, r:Random):(TerrainCache, Cell, Direction, Seq[WorldSpawn]) = {
@@ -53,12 +56,12 @@ object TerrainCache {
 
     }.unzip
     val unloaded = Terrain(0, tf, nt, (0,0), Direction.Down)
-    val cache = TerrainCache(cols, rows, Map(0->((biome, first))), Seq(), unloaded, Seq(), r)
+    val cache = TerrainCache(cols, rows, Map(0->((biome, first))), Map(), unloaded, Seq(), r)
     (cache, first.spawn, first.spawnFace, gs)
   }
 }
 
-case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Seq[Future[(Int, Stratum,Terrain, Seq[WorldSpawn])]], dummy:Terrain, queuedSpawns:Seq[WorldSpawn], r:Random) {
+case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Map[Int,Future[(Stratum,Terrain, Seq[WorldSpawn])]], dummy:Terrain, queuedSpawns:Seq[WorldSpawn], r:Random) {
 
 
   def isSolid(ij:Cell):Boolean = {
@@ -129,35 +132,36 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
     copy(tMap=tMap.updated(i, (s, t)), queuedSpawns=queuedSpawns++ws)
   }
 
-  private def addFuture(f:Future[(Int, Stratum, Terrain, Seq[WorldSpawn])]) = {
-    copy(fs=f+:fs)
+  private def addFuture(i:Int, f:Future[(Stratum, Terrain, Seq[WorldSpawn])]) = {
+    copy(fs=fs.updated(i, f))
   }
 
   def update(ppos:Cell):(TerrainCache, Seq[WorldSpawn]) = {
     val newI = getIndex(ppos)
 
 
-    val uCache = TerrainCache.foldFutures(this)
 
-    val nCache = Seq(-1, 0, 1).map {_ + newI}.foldLeft(uCache) { case (ntc, index) =>
+    val nCache = Seq(-1, 0, 1).map {_ + newI}.foldLeft(this) { case (ntc, index) =>
       if (ntc.tMap.contains(index)) {
         ntc
       } else {
-        val (_, stratum, terrain, spawns) = TerrainCache.gen(cols, rows, ntc, index, r)
+        val (stratum, terrain, spawns) = TerrainCache.gen(cols, rows, ntc, index, r.nextLong())
         insert(index, stratum, terrain, spawns)
       }
     }
-    /*val fCache = Seq(-2, 2).map {_ + newI}.foldLeft(nCache) { case (ntc, index) =>
-      if (ntc.tMap.contains(index)) {
+    val uCache = Seq(2).map {_ + newI}.foldLeft(nCache) { case (ntc, index) =>
+      if (ntc.tMap.contains(index) || ntc.fs.contains(index)) {
         ntc
       } else {
         println("future for " + index)
-        val f = new Future(() => TerrainCache.gen(cols, rows, ntc, index, r))
-        ntc.addFuture(f)
+        val f = new Future(() => TerrainCache.gen(cols, rows, ntc, index, r.nextLong()))
+        ntc.addFuture(index, f)
 
       }
-    }*/
-    nCache.copy(queuedSpawns=Seq()) @@ nCache.queuedSpawns
+    }
+    val (fCache, nfs) = TerrainCache.foldFutures(uCache)
+
+    fCache.copy(queuedSpawns=Seq(), fs=nfs) @@ fCache.queuedSpawns
   }
 
 
@@ -186,7 +190,7 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
   def draw(ij:Cell)(t:TileRenderer):TileRenderer = {
     val ts = Vector(-1, 0, 1).map { k => getRaw(getIndex(ij) + k) }
 
-    val onScreen = ts.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
+    val onScreen = ts.filter { ter => t.project(ter.getRect).intersects(t.screen)}
     Game.drawPerf.track("terrain") {
       onScreen.foldLeft(t) { _ <+< _.draw }
     }
