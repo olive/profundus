@@ -11,14 +11,11 @@ import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.Profundus
 
 class TerrainManager {
-  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Seq[GlobalMessage], Player) = {
-
-    pl.toolPos match {
-      case Some(p) =>
-        val dmg = Damage(pl.inv.tool.`type`.digDamage/*fixme*/, DamageType.Tool)
-        val (wHit, drops, result) = tc.hit(p, dmg, pl.inv.tool.`type`)
-        (wHit, drops, pl.hitTool(result))
-      case None => (tc, Seq(), pl)
+  private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Player, Seq[GlobalMessage]) = {
+    pl.toolPos.foldLeft((tc, pl, Seq[GlobalMessage]())) { case ((cache, player, gs), p) =>
+      val dmg = Damage(player.getDamage/*fixme*/, DamageType.Tool)
+      val (newTc, drops, hit) = cache.hit(p, dmg, player.inv.tool.`type`)
+      (newTc, player.hitTool(hit), gs ++ drops)
     }
   }
   private val climbTime = 5
@@ -80,7 +77,7 @@ class TerrainManager {
     import Profundus._
     val (tryP, gs) = pp.update
     val (dropP, tool) = tryP.updateDropTool(tryP, tcache)
-    val (tc, drops, oldPl) = updateShovel(tcache, dropP)
+    val (tc, oldPl, drops) = updateShovel(tcache, dropP)
     val (movePl, dir) = oldPl.getMove
     val pl1 = processFall(tc, updateFacing(movePl.instDir, movePl).toMassive)
     val pl = processForces(tc, pl1)

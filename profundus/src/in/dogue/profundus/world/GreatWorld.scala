@@ -61,7 +61,7 @@ object GreatWorld {
         case s => s
       }
     }
-    val newP = p.setFallState(newState)
+    val newP = Player.setFallState(p, newState)
     gw.setPlayer(newP)
   }
 
@@ -101,12 +101,9 @@ object GreatWorld {
   private def updateTool : Update[Unit] = stdName("updateTool") { case (gw, ()) =>
     val pp = gw.p
     val em = gw.em
-    val newEm = pp.toolPos match {
-      case None => em
-      case Some(pos) =>
-        val dmg = Damage(pp.inv.tool.`type`.digDamage, DamageType.Player)
-        em.hitRopes(pos).hitCreatures(pos, dmg)
-
+    val newEm = pp.toolPos.foldLeft(em) { case (e, p) =>
+      val dmg = Damage(pp.getDamage, DamageType.Player)
+      e.hitRopes(p).hitCreatures(p, dmg)
     }
     gw.setEm(newEm)
   }

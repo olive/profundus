@@ -29,7 +29,7 @@ object Hud {
     val tf = Profundus.tf
 
     val tool = HudTool.create(ValueBar.create(inv.tool.`type`.durability, Color.White), tf, inv)
-    Hud(cols, rect, inv, tool, stam, health, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), Seq(), tf)
+    Hud(cols, rect, inv, tool, stam, health, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), Seq(), None, tf)
   }
 }
 
@@ -40,12 +40,14 @@ case class Hud private (height:Int, rect:Rect,
                         buffIcon:Tile,
                         text:Text, depth:Text, depthAmt:Text,
                         items:Seq[Item],
+                        feat:Option[Tile],
                         tf:TextFactory) {
   def atDepth(i:Int) = copy(depthAmt=tf.create("%4s".format(i.toString)))
   def withStam(s:ValueBar) = copy(stamBar=s)
   def withBuff(b:Tile) = copy(buffIcon=b)
   def withHealth(s:ValueBar) = copy(healthBar=s)
   def withItems(is:Seq[Item]) = copy(items=is)
+  def withFeat(icon:Option[Tile]) = copy(feat=icon)
   def withInventory(inv:Inventory) = {
     copy(inv=inv, tool = tool.withTool(inv.tool))
   }
@@ -78,6 +80,7 @@ case class Hud private (height:Int, rect:Rect,
         <+< stamBar.draw((13, 3)) <| ((12, 3), buffIcon)
         <+< healthBar.draw((13, 4))
         <+< drawItems((1, 4))
+        <+? feat.map { f => ((28, 4), f) }
       )
   }
 }

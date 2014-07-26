@@ -46,6 +46,7 @@ case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, help:He
                     .withHealth(pl.getHealthBar)
                     .withBuff(pl.getBuffIcon)
                     .withItems(pl.getItems)
+                    .withFeat(pl.feat.getIcon)
     copy(gw=gw.resetLm.update, hud=newHud)
   }
 

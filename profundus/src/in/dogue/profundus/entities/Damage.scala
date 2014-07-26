@@ -36,4 +36,6 @@ sealed trait DamageType {
 }
 
 
-case class Damage(amount:Int, source:DamageType)
+case class Damage(amount:Int, source:DamageType) {
+  def reduce(f:Int=>Int) = copy(amount = f(amount))
+}

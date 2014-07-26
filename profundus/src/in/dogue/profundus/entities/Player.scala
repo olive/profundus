@@ -72,6 +72,21 @@ object Player {
     }
     code.mkTile(Color.Black, Color.Red.dim(2))
   }
+
+  def setFallState(pl:Player, s:FallState) = {
+    val newPl = pl.copy(fall=s)
+    (pl.fall, s) match {
+      case (Falling(_, num), Grounded) =>
+        if (num > 1) {
+          SoundManager.land.play(pl.ij)
+        }
+        val dmg = newPl.fallDamage(num)
+        dmg.map { value => newPl.damage(value)}.getOrElse(newPl)
+
+      case _ => newPl
+    }
+  }
+
   def create(ij:Cell, face:Direction, lo:Loadout) = {
     val shovel = ToolSprite.create
 
@@ -84,7 +99,8 @@ object Player {
            StaminaBar.create(100), HealthBar.create(200),
            shovel, getLive,
            Seq(),
-           ControlState(false, false, false, false, false, false, false),
+           ControlState(false, false, false, false, false, false, false, false),
+           Feat.adrenaline,
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
            PlayerLight.create(smallLight, largeLight),
@@ -97,7 +113,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                            stam:StaminaBar, health:HealthBar,
                            shovel:ToolSprite, t:Direction => Tile,
                            forces:Seq[Force],
-                           ctrl:ControlState,
+                           ctrl:ControlState, feat:Feat,
                            inv:Inventory, log:PlayerLog,
                            fall:FallState, state:LivingState, justKilled:Boolean,
                            light:PlayerLight,
@@ -149,7 +165,18 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     SoundManager.item.play(ij)
     copy(attr=attr.collectItem(it))
   }
-  def toolPos = ((ctrl.isShovelling || Game.hasDrill) && canUseTool).select(None, ((x, y)-->face).some)
+
+  def removeFeat = copy(feat=Feat.default)
+  def repairTool = copy(inv=inv.repairTool)
+  def modFeat(f:Feat=>Feat) = copy(feat = f(feat))
+
+  def toolPos:Seq[Cell] = {
+    if ((ctrl.isShovelling || Game.hasDrill) && canUseTool){
+      feat.shovelPos(this)
+    } else {
+      Seq()
+    }
+  }
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = hasStamina
   def getMineralCount = inv.minerals
@@ -188,6 +215,9 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def spendRope = copy(inv = inv.spendRope, log = log.useRope)
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
+
+  def getDamage = feat.multiplyDamage(inv.tool.`type`.digDamage)
+
   def hitTool(result:HitResult) = {
     val dmg = result.toolHurt
     val tileBroken = result.broken
@@ -262,6 +292,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (dx != 0 || dy != 0).select(face, chooseFace(dx, dy))
   }
 
+  private def updateFeat = {
+
+    val (newFeat, npl) = ctrl.isFeating.select(feat @@ this, feat.tryActivate(this))
+    npl.copy(feat=newFeat.update)
+  }
+
   def update: (Player, Seq[GlobalMessage]) = {
     import Profundus._
     val newAttr = buff.process(attr)
@@ -271,7 +307,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                  stam=stam.update(newAttr),
                  health=health.update(newAttr),
                  light=light.update,
-                 fall=if(attr.hasWings) Floating else fall)
+                 fall=if(attr.hasWings) Floating else fall).updateFeat
+
     val (jkP, ps) = if (justKilled) {
       SoundManager.dead.play(ij)
       (p.copy(justKilled=false), Seq(DeathParticle.create((x, y), Int.MaxValue).toParticle))
@@ -310,21 +347,9 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     amount.map{a => Damage(a, DamageType.Fall)}
   }
 
-  def setFallState(s:FallState) = {
-    val newPl = copy(fall=s)
-    (fall, s) match {
-      case (Falling(_, num), Grounded)  =>
-        if (num > 1) {
-          SoundManager.land.play(ij)
-        }
-        val dmg = fallDamage(num)
-        dmg.map { value => newPl.damage(value)}.getOrElse(newPl)
 
-      case _ => newPl
-    }
-  }
-
-  def damage(dmg:Damage):Player = {
+  def damage(raw:Damage):Player = {
+    val dmg = raw.reduce(feat.reduceDamage)
     if (state == Alive && dmg.amount > 0 && Game.t - Player.lastHurt > 7) {
       Player.lastHurt = Game.t
       SoundManager.hurt.play(ij)
@@ -376,8 +401,10 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
-    tr <+ (ij, t(face)) <+< drawShovel <+< drawIndicator
+    tr <+ (ij, t(face)) <+< drawShovel <+< drawIndicator <+< feat.draw(pos)
   }
+
+
 
   def processForces(tc:TerrainCache) = {
     val newFs = if (ctrl.isKicking && tc.isSolid(pos --> face)) {
@@ -408,7 +435,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else {
       fall
     }
-    Massive(_.pos, _.move, _.setFallState, f, this)
+    Massive(_.pos, _.move, (pl:Player) => pl.feat.setFallState(pl), f, this)
   }
   def toLight:LightSource = light.toLightSource(pos)
 }

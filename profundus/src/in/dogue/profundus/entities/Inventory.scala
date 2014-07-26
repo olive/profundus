@@ -27,4 +27,6 @@ case class Inventory private (fuel:Int, ropes:Int, bombs:Int, minerals:Int, tool
   def collectMineral(g:MineralPickup) = copy(minerals=minerals+1)
   def adjustMinerals(amt:Int) = copy(minerals=minerals+amt)
   def collectRope(g:RopePickup) = copy(ropes=ropes+1)
+
+  def repairTool = copy(tool=tool.`type`.toTool)
 }
