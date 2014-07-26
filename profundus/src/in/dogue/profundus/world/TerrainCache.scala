@@ -1,42 +1,77 @@
 package in.dogue.profundus.world
 
+import in.dogue.antiqua.Antiqua._
+import in.dogue.antiqua.data._
 import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
-import in.dogue.antiqua.Antiqua
-import Antiqua._
-import in.dogue.antiqua.data.{Future, Direction}
-import in.dogue.profundus.entities.{Damage, ToolType, Obelisk, Lurker}
-import in.dogue.antiqua.geometry.Line
-import in.dogue.profundus.entities.pickups.{FoodType, Toadstool, FoodPickup, Pickup}
-import in.dogue.profundus.lighting.LightSource
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.Game
-
+import in.dogue.antiqua.data.FutureFinished
+import in.dogue.antiqua.data.FutureError
+import in.dogue.antiqua.geometry.{Circle, Line}
+import in.dogue.profundus.entities.{ToolType, Damage}
+import in.dogue.antiqua.procgen.PerlinNoise
 
 object TerrainCache {
-  def create(cols:Int, rows:Int, r:Random):(TerrainCache,Cell,Direction, Seq[WorldSpawn]) = {
+  def foldFutures(tc:TerrainCache) = {
+    tc.fs.foldLeft(tc) { case (ntc, f) =>
+      f.update match {
+        case FutureComputing => ntc
+        case FutureError(msg) => throw new RuntimeException("Failed to load chunk.\n" + msg)
+        case FutureFinished((i, s, t, ws)) => ntc.insert(i, s, t, ws)
+      }
+    }
+  }
+
+  def getAdjacent(tc:TerrainCache, i:Int):(Stratum, Terrain) = {
+    (1 until 999) map { k =>
+      if (tc.tMap.contains(i+k)) {
+        return tc.tMap(i+k)
+      } else if (tc.tMap.contains(i-k)) {
+        return tc.tMap(i-k)
+      }
+    }
+    tc.tMap(i)
+  }
+
+  def gen(cols:Int, rows:Int, tc:TerrainCache, k:Int, r:Random) = {
+    val (prevS, _) = getAdjacent(tc, k)
+    val ns = prevS.modBiome(k, r) //FIXME WARNING this will cause the rng to be access asynchronously, causing seeds to diverge!
+    val (terrain, spawns) = ns.generate(cols, rows, k, r)
+    (k, ns, terrain, spawns)
+  }
+
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache, Cell, Direction, Seq[WorldSpawn]) = {
     val copy = new Random(r.nextInt())
-    val biome = Stratum.createSurface(r)
-    val (biomep, first, gs) = biome.generate(cols, rows, 0, copy)
-    val cache = TerrainCache(cols, rows, Map(0->first), 0, 0, biomep, r)
+    val biome: Stratum = Stratum.createSurface(r)
+    val (first, gs) = biome.generate(cols, rows, 0, copy)
+    val tf = biome.ts.toFactory(r)
+    val tg = TerrainGenerator.unloaded
+    val (nt, _) = Array2d.tabulate(cols, rows) { case (ij) =>
+
+      tg.mkTile(biome.ts, tf, ij, 0, cols, rows, 0, r)
+
+    }.unzip
+    val unloaded = Terrain(0, tf, nt, (0,0), Direction.Down)
+    val cache = TerrainCache(cols, rows, Map(0->((biome, first))), Seq(), unloaded, Seq(), r)
     (cache, first.spawn, first.spawnFace, gs)
   }
 }
-case class TerrainCache private (cols:Int, rows:Int,
-                                 tMap:Map[Int, Terrain], max:Int, min:Int,
-                                 biome:Stratum,
-                                 r:Random) {
+
+case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Seq[Future[(Int, Stratum,Terrain, Seq[WorldSpawn])]], dummy:Terrain, queuedSpawns:Seq[WorldSpawn], r:Random) {
+
+
   def isSolid(ij:Cell):Boolean = {
-    get(ij).map{_.isSolid(convert(ij))}.getOrElse(true)
+    get(ij).isSolid(toTerrainCoords(ij))
   }
 
   def isBackgroundSolid(ij:Cell):Boolean = {
-    get(ij).map{_.isBackgroundSolid(convert(ij))}.getOrElse(true)
+    get(ij).isBackgroundSolid(toTerrainCoords(ij))
   }
 
   def isGrounded(ij:Cell):Boolean = {
     val down = ij --> Direction.Down
-    get(down).map{_.isSolid(convert(down))}.getOrElse(true)
+    get(down).isSolid(toTerrainCoords(down))
   }
 
   def isLoaded(ij:Cell):Boolean = {
@@ -49,25 +84,28 @@ case class TerrainCache private (cols:Int, rows:Int,
   }
 
   def isRock(ij:Cell):Boolean ={
-    get(ij).exists{_.isRock(convert(ij))}
+    get(ij).isRock(toTerrainCoords(ij))
   }
 
   def mineralize(ij:Cell):TerrainCache = {
     val index = getIndex(ij)
-    val converted = convert(ij)
-    val mineraled = tMap(index).mineralize(converted)
-    copy(tMap=tMap.updated(index, mineraled))
+    val converted = toTerrainCoords(ij)
+    val mineraled = get(ij).mineralize(converted)
+    updateTerrain(index, mineraled)
+  }
+
+  private def updateTerrain(tIndex:Int, t:Terrain) = {
+    val (s, _) = tMap(tIndex)
+    val ntMap = tMap.updated(tIndex, (s, t))
+    copy(tMap = ntMap)
   }
 
   def getTouching(ij:Cell):Direction => Option[WorldTile] = {
     def g(p:Cell) = {
       val terrain = get(p)
-      terrain.map { t =>
-        val converted = convert(p)
-        val opt = t.tiles.getOption(converted)
-        opt.filter{ !_.isWalkable }.onlyIf(isLoaded(p)).flatten
-
-      }.getOrElse(None)
+      val converted = toTerrainCoords(p)
+      val opt = terrain.tiles.getOption(converted)
+      opt.filter{ !_.isWalkable }.onlyIf(isLoaded(p)).flatten
     }
     import Direction._
     def touching(d:Direction) = d match {
@@ -82,14 +120,56 @@ case class TerrainCache private (cols:Int, rows:Int,
 
 
   def hit(ij:Cell, dmg:Damage, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], HitResult) = {
+    val (broke, dropped, result) = get(ij).hit(toTerrainCoords(ij), dmg, ttype)
     val index = getIndex(ij)
-    val (broke, dropped, result) = tMap(index).hit(convert(ij), dmg, ttype)
-    val updated = tMap.updated(index, broke)
-    (copy(tMap=updated), dropped, result)
+    (updateTerrain(index, broke), dropped, result)
   }
 
-  private def convert(ij:Cell):Cell = {
-    (ij.x, ij.y %% rows)
+  private def insert(i:Int, s:Stratum, t:Terrain, ws:Seq[WorldSpawn]) = {
+    copy(tMap=tMap.updated(i, (s, t)), queuedSpawns=queuedSpawns++ws)
+  }
+
+  private def addFuture(f:Future[(Int, Stratum, Terrain, Seq[WorldSpawn])]) = {
+    copy(fs=f+:fs)
+  }
+
+  def update(ppos:Cell):(TerrainCache, Seq[WorldSpawn]) = {
+    val newI = getIndex(ppos)
+
+
+    val uCache = TerrainCache.foldFutures(this)
+
+    val nCache = Seq(-1, 0, 1).map {_ + newI}.foldLeft(uCache) { case (ntc, index) =>
+      if (ntc.tMap.contains(index)) {
+        ntc
+      } else {
+        val (_, stratum, terrain, spawns) = TerrainCache.gen(cols, rows, ntc, index, r)
+        insert(index, stratum, terrain, spawns)
+      }
+    }
+    /*val fCache = Seq(-2, 2).map {_ + newI}.foldLeft(nCache) { case (ntc, index) =>
+      if (ntc.tMap.contains(index)) {
+        ntc
+      } else {
+        println("future for " + index)
+        val f = new Future(() => TerrainCache.gen(cols, rows, ntc, index, r))
+        ntc.addFuture(f)
+
+      }
+    }*/
+    nCache.copy(queuedSpawns=Seq()) @@ nCache.queuedSpawns
+  }
+
+
+
+
+
+  private def getRaw(i:Int) = {
+    tMap.get(i).map {_._2}.getOrElse(dummy)
+  }
+
+  private def get(ij:Cell) = {
+    getRaw(getIndex(ij))
   }
 
   private def getIndex(ij:Cell) = {
@@ -98,59 +178,15 @@ case class TerrainCache private (cols:Int, rows:Int,
     yy/rows
   }
 
-  def checkPositions(ij:Cell):(TerrainCache, Seq[WorldSpawn]) = {
-    val index = getIndex(ij)
-    val seed = (this, Seq[WorldSpawn]())
-    Seq(index-1, index+1, index+2).foldLeft(seed) { case ((map, gs), i) =>
-      val (next, newGs) = map.check(i)
-      (next, gs ++ newGs)
-    }
-  }
 
-  //fixme -- code clones
-  private def check(i:Int):(TerrainCache, Seq[WorldSpawn]) = {
-
-    val range = {
-      if (i > max) {
-        (max+1) to i
-      } else if (i < min){
-        (min - 1) to (i, -1)
-      } else {
-        Seq()
-      }
-    }
-
-
-
-    val (newBiome, newMap, newMin, newMax, gs) = {
-      val seed = (biome, tMap, Seq[WorldSpawn]())
-      //fixme -- use fold3
-      val (b, mm, gs) = range.foldLeft(seed) { case ((bm, map, gs), k) =>
-        val (newBiome, next, moreGs) = bm.generate(cols, rows, k, r)
-        (newBiome, map.updated(k, next), moreGs ++ gs)
-      }
-      (b, mm, math.min(min, i), math.max(max, i), gs)
-    }
-
-    val newTc = copy(biome = newBiome, tMap=newMap, min=newMin, max=newMax)
-    (newTc, gs)
-
-  }
-
-  private def get(ij:Cell):Option[Terrain] = {
-    tMap.get(getIndex(ij))
-
-
+  private def toTerrainCoords(ij:Cell):Cell = {
+    (ij.x, ij.y %% rows)
   }
 
   def draw(ij:Cell)(t:TileRenderer):TileRenderer = {
-    val things = Vector(
-      tMap(getIndex(ij)-1),
-      tMap(getIndex(ij)),
-      tMap(getIndex(ij)+1)
-    )
+    val ts = Vector(-1, 0, 1).map { k => getRaw(getIndex(ij) + k) }
 
-    val onScreen = things.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
+    val onScreen = ts.filter { ter => t.project(ter.getRect).intersects(Recti(0,0,32, 48))}
     Game.drawPerf.track("terrain") {
       onScreen.foldLeft(t) { _ <+< _.draw }
     }

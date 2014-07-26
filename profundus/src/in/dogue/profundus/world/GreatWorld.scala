@@ -130,7 +130,7 @@ object GreatWorld {
   private def updateCache : Update[Unit] = stdName("updateTerrain") { case (gw, ()) =>
     val ppos = gw.p.pos
     val cache = gw.cache
-    val (tc, gs) = cache.checkPositions(ppos)
+    val (tc, gs) = cache.update(ppos)
 
     gw.setTc(tc).insertSpawns(gs)
   }
@@ -265,7 +265,7 @@ object GreatWorld {
 
   def create(worldCols:Int, worldRows:Int, screenCols:Int, screenRows:Int, lo:Loadout, r:Random) = {
     val (cache, spawn, spawnFace, gs1) = TerrainCache.create(worldCols, worldRows, r)
-    val (tc, gs2) = cache.checkPositions(spawn)
+    val (tc, gs2) = cache.update(spawn)
     val loadout = if (Game.hasDrill) {
       lo.copy(`type`=Drill)
     } else {

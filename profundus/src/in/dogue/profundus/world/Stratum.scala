@@ -9,7 +9,7 @@ import Antiqua._
 object Stratum {
   def createDummy(r:Random) = {
     val ts = TerrainScheme.generate(r)
-    val tg = TerrainGenerator.dummy(ts)
+    val tg = TerrainGenerator.dummy
     val fg = FeatureGenerator.dummy
     val eg = EntityGenerator.dummy
     val dg = DoodadGenerator.empty
@@ -21,7 +21,7 @@ object Stratum {
   def createSurface(r:Random) = {
     val ts = TerrainScheme.generate(r)
     val sg = SpawnGenerator.surface
-    val tg = TerrainGenerator.dummy(ts)
+    val tg = TerrainGenerator.dummy
     val fg = FeatureGenerator.surface
     val eg = EntityGenerator.empty
     val dg = DoodadGenerator.empty
@@ -32,7 +32,7 @@ object Stratum {
   def createLair(r:Random):Stratum = {
     val ts = TerrainScheme.generate(r)
     val sg = SpawnGenerator.dummy
-    val tg = TerrainGenerator.dummy(ts)
+    val tg = TerrainGenerator.dummy
     val fg = FeatureGenerator.lair
     val eg = EntityGenerator.lair
     val dg = DoodadGenerator.empty
@@ -43,7 +43,7 @@ object Stratum {
   def createAbyss(r:Random) = {
     val ts = TerrainScheme.generate(r)
     val sg = SpawnGenerator.dummy
-    val tg = TerrainGenerator.dummy(ts)
+    val tg = TerrainGenerator.dummy
     val fg = FeatureGenerator.abyss
     val eg = EntityGenerator.empty
     val dg = DoodadGenerator.empty
@@ -96,7 +96,7 @@ trait Stratum {
       Stratum.createAbyss(r)
     } else if (yIndex == endIndex) {
       Stratum.createLair(r)
-    } else if (yIndex == 1) {
+    } else if (yIndex >= 0) {
       Stratum.createDummy(r)
     } else {
       if (yIndex % strataSize == 0) {
@@ -109,7 +109,7 @@ trait Stratum {
 
 
 
-  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Stratum, Terrain, Seq[WorldSpawn]) = {
+  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Terrain, Seq[WorldSpawn]) = {
     import Profundus._
 
     val (spawn, face, t) = sg.gen(cols, rows, r)
@@ -132,8 +132,7 @@ trait Stratum {
 
     val doodads = dg.generate(ts, newTiles, r).gss
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
-    val newBiome = modBiome(yIndex+1, r)
-    (newBiome, Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
+    (Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
   }
 
 }

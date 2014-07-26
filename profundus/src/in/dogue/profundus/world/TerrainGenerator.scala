@@ -10,6 +10,11 @@ object TerrainGenerator {
   def mkEmpty(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random):(WorldTile, Option[Cell]) = {
     tf.mkEmpty
   }
+
+  def mkUnloaded(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random): (WorldTile, Option[Cell]) = {
+    tf.mkShaft
+  }
+
   def test(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random): (WorldTile, Option[Cell]) = {
     val vs:Vector[Double] = (0 until 8).map { (i:Int) => 0.2 * (i/8.toDouble) - 0.2 }.toVector
     val base = ts.color.ways1(vs)
@@ -30,8 +35,9 @@ object TerrainGenerator {
 
   }
 
-  def dummy(ts:TerrainScheme) = TerrainGenerator(test)
-  def empty(ts:TerrainScheme) = TerrainGenerator(mkEmpty)
+  def dummy = TerrainGenerator(test)
+  def empty = TerrainGenerator(mkEmpty)
+  def unloaded = TerrainGenerator(mkUnloaded)
   type Generate = (TerrainScheme, WorldTileFactory, Cell,Int,Int,Int,Double,Random) => (WorldTile, Option[Cell])
 }
 case class TerrainGenerator(mkTile:TerrainGenerator.Generate) {
