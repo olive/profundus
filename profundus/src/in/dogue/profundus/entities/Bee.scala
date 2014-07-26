@@ -32,7 +32,7 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
   final val innerRange = 4
   final val attackTime = 60
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Bee, Cell, Seq[GlobalMessage]) = {
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Bee, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val ppos = pi.pos
     val newSelf = copy(a = a.update, b = b.update)

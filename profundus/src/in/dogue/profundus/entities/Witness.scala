@@ -67,7 +67,7 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     normalAnim
   }
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Witness, Cell, Seq[GlobalMessage]) = {
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Witness, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val ppos = pi.pos
     val dd = ppos |-| pos

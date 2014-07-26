@@ -30,7 +30,7 @@ object Entity {
   var lastPlayed = 0
   private def apply[A](aij:Cell,
                        afall:FallState,
-                       aup: A => (Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+                       aup: A => (EntityId, Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
                        amv: A => (Cell, Direction, (Direction => Option[WorldTile])) => A,
                        admg: A => Damage => A,
                        adoKill: A => A,
@@ -58,7 +58,7 @@ object Entity {
 
   def create[A](ij:Cell,
                 fall:FallState,
-                up: A => (Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+                up: A => (EntityId, Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
                 mv: A => (Cell, Direction, (Direction => Option[WorldTile])) => A,
                 dmg: A => Damage => A,
                 doKill: A => A,
@@ -75,7 +75,7 @@ trait Entity {
   type T
   val ij:Cell
   val fall:FallState
-  val up: T => (Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage])
+  val up: T => (EntityId, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage])
   val mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T
   val dmg: T => Damage => T
   val doKill: T => T
@@ -94,7 +94,7 @@ trait Entity {
   def isId(id:EntityId) = this.id == id
   def pos = ij
   def update(tc:TerrainCache, pi:PlayerInfo, r:Random): (Entity, Seq[GlobalMessage]) = {
-    val (t, newPos, glob) = up(self)(ij, tc, pi, r)
+    val (t, newPos, glob) = up(self)(id, ij, tc, pi, r)
     (copy(self=t, ij=newPos), glob)
   }
 

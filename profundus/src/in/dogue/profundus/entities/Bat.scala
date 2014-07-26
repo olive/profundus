@@ -2,9 +2,8 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.data.{CP437, Direction}
-import in.dogue.profundus.world.{GlobalMessage, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{GlobalMessage, TerrainCache}
 import scala.util.Random
-import in.dogue.profundus.particles.{DeathParticle, Particle, RingParticle}
 import in.dogue.profundus.entities.damagezones.{SingleTileZone, ExplosionZone}
 import in.dogue.profundus.entities.pickups.ItemPickup
 import in.dogue.antiqua.graphics.{Tile, TileFactory, Animation, TileRenderer}
@@ -44,7 +43,7 @@ object Bat {
 case class Bat(a:AnimationGroup) {
 
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Bat, Cell, Seq[GlobalMessage]) = {
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Bat, Cell, Seq[GlobalMessage]) = {
     val ppos = pi.pos
     import Profundus._
     val dd = ppos |-| pos

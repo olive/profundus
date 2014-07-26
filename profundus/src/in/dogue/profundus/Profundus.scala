@@ -8,7 +8,7 @@ import in.dogue.antiqua.data.CP437
 import in.dogue.profundus.world._
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
-import in.dogue.profundus.entities.{GameBox, Entity, Obelisk, Lurker}
+import in.dogue.profundus.entities._
 import in.dogue.antiqua.graphics.Border
 import in.dogue.profundus.world.NewParticles
 import in.dogue.profundus.world.NewDeformations
@@ -17,6 +17,19 @@ import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.antiqua.algebra.Monoid
 import in.dogue.profundus.ui.MessageBox
+import in.dogue.antiqua.graphics.Border
+import in.dogue.profundus.world.Transaction
+import in.dogue.profundus.world.DestroyEntity
+import in.dogue.profundus.entities.GameBox
+import in.dogue.profundus.world.NewDoodads
+import in.dogue.profundus.world.NewEntities
+import in.dogue.profundus.world.NewDamageZones
+import in.dogue.profundus.world.NewMessageBox
+import in.dogue.profundus.world.NewEmitters
+import in.dogue.profundus.world.NewParticles
+import in.dogue.profundus.world.NewDeformations
+import in.dogue.profundus.world.NewTransaction
+import in.dogue.profundus.world.NewPickups
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle]) {
@@ -72,6 +85,11 @@ object Profundus {
   }
   implicit def transaction2NewTransaction(s:Transaction) = new AugNewTransaction(s)
 
+  class AugDestroyEntity(s:EntityId) {
+    def gs = DestroyEntity(s)
+    def gss = Seq(gs)
+  }
+  implicit def transaction2DestroyEntity(s:EntityId) = new AugDestroyEntity(s)
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
 

@@ -18,7 +18,7 @@ import in.dogue.profundus.entities.pickups.{Pickup, ToolPickup}
 object Shopkeeper {
   def create(ij:Cell, item:Pickup, r:Random) = {
     val tile = CP437.S.mkTile(Color.Black, Color.Yellow)
-    val border = Border(CP437.doubleBorder)(Color.Black, Color.White)(20, 10).toTileGroup
+    val border = Profundus.border(20, 10).toTileGroup
     val bg = Rect.createPlain(20, 10, CP437.` `.mkTile(Color.Black, Color.Black)).toTileGroup
     val enough = MessageBoxReader.load("shopkeeper_enough")
     val lacking = MessageBoxReader.load("shopkeeper_lacking")
@@ -45,7 +45,7 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
   private def mkBox(pos:Cell, box:MessageBox[Unit]) = {
     GameBox(pos |+| ((-6, 3)), box).gss
   }
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Shopkeeper, Cell, Seq[GlobalMessage]) = {
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Shopkeeper, Cell, Seq[GlobalMessage]) = {
     val ppos = pi.pos
     val isClose = (pos |-| ppos).mag < 5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose

@@ -21,7 +21,7 @@ object Midas {
 }
 
 case class Midas(t:Tile) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Midas, Cell, Seq[GlobalMessage]) = {
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Midas, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val newPos = if (t % 120 == 0) {
       val dir = Vector(Direction.Left, Direction.Right).randomR(r)

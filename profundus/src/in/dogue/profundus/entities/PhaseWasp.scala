@@ -44,7 +44,7 @@ case class PhaseWasp(a:AnimationGroup) {
   final val attackTime = 60
 
   private def updateAnim = copy(a=a.smap {_.update})
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (PhaseWasp, Cell, Seq[GlobalMessage]) = {
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (PhaseWasp, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val ppos = pi.pos
     val pState = pi.live

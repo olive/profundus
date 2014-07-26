@@ -23,10 +23,10 @@ object Beezle {
 }
 
 case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Beezle, Cell, Seq[GlobalMessage]) = {
+  import Profundus._
+  def update(id:EntityId, health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Beezle, Cell, Seq[GlobalMessage]) = {
     val ppos = pi.pos
     val pState = pi.live
-    import Profundus._
     val dd = ppos |-| pos
     val close = dd.mag < 10
     val adjacent = dd.x.abs + dd.y.abs == 1
