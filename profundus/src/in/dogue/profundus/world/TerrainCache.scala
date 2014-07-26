@@ -80,16 +80,16 @@ case class TerrainCache private (cols:Int, rows:Int,
 
   }
 
-  private def convert(ij:Cell):Cell = {
-    (ij.x, ij.y %% rows)
-  }
-
 
   def hit(ij:Cell, dmg:Damage, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], HitResult) = {
     val index = getIndex(ij)
     val (broke, dropped, result) = tMap(index).hit(convert(ij), dmg, ttype)
     val updated = tMap.updated(index, broke)
     (copy(tMap=updated), dropped, result)
+  }
+
+  private def convert(ij:Cell):Cell = {
+    (ij.x, ij.y %% rows)
   }
 
   private def getIndex(ij:Cell) = {
