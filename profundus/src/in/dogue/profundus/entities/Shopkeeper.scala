@@ -61,13 +61,15 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
       } else {
         false @@ lacking
       }).doo{ case (doBuy, box) =>
-        val itemPos = if (!args.tc.isSolid(ppos --> Direction.Left)) {
-          ppos --> Direction.Left
-        } else if (!args.tc.isSolid(ppos --> Direction.Right)) {
-          ppos --> Direction.Right
-        } else {
-          ppos
-        }
+        val itemPos = ppos.map { p =>
+          if (!args.tc.isSolid(p --> Direction.Left)) {
+            p --> Direction.Left
+          } else if (!args.tc.isSolid(p --> Direction.Right)) {
+            p --> Direction.Right
+          } else {
+            p
+          }
+        }.getOrElse(throw new Exception("fixme"))
         doBuy @@ (mkBox(pos, box) ++ trans(itemPos).gss)
       }
 

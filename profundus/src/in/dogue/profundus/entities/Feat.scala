@@ -32,6 +32,8 @@ object Feat {
 
 
   }
+  def DefaultSeekPlayer(p:Player):Option[Cell] = p.pos.some
+  def NoSeekPlayer(p:Player):Option[Cell] = None
 
   def DefaultDoDamage(dmg:Int) = dmg
   def AdrenalineDoDamage(dmg:Int) = dmg*10
@@ -49,27 +51,32 @@ object Feat {
   }
 
   def default:Feat = {
-    Feat(None, 0, 0, false, DefaultTool, DefaultFall, DefaultDoDamage, DefaultTakeDamage, DefaultOnActivate, NeverActivate)
+    Feat(None, 0, 0, false, DefaultTool, DefaultFall, DefaultDoDamage, DefaultTakeDamage, DefaultSeekPlayer, DefaultOnActivate, NeverActivate)
   }
 
   def fury = {
     val icon = CP437./.mkTile(Color.Black, Color.Brown).some
-    Feat(icon, 180, 0, false, FuryTool, DefaultFall, DefaultDoDamage, DefaultTakeDamage, DefaultOnActivate, AlwaysActivate)
+    Feat(icon, 180, 0, false, FuryTool, DefaultFall, DefaultDoDamage, DefaultTakeDamage, DefaultSeekPlayer, DefaultOnActivate, AlwaysActivate)
   }
 
   def superbrace = {
     val icon = CP437.Ω.mkTile(Color.Black, Color.Pink).some
-    Feat(icon, Int.MaxValue, 0, false, DefaultTool, BraceFall, DefaultDoDamage, DefaultTakeDamage, DefaultOnActivate, MidairActivate)
+    Feat(icon, Int.MaxValue, 0, false, DefaultTool, BraceFall, DefaultDoDamage, DefaultTakeDamage, DefaultSeekPlayer, DefaultOnActivate, MidairActivate)
   }
 
   def repair = {
     val icon = CP437.X.mkTile(Color.Black, Color.Green).some
-    Feat(icon, 1, 0, false, DefaultTool, BraceFall, DefaultDoDamage, DefaultTakeDamage, ToolRepairOnActivate, AlwaysActivate)
+    Feat(icon, 1, 0, false, DefaultTool, BraceFall, DefaultDoDamage, DefaultTakeDamage, DefaultSeekPlayer,ToolRepairOnActivate, AlwaysActivate)
   }
 
   def adrenaline = {
     val icon = CP437.∞.mkTile(Color.Black, Color.Red).some
-    Feat(icon, 180, 0, false, DefaultTool, DefaultFall, AdrenalineDoDamage, AdrenalineTakeDamage, DefaultOnActivate, AlwaysActivate)
+    Feat(icon, 180, 0, false, DefaultTool, DefaultFall, AdrenalineDoDamage, AdrenalineTakeDamage, DefaultSeekPlayer, DefaultOnActivate, AlwaysActivate)
+  }
+
+  def meditation = {
+    val icon = CP437.O.mkTile(Color.White, Color.Black).some
+    Feat(icon, 180, 0, false, DefaultTool, DefaultFall, DefaultDoDamage, DefaultTakeDamage, NoSeekPlayer, DefaultOnActivate, AlwaysActivate)
   }
 }
 case class Feat(private val icon:Option[Tile], t:Int, tActivate:Int, isActivated:Boolean,
@@ -77,6 +84,7 @@ case class Feat(private val icon:Option[Tile], t:Int, tActivate:Int, isActivated
                 setFall: (Player, FallState) => Player,
                 doDamage: Int => Int,
                 takeDamage: Int => Int,
+                seekPlayer: Player => Option[Cell],
                 onActivate:(Player => Player),
                 mayActivate:Player => Boolean) {
   def shovelPos(p:Player):Seq[Cell] = {
@@ -98,6 +106,11 @@ case class Feat(private val icon:Option[Tile], t:Int, tActivate:Int, isActivated
     } else {
       copy(t=newT, tActivate=tActivate.drop1)
     }
+  }
+
+  def getPlayerPosition(pl:Player) = {
+    val f:Player => Option[Cell] = isActivated.select(Feat.DefaultSeekPlayer, seekPlayer)
+    f(pl)
   }
 
   def setFallState(pl:Player)(state:FallState):Player = {

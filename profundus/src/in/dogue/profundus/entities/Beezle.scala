@@ -35,7 +35,7 @@ case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
     } else if (adjacent) {
       pos
     } else if (args.hasLos && close && t % 12 == 0) {
-      pos |+| args.toward
+      args.toward.map{t => pos |+| t}.getOrElse(pos)
     } else {
       pos
     }

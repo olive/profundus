@@ -51,12 +51,15 @@ case class Bat(a:AnimationGroup) {
       args.moveRandom
     } else if (!isAdjacent && t % 14 == 0 && args.hasLos) {
       val move =  args.toward
-      val res = pos |+| move
-      if (!args.tc.isSolid(res)) {
-        res
-      } else {
-        pos
-      }
+      move.map { m =>
+        val res = pos |+| m
+        if (!args.tc.isSolid(res)) {
+          res
+        } else {
+          pos
+        }
+      }.getOrElse(pos)
+
 
     } else if (t % 15 == 0) {
       args.moveRandom
@@ -64,7 +67,7 @@ case class Bat(a:AnimationGroup) {
       pos
     }
     val attack = if (isAdjacent && t % 15 == 0) {
-      Seq(SingleTileZone(args.ppos, 75, DamageType.HellBat).toZone)
+      args.ppos.map{p => Seq(SingleTileZone(p, 75, DamageType.HellBat).toZone)}.getOrElse(Seq())
     } else {
       Seq()
     }

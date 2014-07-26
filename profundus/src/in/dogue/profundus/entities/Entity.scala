@@ -28,19 +28,21 @@ object EntityId {
 case class EntityId private (id:BigInt)
 
 case class EntityArgs(id:EntityId, pos:Cell, tc:TerrainCache, pi:PlayerInfo, r:Random) {
-  val dd = pi.pos |-| pos
-  def distance2 = dd.mag2
+  val dd = pi.pos.map { _ |-| pos }
+  def distance2 = dd.map {d => d.mag2}.getOrElse(Int.MaxValue)
   @inline def ppos = pi.pos
   def isAdjacent = {
-    math.abs(dd.x) + math.abs(dd.y) == 1
+    dd.exists {v => math.abs(v.x) + math.abs(v.y) == 1 }
   }
 
   def isOnTop = {
-    math.abs(dd.x) + math.abs(dd.y) == 0
+    dd.exists {v =>  math.abs(v.x) + math.abs(v.y) == 0 }
   }
 
+  def toward = dd.map {_.signum}
   def hasLos = {
-    tc.hasLineOfSight(pos, pi.pos)
+    pi.pos.forall{p => tc.hasLineOfSight(pos, p) }
+
   }
 
   def moveRandom:Cell = {
@@ -57,7 +59,6 @@ case class EntityArgs(id:EntityId, pos:Cell, tc:TerrainCache, pi:PlayerInfo, r:R
     move.map{pos --> _}.getOrElse(pos)
   }
 
-  def toward = dd.signum
 }
 
 object Entity {

@@ -209,8 +209,10 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     }
   }
 
-  def getInfo = PlayerInfo(pos, state, inv.minerals)
+  def getInfo = PlayerInfo(getSeekPos, state, inv.minerals)
 
+
+  def getSeekPos = feat.getPlayerPosition(this)
   def spendBomb = copy(inv = inv.spendBomb, log = log.useBomb)
   def spendRope = copy(inv = inv.spendRope, log = log.useRope)
 

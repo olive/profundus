@@ -50,7 +50,7 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
       val dx = if (onTop) {
         -1
       } else if (!adjacent){
-        dd.x.signum
+        dd.getOrElse((0,0)).x.signum
       } else {
         0
       }

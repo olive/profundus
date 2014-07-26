@@ -51,10 +51,10 @@ case class PhaseWasp(a:AnimationGroup) {
     if (args.distance2 > range*range || pState == Dead) {
       return (updateAnim, pos, Seq())
     }
-    val d = args.toward
     val (newPos, canAttack) = if (t % moveTime == 0) {
       if (args.distance2 > innerRange*innerRange) {
-        (pos |+| d, false)
+        val newPos = args.toward.map {t => pos |+| t}.getOrElse(pos)
+        (newPos, false)
       } else {
         (pos, true)
       }

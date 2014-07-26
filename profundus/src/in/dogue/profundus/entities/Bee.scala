@@ -55,19 +55,21 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
         (newPos, Seq())
       } else if (isAdjacent) {
         val kz = if (t %5 == 0) {
-          Seq(SingleTileZone(pos |+| args.toward, 30, DamageType.Bee).toZone)
+          args.toward.map {t => Seq(SingleTileZone(pos |+| t, 30, DamageType.Bee).toZone)}.getOrElse(Seq())
         } else {
           Seq()
         }
         (pos, kz)
       } else {
         val newPos = if (t % 15 == 0) {
-          val tryPos = pos |+| args.toward
-          if (!args.tc.isSolid(tryPos)) {
-            tryPos
-          } else {
-            pos
-          }
+          args.toward.map { t =>
+            val tryPos = pos |+| t
+            if (!args.tc.isSolid(tryPos)) {
+              tryPos
+            } else {
+              pos
+            }
+          }.getOrElse(pos)
         } else {
           pos
         }

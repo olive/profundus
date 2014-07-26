@@ -127,20 +127,20 @@ case class Lurker private (tile:Tile, state:LurkerState) {
 
   private def update(health:Int, t:Int, args:EntityArgs):(Lurker, Cell, Seq[GlobalMessage]) = {
     import Profundus._
-    val ppos = args.ppos
     val hasLos = args.hasLos
     val pos = args.pos
-    val ns = state match {
-      case c@Chase(p, _) if !hasLos => LostSight.create(p)
-      case c@Chase(p, _) if hasLos => c
-      case a if hasLos && !a.isAttack => Chase.create(ppos)
-      case a => a
+    val ns = (state, args.ppos) match {
+      case (c@Chase(p, _),_) if !hasLos => LostSight.create(p)
+      case (c@Chase(p, _),_) if hasLos => c
+      case (a, Some(ppos)) if hasLos && !a.isAttack => Chase.create(ppos)
+      case (s, _) => s
     }
-    val (newState, newPos, newSelf, attacks) = ns match {
-      case a@Attack(p, t) => updateAttack(pos, a, ppos)
-      case c@Chase(p, t) => updateChase(pos, c, args.tc, ppos)
-      case l@LostSight(p, t) => updateLost(pos, l)
-      case w@Wander(t) => updateWander(pos, w, args.tc, args.r)
+    val (newState, newPos, newSelf, attacks) = (ns, args.ppos) match {
+      case (a@Attack(p, t), Some(ppos)) => updateAttack(pos, a, ppos)
+      case (c@Chase(p, t), Some(ppos)) => updateChase(pos, c, args.tc, ppos)
+      case (l@LostSight(p, t), _) => updateLost(pos, l)
+      case (w@Wander(t), _) => updateWander(pos, w, args.tc, args.r)
+      case (a, _) => (Wander.create, pos, this, Seq())
     }
     (newSelf.copy(state = newState), newPos, attacks.gss)
   }
