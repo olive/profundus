@@ -8,7 +8,7 @@ import Antiqua._
 import in.dogue.profundus.Profundus
 import Profundus._
 case class Transaction(adjust:Int, item:Pickup)(dump:Cell) {
-  def apply(p:Player, em:EntityManager):((Player, EntityManager), Seq[WorldSpawn]) = {
+  def apply(p:Player, em:EntityManager):((Player, EntityManager), Seq[GlobalMessage]) = {
     if (p.getMineralCount + adjust > 0) {
         val drop = item.setPos(dump)
         ((p.adjustMinerals(adjust), em.removePickup(item)), Seq(drop).gss)

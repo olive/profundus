@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{WorldTile, WorldSpawn, TerrainCache}
+import in.dogue.profundus.world.{WorldTile, GlobalMessage, TerrainCache}
 import scala.util.Random
 import in.dogue.antiqua.data.Direction
 import in.dogue.profundus.particles.{DeathParticle, Particle}
@@ -10,7 +10,7 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 
 object StandardEntity {
-  def create[T](up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
+  def create[T](up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage]),
                 dr:T => Cell => TileRenderer => TileRenderer,
                 onMove:T => (Direction => Option[WorldTile]) => T,
                 self:T,
@@ -27,7 +27,7 @@ object StandardEntity {
 }
 
 
-case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
+case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage]),
                                       dr:T => Cell => TileRenderer => TileRenderer,
                                       onMove:T => (Direction => Option[WorldTile]) => T,
                                       self:T,
@@ -37,7 +37,7 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Pla
                                       selfType:Option[DamageType],
                                       health:Int,
                                       t:Int) {
-  def update(pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(StandardEntity[T], Cell, Seq[WorldSpawn]) = {
+  def update(pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(StandardEntity[T], Cell, Seq[GlobalMessage]) = {
     if (pi.live == Dead) {
       return (copy(t=t+1), pos, Seq())
     }

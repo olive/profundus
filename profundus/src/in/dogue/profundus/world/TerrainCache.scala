@@ -15,7 +15,7 @@ import scala.collection.script.Index
 
 object TerrainCache {
   def foldFutures(tc:TerrainCache) = {
-    val seed = (tc, Map[Int,Future[(Stratum,Terrain, Seq[WorldSpawn])]]())
+    val seed = (tc, Map[Int,Future[(Stratum,Terrain, Seq[GlobalMessage])]]())
     tc.fs.foldLeft(seed) { case ((ntc, fs), (i, f)) =>
       f.update match {
         case FutureComputing => (ntc, fs.updated(i, f))
@@ -44,7 +44,7 @@ object TerrainCache {
     (ns, terrain, spawns)
   }
 
-  def create(cols:Int, rows:Int, r:Random):(TerrainCache, Cell, Direction, Seq[WorldSpawn]) = {
+  def create(cols:Int, rows:Int, r:Random):(TerrainCache, Cell, Direction, Seq[GlobalMessage]) = {
     val copy = new Random(r.nextInt())
     val biome: Stratum = Stratum.createSurface(r)
     val (first, gs) = biome.generate(cols, rows, 0, copy)
@@ -61,7 +61,7 @@ object TerrainCache {
   }
 }
 
-case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Map[Int,Future[(Stratum,Terrain, Seq[WorldSpawn])]], dummy:Terrain, queuedSpawns:Seq[WorldSpawn], r:Random) {
+case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Map[Int,Future[(Stratum,Terrain, Seq[GlobalMessage])]], dummy:Terrain, queuedSpawns:Seq[GlobalMessage], r:Random) {
 
 
   def isSolid(ij:Cell):Boolean = {
@@ -122,21 +122,21 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
   }
 
 
-  def hit(ij:Cell, dmg:Damage, ttype:ToolType):(TerrainCache, Seq[WorldSpawn], HitResult) = {
+  def hit(ij:Cell, dmg:Damage, ttype:ToolType):(TerrainCache, Seq[GlobalMessage], HitResult) = {
     val (broke, dropped, result) = get(ij).hit(toTerrainCoords(ij), dmg, ttype)
     val index = getIndex(ij)
     (updateTerrain(index, broke), dropped, result)
   }
 
-  private def insert(i:Int, s:Stratum, t:Terrain, ws:Seq[WorldSpawn]) = {
+  private def insert(i:Int, s:Stratum, t:Terrain, ws:Seq[GlobalMessage]) = {
     copy(tMap=tMap.updated(i, (s, t)), queuedSpawns=queuedSpawns++ws)
   }
 
-  private def addFuture(i:Int, f:Future[(Stratum, Terrain, Seq[WorldSpawn])]) = {
+  private def addFuture(i:Int, f:Future[(Stratum, Terrain, Seq[GlobalMessage])]) = {
     copy(fs=fs.updated(i, f))
   }
 
-  def update(ppos:Cell):(TerrainCache, Seq[WorldSpawn]) = {
+  def update(ppos:Cell):(TerrainCache, Seq[GlobalMessage]) = {
     val newI = getIndex(ppos)
 
 

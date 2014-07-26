@@ -68,7 +68,7 @@ case class Terrain(y:Int, tf:WorldTileFactory, tiles:Array2d[WorldTile], spawn:C
   }
 
 
-  def hit(ij:Cell, dmg:Damage, ttype:ToolType):(Terrain, Seq[WorldSpawn], HitResult) = {
+  def hit(ij:Cell, dmg:Damage, ttype:ToolType):(Terrain, Seq[GlobalMessage], HitResult) = {
     val to = tiles.getOption(ij)
     if (!to.exists{_.canBreakBy(ttype.breakable)}) {
       (this, Seq(), HitResult(false, 0, 0))
@@ -77,7 +77,7 @@ case class Terrain(y:Int, tf:WorldTileFactory, tiles:Array2d[WorldTile], spawn:C
       val (newTile, drops, result) = t.hit(tf, ij +| y, dmg)
       val newT = copy(tiles=tiles.updated(ij, newTile))
       if (result.broken) {
-        val (newTiles, gs) = fold2[Terrain, Seq[WorldSpawn], Cell](newT, t.dependents) { case (dep, terrain: Terrain) =>
+        val (newTiles, gs) = fold2[Terrain, Seq[GlobalMessage], Cell](newT, t.dependents) { case (dep, terrain: Terrain) =>
           val t = terrain.tiles.get(dep)
           val (mod, gs) = t.notifyTile(tf, dep, y)
           (terrain.updated(dep, mod), gs)

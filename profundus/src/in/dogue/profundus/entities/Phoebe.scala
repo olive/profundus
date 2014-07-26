@@ -1,6 +1,6 @@
 package in.dogue.profundus.entities
 
-import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalMessage, TerrainCache}
 import scala.util.Random
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
@@ -31,7 +31,7 @@ object Phoebe {
 case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, close:Boolean, aggroed:Boolean, maxHealth:Int, t:Int) {
 
   private def getBox = boxes(ptr)
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Phoebe, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Phoebe, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val ppos = pi.pos
     val isClose = (pos |-| ppos).mag < 5 && !aggroed

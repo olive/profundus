@@ -125,7 +125,7 @@ case class Lurker private (tile:Tile, state:LurkerState) {
   }
 
 
-  private def update(health:Int, gt:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Lurker, Cell, Seq[WorldSpawn]) = {
+  private def update(health:Int, gt:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Lurker, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val ppos = pi.pos
     val hasLos = cache.hasLineOfSight(pos, ppos)

@@ -58,7 +58,7 @@ trait WorldTileFactory {
 }
 
 case class HitResult(broken:Boolean, toolHurt:Int, healthHurt:Int)
-case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDamage:Int, healthDamage:Int, onKill:Cell => Seq[WorldSpawn], dependents:Seq[Cell]) {
+case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDamage:Int, healthDamage:Int, onKill:Cell => Seq[GlobalMessage], dependents:Seq[Cell]) {
 
   def addDep(ij:Cell) = {
     copy(dependents = ij +: dependents)
@@ -67,11 +67,11 @@ case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDa
    * Notify this tile that a tile it is dependent on has been destroyed
    * @return the modified version of 'this'
    */
-  def notifyTile(tf:WorldTileFactory, ij:Cell, y:Int):(WorldTile, Seq[WorldSpawn]) = {
+  def notifyTile(tf:WorldTileFactory, ij:Cell, y:Int):(WorldTile, Seq[GlobalMessage]) = {
     println("Spawned at " + ij)
     (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, this)).gss)
   }
-  def hit(tf:WorldTileFactory, ij:Cell, dmg:Damage):(WorldTile, Seq[WorldSpawn], HitResult) = {
+  def hit(tf:WorldTileFactory, ij:Cell, dmg:Damage):(WorldTile, Seq[GlobalMessage], HitResult) = {
     val amt = dmg.amount
     val newHp = hp - amt
     if (newHp <= 0) {

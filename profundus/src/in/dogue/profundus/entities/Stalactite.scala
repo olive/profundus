@@ -2,7 +2,7 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua.Cell
-import in.dogue.profundus.world.{WorldSpawn, TerrainCache, WorldTile, Spike}
+import in.dogue.profundus.world.{GlobalMessage, TerrainCache, WorldTile, Spike}
 import in.dogue.profundus.lighting.LightSource
 import scala.util.Random
 import in.dogue.profundus.entities.damagezones.SingleTileZone
@@ -30,7 +30,7 @@ case class Stalactite(t:Tile) {
     }
   }
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Stalactite, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Stalactite, Cell, Seq[GlobalMessage]) = {
     val kz = SingleTileZone(pos --> Direction.Down, 100, DamageType.Spikes).toZone
     this @@ pos @@ Seq(kz).gss
   }

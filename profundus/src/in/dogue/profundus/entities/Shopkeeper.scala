@@ -1,7 +1,7 @@
 package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.world.{Transaction, WorldSpawn, TerrainCache}
+import in.dogue.profundus.world.{Transaction, GlobalMessage, TerrainCache}
 import scala.util.Random
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.graphics._
@@ -45,7 +45,7 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
   private def mkBox(pos:Cell, box:MessageBox[Unit]) = {
     GameBox(pos |+| ((-6, 3)), box).gss
   }
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Shopkeeper, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Shopkeeper, Cell, Seq[GlobalMessage]) = {
     val ppos = pi.pos
     val isClose = (pos |-| ppos).mag < 5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose

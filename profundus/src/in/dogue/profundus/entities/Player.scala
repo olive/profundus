@@ -262,7 +262,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     (dx != 0 || dy != 0).select(face, chooseFace(dx, dy))
   }
 
-  def update: (Player, Seq[WorldSpawn]) = {
+  def update: (Player, Seq[GlobalMessage]) = {
     import Profundus._
     val newAttr = buff.process(attr)
     val p = copy(ctrl=ctrl.update(canUseTool),

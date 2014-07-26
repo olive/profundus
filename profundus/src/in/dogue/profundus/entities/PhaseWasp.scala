@@ -6,7 +6,7 @@ import in.dogue.antiqua.graphics.{TileRenderer, Animation, TileFactory}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.{Direction, CP437}
 import in.dogue.profundus.lighting.LightSource
-import in.dogue.profundus.world.{WorldSpawn, TerrainCache, WorldTile}
+import in.dogue.profundus.world.{GlobalMessage, TerrainCache, WorldTile}
 import in.dogue.profundus.particles.{RingParticle, DeathParticle, Particle}
 import in.dogue.profundus.entities.damagezones.ExplosionZone
 import in.dogue.profundus.Profundus
@@ -44,7 +44,7 @@ case class PhaseWasp(a:AnimationGroup) {
   final val attackTime = 60
 
   private def updateAnim = copy(a=a.smap {_.update})
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (PhaseWasp, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (PhaseWasp, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val ppos = pi.pos
     val pState = pi.live

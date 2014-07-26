@@ -21,7 +21,7 @@ import in.dogue.antiqua.graphics.Tile
 object CaveMouth {
   def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
 
-  def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random): (Array2d[WorldTile], Seq[WorldSpawn]) = {
+  def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random): (Array2d[WorldTile], Seq[GlobalMessage]) = {
     import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
 
@@ -66,7 +66,7 @@ object CaveMouth {
   }
 
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
-  : (Array2d[WorldTile], Seq[WorldSpawn]) = {
+  : (Array2d[WorldTile], Seq[GlobalMessage]) = {
     import Profundus._
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     //val scheme = TerrainScheme.dummy

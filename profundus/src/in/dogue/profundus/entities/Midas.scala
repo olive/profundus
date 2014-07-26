@@ -5,7 +5,7 @@ import scala.util.Random
 import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
-import in.dogue.profundus.world.{WorldSpawn, TerrainCache}
+import in.dogue.profundus.world.{GlobalMessage, TerrainCache}
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -21,7 +21,7 @@ object Midas {
 }
 
 case class Midas(t:Tile) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Midas, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Midas, Cell, Seq[GlobalMessage]) = {
     import Profundus._
     val newPos = if (t % 120 == 0) {
       val dir = Vector(Direction.Left, Direction.Right).randomR(r)
