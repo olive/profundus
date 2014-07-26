@@ -8,6 +8,7 @@ import Antiqua._
 import com.deweyvm.gleany.graphics.Color
 import Color._
 import in.dogue.profundus.world.TileClass
+import scala.util.Random
 
 case class Tool(dura:Int, `type`:ToolType) {
   def isBare = `type` == BareHands
@@ -17,6 +18,10 @@ case class Tool(dura:Int, `type`:ToolType) {
   }
 }
 
+object ToolType {
+  val All = Vector(Gouge, Shovel, Mallet, Mattock, Rapier)
+  def randomR(r:Random) = All.randomR(r)
+}
 
 sealed trait ToolType {
   val healthHurt:Int = 0

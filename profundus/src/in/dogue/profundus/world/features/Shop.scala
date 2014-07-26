@@ -9,7 +9,7 @@ import in.dogue.profundus.doodads.Campfire
 import in.dogue.antiqua.utils.TmxMap
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.{Gouge, Shopkeeper}
+import in.dogue.profundus.entities.{ToolType, Tool, Gouge, Shopkeeper}
 import in.dogue.profundus.Profundus
 import in.dogue.profundus.entities.pickups.ToolPickup
 
@@ -32,7 +32,8 @@ class Shop(x:Int, y:Int) {
     }.unzip
     val newTiles = Terrain.merge(nt, gen)
     val skOffset = (6, 10)
-    val item = ToolPickup.create((x, y) |+| skOffset -| 5 +| yy, Gouge.toTool)
+    val toolType = ToolType.randomR(r)
+    val item = ToolPickup.create((x, y) |+| skOffset -| 5 +| yy, toolType.toTool)
     val sk = Seq(Shopkeeper.create((x, y) |+| skOffset +| yy, item, r)).gss ++ item.seq.gss
     (newTiles, sk)
   }

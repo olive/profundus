@@ -9,9 +9,11 @@ import com.deweyvm.gleany.graphics.Color
 sealed trait Item {
   val icon:Tile
 }
+
 case object LongArms extends Item {
   override val icon = CP437.¬.mkTile(Color.Black, Color.Tan)
 }
+
 case object Trampoline extends Item {
   override val icon = CP437.∩.mkTile(Color.Black, Color.Purple)
 }

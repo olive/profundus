@@ -62,7 +62,7 @@ object EntityGenerator {
 
       val all = Vector(lurkers, casques, bats, bee, wasp, witness, beezles, midas)
       val (a, b) = ts.color.ways2(all)
-      a ++ b ++ casques
+      a ++ b
     }
     s.gs
   }

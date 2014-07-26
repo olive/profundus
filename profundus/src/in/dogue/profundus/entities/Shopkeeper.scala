@@ -23,27 +23,35 @@ object Shopkeeper {
     val enough = MessageBoxReader.load("shopkeeper_enough")
     val lacking = MessageBoxReader.load("shopkeeper_lacking")
     val out = MessageBoxReader.load("shopkeeper_out")
+    val attack = MessageBoxReader.load("shopkeeper_attack")
     def mkBox(vb:Vector[String]) = MessageBox.create(Profundus.tf, vb, () => (), (bg ++ border) |++| ((-2, -2)))
     val eBox = mkBox(enough)
     val lBox = mkBox(lacking)
     val oBox = mkBox(out)
+    val aBox = mkBox(attack)
     val arrow = CP437.↑.mkTile(Color.Black, Color.White)
     val light = LightSource.createCircle(ij, 0, 0, 0)
-    val cost = 1
+    val cost = 20
     val trans = Transaction(-cost, item) _
-    val sk = new Shopkeeper(tile, arrow, eBox, lBox, oBox, cost, trans, false, false, false, 0)
-    StandardEntity.create[Shopkeeper](_.update, _.draw, sk, light, false, None, 100, r).toEntity(ij)
+    val sk = new Shopkeeper(tile, arrow, eBox, lBox, oBox, aBox, cost, trans, false, false, false, 0)
+    StandardEntity.create[Shopkeeper](_.update, _.draw, sk, light, false, None, 1, r).toEntity(ij)
   }
 }
 case class Shopkeeper(tile:Tile, arrow:Tile,
-                      enough:MessageBox[Unit], lacking:MessageBox[Unit], out:MessageBox[Unit],
+                      enough:MessageBox[Unit], lacking:MessageBox[Unit], out:MessageBox[Unit], attacked:MessageBox[Unit],
                       cost:Int, trans:Cell => Transaction,
                       bought:Boolean, aggroed:Boolean, close:Boolean,
                       tt:Int) {
+  private def mkBox(pos:Cell, box:MessageBox[Unit]) = {
+    GameBox(pos |+| ((-6, 3)), box).gss
+  }
   def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Shopkeeper, Cell, Seq[WorldSpawn]) = {
     val ppos = pi.pos
     val isClose = (pos |-| ppos).mag < 5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose
+    if (health <= 0) {
+      return this @@ pos @@ mkBox(pos, attacked)
+    }
     val (buy, spawns) = if (showMb) {
       (if (bought) {
         true @@ out
@@ -59,7 +67,7 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
         } else {
           ppos
         }
-        doBuy @@ (GameBox(pos |+| ((-6, 3)), box).gss ++ trans(itemPos).gss)
+        doBuy @@ (mkBox(pos, box) ++ trans(itemPos).gss)
       }
 
     } else {

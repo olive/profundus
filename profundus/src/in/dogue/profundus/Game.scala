@@ -15,7 +15,7 @@ object Game {
   val flyMode    = false && debug
   val invMode    = true && debug
   val hasDrill   = true && debug
-  var lightsOff  = true && debug
+  var lightsOff  = false && debug
   val version = "Version 0.0.15"
   val updatePerf = new PerfTrack("World Update")
   val globPerf = new PerfTrack("Everything")
