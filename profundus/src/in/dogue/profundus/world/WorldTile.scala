@@ -3,7 +3,7 @@ package in.dogue.profundus.world
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.antiqua.data.Direction
+import in.dogue.antiqua.data.{CP437, Direction}
 import in.dogue.profundus.entities.pickups.MineralPickup
 import in.dogue.profundus.entities.{Stalactite, Damage}
 import scala.util.Random
@@ -68,7 +68,7 @@ case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDa
    * @return the modified version of 'this'
    */
   def notifyTile(tf:WorldTileFactory, ij:Cell, y:Int):(WorldTile, Seq[GlobalMessage]) = {
-    (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, this)).gss)
+    (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, copy(tile.setCode(CP437.▼)))).gss)
   }
   def hit(tf:WorldTileFactory, ij:Cell, dmg:Damage):(WorldTile, Seq[GlobalMessage], HitResult) = {
     val amt = dmg.amount

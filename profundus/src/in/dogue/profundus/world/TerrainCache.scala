@@ -138,9 +138,6 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
 
   def update(ppos:Cell):(TerrainCache, Seq[GlobalMessage]) = {
     val newI = getIndex(ppos)
-
-
-
     val nCache = Seq(-1, 0, 1).map {_ + newI}.foldLeft(this) { case (ntc, index) =>
       if (ntc.tMap.contains(index)) {
         ntc
