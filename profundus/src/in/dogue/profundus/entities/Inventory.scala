@@ -7,11 +7,11 @@ import in.dogue.profundus.entities.pickups.{RopePickup, MineralPickup}
 
 object Inventory {
   def create(lo:Loadout):Inventory = {
-    Inventory(lo.fuel, lo.ropes, lo.bombs, lo.gems, lo.`type`.toTool)
+    Inventory(lo.fuel, lo.ropes, lo.bombs, lo.minerals, lo.`type`.toTool)
   }
 }
 
-case class Inventory private (fuel:Int, ropes:Int, bombs:Int, gems:Int, tool:Tool) {
+case class Inventory private (fuel:Int, ropes:Int, bombs:Int, minerals:Int, tool:Tool) {
   def hasBomb = bombs > 0
   def spendBomb = copy(bombs = bombs.drop1)
 
@@ -24,6 +24,7 @@ case class Inventory private (fuel:Int, ropes:Int, bombs:Int, gems:Int, tool:Too
   def useTool(dmg:Int) = copy(tool=tool.damage(dmg))
   def setTool(t:Tool) = copy(tool=t)
 
-  def collectMineral(g:MineralPickup) = copy(gems=gems+1)
+  def collectMineral(g:MineralPickup) = copy(minerals=minerals+1)
+  def adjustMinerals(amt:Int) = copy(minerals=minerals+amt)
   def collectRope(g:RopePickup) = copy(ropes=ropes+1)
 }

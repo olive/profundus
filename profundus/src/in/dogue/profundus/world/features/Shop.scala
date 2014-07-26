@@ -9,8 +9,9 @@ import in.dogue.profundus.doodads.Campfire
 import in.dogue.antiqua.utils.TmxMap
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.Shopkeeper
+import in.dogue.profundus.entities.{Gouge, Shopkeeper}
 import in.dogue.profundus.Profundus
+import in.dogue.profundus.entities.pickups.ToolPickup
 
 class Shop(x:Int, y:Int) {
   val tiles = new TmxMap("shop", "tiles")
@@ -21,6 +22,8 @@ class Shop(x:Int, y:Int) {
       val g = tiles.getOption(p |-| ((x, y)))
       if (!g.isDefined || g.get > 252) {
         t @@ None
+      } else if (g.get == 2) {
+        tf.mkShaft
       } else if (g.get > 1) {
         tf.mkRock3
       } else {
@@ -28,7 +31,9 @@ class Shop(x:Int, y:Int) {
       }
     }.unzip
     val newTiles = Terrain.merge(nt, gen)
-    val sk = Seq(Shopkeeper.create((x, y) |+| ((6, 10)) +| yy, r)).gss
+    val skOffset = (6, 10)
+    val item = ToolPickup.create((x, y) |+| skOffset -| 5 +| yy, Gouge.toTool)
+    val sk = Seq(Shopkeeper.create((x, y) |+| skOffset +| yy, item, r)).gss ++ item.seq.gss
     (newTiles, sk)
   }
 

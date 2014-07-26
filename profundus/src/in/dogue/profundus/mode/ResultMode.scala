@@ -32,7 +32,7 @@ object ResultMode {
       mk("Ropes used        : " + pl.ropesUsed) |++| ((x0, y0+6)) ,
       mk("Capsules used     : " + pl.bombsUsed) |++| ((x0, y0+7)),
       mk("Fuel used         : " + pl.fuelUsed) |++| ((x0, y0+8)),
-      mk("Minerals traded   : " + pl.gemsSpent) |++| ((x0, y0+9)),
+      mk("Minerals traded   : " + pl.gemsTraded) |++| ((x0, y0+9)),
       mk("Minerals got      : " + pl.gemsCollected) |++| ((x0, y0+10)),
       mk("Pounds earth moved: " + pl.tilesDug) |++| ((x0, y0+12)),
       mk("Lived for         : " + pl.timeString) |++| ((x0, y0+13)),

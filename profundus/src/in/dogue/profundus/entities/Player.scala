@@ -25,17 +25,17 @@ import in.dogue.profundus.world.WorldTile
 
 object PlayerLog {
   def create(lo:Loadout) = {
-    PlayerLog(lo, lo.name, DamageType.Unknown, 0, 0, lo.gems, 0, 0, 0, 0, 0, 0, Vector())
+    PlayerLog(lo, lo.name, DamageType.Unknown, 0, 0, lo.minerals, 0, 0, 0, 0, 0, 0, Vector())
   }
 
 }
 
-case class PlayerLog(lo:Loadout, title:String, killedBy:DamageType, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsSpent:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
+case class PlayerLog(lo:Loadout, title:String, killedBy:DamageType, bombsUsed:Int, ropesUsed:Int, gemsCollected:Int, gemsTraded:Int, fuelUsed:Int, toolsBroken:Int, deepest:Int, timeSpent:Int, tilesDug:Int, foodEaten:Vector[FoodType]) {
   def digTile = copy(tilesDug=tilesDug+1)
   def useBomb = copy(bombsUsed = bombsUsed + 1)
   def useRope = copy(ropesUsed = ropesUsed + 1)
-  def getGem = copy(gemsCollected = gemsCollected + 1)
-  def spendGem = copy(gemsSpent = gemsSpent + 1)
+  def getMinerals = copy(gemsCollected = gemsCollected + 1)
+  def spendMinerals(adj:Int) = copy(gemsTraded = gemsTraded + adj.abs)
   def useFuel = copy(fuelUsed = fuelUsed + 1)
   def breakTool = copy(toolsBroken = toolsBroken + 1)
   def setDepth(d:Int) = copy(deepest = math.max(d, deepest))
@@ -111,7 +111,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
   def collectMineral(g:MineralPickup) = {
     SoundManager.item.play(ij)
-    copy(inv=inv.collectMineral(g), log=log.getGem)
+    copy(inv=inv.collectMineral(g), log=log.getMinerals)
   }
   def collectFood(typ:FoodType) = {
     SoundManager.item.play(ij)
@@ -152,7 +152,12 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def toolPos = ((ctrl.isShovelling || Game.hasDrill) && canUseTool).select(None, ((x, y)-->face).some)
   def hasStamina = stam.amt >= inv.tool.`type`.stamCost
   def canUseTool = hasStamina
-
+  def getMineralCount = inv.minerals
+  def adjustMinerals(adj:Int) = {
+    val newInv = inv.adjustMinerals(adj)
+    val newLog = log.spendMinerals(adj)
+    copy(inv=newInv, log=newLog)
+  }
   def getStamBar = stam.vb
   def getHealthBar = health.vb
   def getBuffIcon = buff.icon
@@ -177,6 +182,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     }
   }
 
+  def getInfo = PlayerInfo(pos, state, inv.minerals)
 
   def spendBomb = copy(inv = inv.spendBomb, log = log.useBomb)
   def spendRope = copy(inv = inv.spendRope, log = log.useRope)

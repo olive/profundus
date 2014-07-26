@@ -18,7 +18,7 @@ object StoryMode {
   def create(cols:Int, rows:Int, lo:Loadout) = {
     val lines = MessageBoxReader.load("story")
     def getMode():() => Mode[_] = () => LoadoutMode.create(cols, rows, lo.some).toMode
-    val mb = MessageBox.create(Profundus.tf, lines, getMode)
+    val mb = MessageBox.create(Profundus.tf, lines, getMode, Seq())
     val rect = Rect.createPlain(cols, rows, CP437.`#`.mkTile(Color.Brown.dim(10), Color.Black))
     val arrow = CP437.►.mkTile(Color.Black, Color.White)
     StoryMode(cols, rows, rect, lo, arrow, mb, 0)

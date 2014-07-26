@@ -15,7 +15,7 @@ object ToolPickup {
   }
 }
 
-case class ToolPickup(icon:Tile, tool:Tool) {
+case class ToolPickup private (icon:Tile, tool:Tool) {
   def update = this
   def isCollectable(p:Player) = p.inv.tool.isBare
   def onPickup(p:Player) = p.collectTool(tool)

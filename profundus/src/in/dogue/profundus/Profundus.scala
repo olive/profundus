@@ -37,7 +37,6 @@ object Profundus {
   }
   implicit def damageZones2NewMessageBox(s:GameBox) = new AugNewMessageBox(s)
 
-
   class AugNewDeformations(s:Seq[Deformation]) {
     def gs = NewDeformations(s)
     def gss = Seq(gs)
@@ -67,6 +66,11 @@ object Profundus {
   }
   implicit def doodad2NewDoodads(s:Seq[Doodad]) = new AugNewDoodads(s)
 
+  class AugNewTransaction(s:Transaction) {
+    def gs = NewTransaction(s)
+    def gss = Seq(gs)
+  }
+  implicit def transaction2NewTransaction(s:Transaction) = new AugNewTransaction(s)
 
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _

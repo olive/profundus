@@ -53,7 +53,7 @@ case class Hud private (height:Int, rect:Rect,
   private def drawInventory(xy:Cell) (tr:TileRenderer):TileRenderer = {
     def fmt(i:Int) = tf.create("%2s".format(i.toString))
     val cap  = tr   <| (              xy, Capsule.stick) <+< fmt(inv.bombs).drawFg(xy |+ 1)
-    val gem  = cap  <| (         xy +| 1, Hud.gemIcon)   <+< fmt(inv.gems).drawFg( xy |+| ((1,1)))
+    val gem  = cap  <| (         xy +| 1, Hud.gemIcon)   <+< fmt(inv.minerals).drawFg( xy |+| ((1,1)))
     val rope = gem  <| (         xy |- 4, Hud.ropeIcon)  <+< fmt(inv.ropes).drawFg(xy |- 3)
                rope <| (xy |+| ((-4, 1)), Hud.fuelIcon)  <+< fmt(inv.fuel).drawFg( xy |+| ((-3, 1)))
 

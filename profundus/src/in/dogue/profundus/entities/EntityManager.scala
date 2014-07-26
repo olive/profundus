@@ -119,9 +119,14 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     (newPl, copy(picks=newPicks))
   }
 
-  def updateCreatures(w:TerrainCache, ppos:Cell, pState:LivingState):(EntityManager, Seq[WorldSpawn]) = {
+  def removePickup(item:Pickup) = {
+    val newPicks = picks.filter{i => !i.equals(item)}
+    copy(picks = newPicks)
+  }
+
+  def updateCreatures(w:TerrainCache, pi:PlayerInfo):(EntityManager, Seq[WorldSpawn]) = {
     val (newCr, glob) = cr.map { c =>
-      val thing: ((Entity[T] forSome {type T}, Seq[WorldSpawn])) = c.update(w, ppos, pState, r)
+      val thing: ((Entity[T] forSome {type T}, Seq[WorldSpawn])) = c.update(w, pi, r)
       thing
     }.unzip
     (copy(cr=newCr), glob.flatten)

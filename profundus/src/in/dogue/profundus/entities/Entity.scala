@@ -15,7 +15,7 @@ object Entity {
 }
 case class Entity[T](ij:Cell,
                      fall:FallState,
-                     up: T => (Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[WorldSpawn]),
+                     up: T => (Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
                      mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T,
                      dmg: T => Damage => T,
                      doKill: T => T,
@@ -25,8 +25,8 @@ case class Entity[T](ij:Cell,
                      dr:T => Cell => TileRenderer => TileRenderer,
                      self:T) {
   def pos = ij
-  def update(tc:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Entity[T], Seq[WorldSpawn]) = {
-    val (t, newPos, glob) = up(self)(ij, tc, ppos, pState, r)
+  def update(tc:TerrainCache, pi:PlayerInfo, r:Random): (Entity[T], Seq[WorldSpawn]) = {
+    val (t, newPos, glob) = up(self)(ij, tc, pi, r)
     (copy(self=t, ij=newPos), glob)
   }
 

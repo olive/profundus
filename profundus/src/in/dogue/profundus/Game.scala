@@ -14,13 +14,17 @@ object Game {
   val fixedSeed  = true && debug
   val flyMode    = false && debug
   val invMode    = true && debug
-  val hasDrill   = false && debug
-  var lightsOff  = false && debug
+  val hasDrill   = true && debug
+  var lightsOff  = true && debug
   val version = "Version 0.0.15"
   val updatePerf = new PerfTrack("World Update")
   val globPerf = new PerfTrack("Everything")
   val drawPerf = new PerfTrack("Drawing")
-  def getSeed = fixedSeed.select(new Random().nextInt(), 3)
+  def getSeed = {
+    val seed = fixedSeed.select(new Random().nextInt(), -771711754)
+    println("SEED: " + seed)
+    seed
+  }
 }
 class Game(initializer: GleanyInitializer) extends GleanyGame(initializer) {
   private lazy val engine = new Engine()

@@ -99,7 +99,7 @@ trait Stratum {
     } else if (yIndex == 1) {
       Stratum.createDummy(r)
     } else {
-      if ((yIndex + 1) % strataSize == 0) {
+      if (yIndex % strataSize == 0) {
         copy(ts=TerrainScheme.generate(r))
       } else {
         this

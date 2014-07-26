@@ -15,7 +15,7 @@ object Loadout {
   val diffCost = 10
   val gemCost = 1
   val fuelCost = 2
-  val default = Loadout(20,3,3,0,Shovel, "Debug")
+  val default = Loadout(20,3,3,5,Shovel, "Debug")
   private def indexToTool(v:Int) = v match {
     case 0 => Shovel
     case 1 => Mallet
@@ -42,7 +42,7 @@ object Loadout {
 
   def fillBombs(v:Int)(lo:Loadout) = lo.copy(bombs = v)
   def fillRopes(v:Int)(lo:Loadout) = lo.copy(ropes = v)
-  def fillGems(v:Int)(lo:Loadout) = lo.copy(gems = v)
+  def fillGems(v:Int)(lo:Loadout) = lo.copy(minerals = v)
   def fillFuel(v:Int)(lo:Loadout) = lo.copy(fuel = v)
   def fillTool(v:Int)(lo:Loadout) = {
     val tool = indexToTool(v)
@@ -62,7 +62,7 @@ object Loadout {
     val y1 = y0 + 5
     val (r1, cap) =  makeSimpleSlider((x0, y0), Capsule.stick, fillBombs, bombCost, 1)(lo.bombs)
     val (r2, rope) = makeSimpleSlider((x1, y0), Hud.ropeIcon, fillRopes, ropeCost, 1)(lo.ropes)
-    val (r3, gem) =  makeSimpleSlider((x0, y1), Hud.gemIcon, fillGems, gemCost, 5)(lo.gems)
+    val (r3, gem) =  makeSimpleSlider((x0, y1), Hud.gemIcon, fillGems, gemCost, 5)(lo.minerals)
     val (r4, fuel) = makeSimpleSlider((x1, y1), Hud.fuelIcon, fillFuel, fuelCost, 1)(lo.fuel)
     (rem - (r1 + r2 + r3 + r4), Vector(cap, rope, gem, fuel))
   }
@@ -75,4 +75,4 @@ object Loadout {
   }
 }
 
-case class Loadout(fuel:Int, ropes:Int, bombs:Int, gems:Int, `type`:ToolType, name:String)
+case class Loadout(fuel:Int, ropes:Int, bombs:Int, minerals:Int, `type`:ToolType, name:String)

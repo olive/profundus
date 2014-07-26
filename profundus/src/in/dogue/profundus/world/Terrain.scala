@@ -74,7 +74,6 @@ case class Terrain(y:Int, tf:WorldTileFactory, tiles:Array2d[WorldTile], spawn:C
       (this, Seq(), HitResult(false, 0, 0))
     } else {
       val t = to.get//fixme
-      println(t.dependents.length)
       val (newTile, drops, result) = t.hit(tf, ij +| y, dmg)
       val newT = copy(tiles=tiles.updated(ij, newTile))
       if (result.broken) {

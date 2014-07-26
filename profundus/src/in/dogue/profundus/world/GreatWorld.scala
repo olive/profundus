@@ -29,6 +29,7 @@ case class NewDoodads(s:Seq[Doodad]) extends WorldSpawn
 
 case class NewEntities(s:Seq[Entity[_]]) extends WorldSpawn
 case class NewPickups(s:Seq[Pickup]) extends WorldSpawn
+case class NewTransaction(s:Transaction) extends WorldSpawn
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
@@ -152,7 +153,7 @@ object GreatWorld {
   private def updateCreatures : Update[Unit] = withName("entities") { case (gw, ()) =>
     val pl = gw.p
     val cache = gw.cache
-    val (newEm, glob) = gw.em.updateCreatures(cache, pl.pos, pl.state)
+    val (newEm, glob) = gw.em.updateCreatures(cache, pl.getInfo)
     (gw.setEm(newEm), glob)
   }
 
@@ -223,6 +224,17 @@ object GreatWorld {
     gw.setDoodads(doods).setEm(newEm)
   }
 
+  private def doTransactions : Update[Unit] = stdNoName { case (gw, ()) =>
+    val pl = gw.p
+    val ts = gw.ts
+    val em = gw.em
+    import Profundus._
+    val ((newP, newEm), ws) = fold2((pl, em), ts) { case (t, (p, e)) =>
+      t.apply(p, e)
+    }
+    gw.setTransactions(Seq()).setPlayer(newP).setEm(newEm).insertSpawns(ws)
+  }
+
   def allUpdates(gw:GreatWorld):GreatWorld = {
     (gw #+ updateClimbRope
         #+ updateItemUse
@@ -241,6 +253,7 @@ object GreatWorld {
         #+ updateMusicManager
         #+ addDoodadLights
         #+ filterOffscreen
+        #+ doTransactions
       )
   }
 
@@ -263,7 +276,7 @@ object GreatWorld {
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(worldCols, worldRows, p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
+    val gw = GreatWorld(worldCols, worldRows, p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
     allUpdates(gw)
   }
 }
@@ -276,6 +289,7 @@ case class GreatWorld(cols:Int, rows:Int,
                       cache:TerrainCache,
                       kz:Seq[DamageZone] ,
                       ds:Seq[Deformation],
+                      ts:Seq[Transaction],
                       doodads:Seq[Doodad],
                       updates:Seq[(T, GreatWorld.Update[T]) forSome {type T}],
                       mm:MusicManager,
@@ -296,6 +310,8 @@ case class GreatWorld(cols:Int, rows:Int,
   def setGb(b:GameBox) = copy(gb=b.some)
   def addDoodads(doods:Seq[Doodad]) = copy(doodads = doodads ++ doods)
   def setDoodads(doods:Seq[Doodad]) = copy(doodads = doods)
+  def addTransaction(t:Transaction) = copy(ts=ts:+t)
+  def setTransactions(t:Seq[Transaction]) = copy(ts=t)
   def resetLm = copy(lm = lm.reset)
   def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
@@ -349,6 +365,7 @@ case class GreatWorld(cols:Int, rows:Int,
       case NewDoodads(ds) => addDoodads(ds)
       case NewEntities(cs) => copy(em=em.spawnEntities(cs))
       case NewPickups(fs) => copy(em=em.addDrops(fs))
+      case NewTransaction(ts) => addTransaction(ts)
     }
   }
 

@@ -44,8 +44,10 @@ case class PhaseWasp(a:AnimationGroup) {
   final val attackTime = 60
 
   private def updateAnim = copy(a=a.smap {_.update})
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (PhaseWasp, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (PhaseWasp, Cell, Seq[WorldSpawn]) = {
     import Profundus._
+    val ppos = pi.pos
+    val pState = pi.live
     val diff = ppos |-| pos
     if (diff.mag2 > range*range || pState == Dead) {
       return (updateAnim, pos, Seq())

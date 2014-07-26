@@ -10,7 +10,7 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 
 object StandardEntity {
-  def create[T](up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[WorldSpawn]),
+  def create[T](up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
                 dr:T => Cell => TileRenderer => TileRenderer,
                 self:T,
                 light:LightSource,
@@ -24,7 +24,7 @@ object StandardEntity {
 }
 
 
-case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cell, LivingState, Random) => (T, Cell, Seq[WorldSpawn]),
+case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[WorldSpawn]),
                                       dr:T => Cell => TileRenderer => TileRenderer,
                                       self:T,
                                       light:LightSource,
@@ -33,11 +33,11 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Cel
                                       selfType:Option[DamageType],
                                       health:Int,
                                       t:Int) {
-  def update(pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(StandardEntity[T], Cell, Seq[WorldSpawn]) = {
-    if (pState == Dead) {
+  def update(pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(StandardEntity[T], Cell, Seq[WorldSpawn]) = {
+    if (pi.live == Dead) {
       return (copy(t=t+1), pos, Seq())
     }
-    val (newSelf, newPos, gs) = up(self)(health, t, pos, cache, ppos, pState, r)
+    val (newSelf, newPos, gs) = up(self)(health, t, pos, cache, pi, r)
     val newThis = copy(self=newSelf, t=t+1)
     val killed = if (health <= 0) {
       newThis.kill

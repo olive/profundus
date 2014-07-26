@@ -9,7 +9,7 @@ import Antiqua._
 import in.dogue.profundus.audio.SoundManager
 
 object MessageBox {
-  def create[T](tf:TextFactory, boxes:Seq[String], onFinish: () => T) = {
+  def create[T](tf:TextFactory, boxes:Seq[String], onFinish: () => T, bg:TileGroup) = {
     val seq = boxes.map { s =>
       val lines = tf.textLines(s)
       def play() {
@@ -20,7 +20,7 @@ object MessageBox {
       val textLines = lines.map(mkLine)
       TextBox.create(textLines.toVector)
     }
-    MessageBox(seq.toVector, onFinish, 0)
+    MessageBox(seq.toVector, onFinish, 0, bg)
   }
 }
 
@@ -28,7 +28,7 @@ sealed trait MessageBoxResult[T]
 case class MessageBoxContinue[T](mb:MessageBox[T]) extends MessageBoxResult[T]
 case class MessageBoxComplete[T](t:T) extends MessageBoxResult[T]
 
-case class MessageBox[T](boxes:IndexedSeq[TextBox], onFinish:() => T, ptr:Int) {
+case class MessageBox[T](boxes:IndexedSeq[TextBox], onFinish:() => T, ptr:Int, bg:TileGroup) {
 
   def reset = copy(boxes=boxes.map{_.reset}, ptr=0)
 
@@ -53,6 +53,6 @@ case class MessageBox[T](boxes:IndexedSeq[TextBox], onFinish:() => T, ptr:Int) {
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <+< boxes(ptr).draw(ij)
+    tr <++ (bg |++| ij) <+< boxes(ptr).draw(ij)
   }
 }

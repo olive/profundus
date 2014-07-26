@@ -23,7 +23,9 @@ object Beezle {
 }
 
 case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Beezle, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Beezle, Cell, Seq[WorldSpawn]) = {
+    val ppos = pi.pos
+    val pState = pi.live
     import Profundus._
     val dd = ppos |-| pos
     val close = dd.mag < 10

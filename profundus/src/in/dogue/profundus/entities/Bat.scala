@@ -44,7 +44,8 @@ object Bat {
 case class Bat(a:AnimationGroup) {
 
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random):(Bat, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random):(Bat, Cell, Seq[WorldSpawn]) = {
+    val ppos = pi.pos
     import Profundus._
     val dd = ppos |-| pos
     val isAdjacent = math.abs(dd.x) + math.abs(dd.y) == 1

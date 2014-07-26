@@ -67,8 +67,9 @@ case class Witness(normalAnim:AnimationGroup, killAnim:AnimationGroup, killT:Int
     normalAnim
   }
 
-  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, ppos:Cell, pState:LivingState, r:Random): (Witness, Cell, Seq[WorldSpawn]) = {
+  def update(health:Int, t:Int, pos:Cell, cache:TerrainCache, pi:PlayerInfo, r:Random): (Witness, Cell, Seq[WorldSpawn]) = {
     import Profundus._
+    val ppos = pi.pos
     val dd = ppos |-| pos
     val killer = if (dd.mag < 10 && cache.hasLineOfSight(ppos, pos)) {
       copy(killT=killT+1)
