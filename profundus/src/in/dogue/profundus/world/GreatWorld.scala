@@ -27,9 +27,10 @@ case class NewDeformations(s:Seq[Deformation]) extends GlobalMessage
 case class NewMessageBox(mb:GameBox) extends GlobalMessage
 case class NewDoodads(s:Seq[Doodad]) extends GlobalMessage
 
-case class NewEntities(s:Seq[Entity[_]]) extends GlobalMessage
+case class NewEntities(s:Seq[Entity]) extends GlobalMessage
 case class NewPickups(s:Seq[Pickup]) extends GlobalMessage
 case class NewTransaction(s:Transaction) extends GlobalMessage
+case class DestroyEntity(id:EntityId) extends GlobalMessage
 object GreatWorld {
 
   /** @tparam T T should not be gettable from GreatWorld, it should be an outside value.
@@ -366,6 +367,7 @@ case class GreatWorld(cols:Int, rows:Int,
       case NewEntities(cs) => copy(em=em.spawnEntities(cs))
       case NewPickups(fs) => copy(em=em.addDrops(fs))
       case NewTransaction(ts) => addTransaction(ts)
+      case DestroyEntity(id) => copy(em=em.killEntity(id))
     }
   }
 

@@ -54,11 +54,11 @@ object Profundus {
   }
   implicit def pickup2NewPickups(s:Seq[Pickup])  = new AugNewPickups(s)
 
-  class AugNewEntitys(s:Seq[Entity[_]]) {
+  class AugNewEntitys(s:Seq[Entity]) {
     def gs = NewEntities(s)
     def gss = Seq(gs)
   }
-  implicit def creature2NewEntitys(s:Seq[Entity[_]]) = new AugNewEntitys(s)
+  implicit def creature2NewEntitys(s:Seq[Entity]) = new AugNewEntitys(s)
 
   class AugNewDoodads(s:Seq[Doodad]) {
     def gs = NewDoodads(s)

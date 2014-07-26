@@ -76,7 +76,7 @@ case class StandardEntity[T] private (up:T => (Int, Int, Cell, TerrainCache, Pla
 
   def getLight(ij:Cell) = Seq(light.copy(pos=ij))
 
-  def toEntity(ij:Cell):Entity[StandardEntity[T]] = {
-    Entity(ij, canFly.select(Grounded,Floating), _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
+  def toEntity(ij:Cell):Entity = {
+    Entity.create[StandardEntity[T]](ij, canFly.select(Grounded,Floating), _.update, _.move, _.damage, _.kill, _.getDeathParticle, _.getLight, _.getLive, _.draw, this)
   }
 }

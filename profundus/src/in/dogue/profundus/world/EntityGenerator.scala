@@ -14,15 +14,15 @@ object EntityGenerator {
   private def dummyFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
     import Profundus._
     def isSolid(ij:Cell) = !t.getOption(ij).exists{_.isWalkable}
-    val s:Seq[Entity[_]] = if (i <= 0) {
+    val s:Seq[Entity] = if (i <= 0) {
       Seq()
     } else {
-      val lurkers:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val lurkers:Seq[Entity] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Lurker.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
 
       }.flatten
-      val casques:Seq[Entity[_]] = (0 until 100).map { _ =>
+      val casques:Seq[Entity] = (0 until 100).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
 
         Obelisk.create(pos +| (i * rows), r).onlyIf(!isSolid(pos)
@@ -30,32 +30,32 @@ object EntityGenerator {
                                                  && isSolid(pos --> Down --> Down))
 
       }.headOption.toSeq.flatten
-      val bats:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val bats:Seq[Entity] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bat.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val wasp:Seq[Entity[_]] = (0 until 1).map { _ =>
+      val wasp:Seq[Entity] = (0 until 1).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         PhaseWasp.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val bee:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val bee:Seq[Entity] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Bee.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val witness:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val witness:Seq[Entity] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Witness.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val beezles:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val beezles:Seq[Entity] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Beezle.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten
 
-      val midas:Seq[Entity[_]] = (0 until 10).map { _ =>
+      val midas:Seq[Entity] = (0 until 10).map { _ =>
         val pos = (r.nextInt(cols), r.nextInt(rows))
         Midas.create(pos +| (i * rows), r).onlyIf(!isSolid(pos))
       }.flatten

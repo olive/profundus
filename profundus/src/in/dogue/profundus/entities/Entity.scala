@@ -9,28 +9,96 @@ import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.Game
+import in.dogue.profundus.entities.pickups.PickupId
 
+
+object EntityId {
+  var id:BigInt = 0
+  def create:EntityId = {
+    val result = EntityId(id)
+    synchronized(this) {
+      id += 1
+      0
+    }
+    result
+  }
+}
+case class EntityId private (id:BigInt) {
+
+}
 object Entity {
   var lastPlayed = 0
+  private def apply[A](aij:Cell,
+                       afall:FallState,
+                       aup: A => (Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+                       amv: A => (Cell, Direction, (Direction => Option[WorldTile])) => A,
+                       admg: A => Damage => A,
+                       adoKill: A => A,
+                       adeathPart:A => Cell => Particle,
+                       alight: A => Cell => Seq[LightSource],
+                       alive:A => LivingState,
+                       adr:A => Cell => TileRenderer => TileRenderer,
+                       aself:A,
+                       aid:EntityId) = new Entity {
+
+    override type T = A
+    override protected val id = aid
+    override val deathPart = adeathPart
+    override val self = aself
+    override val up = aup
+    override val dmg = admg
+    override val fall = afall
+    override val live = alive
+    override val mv = amv
+    override val light = alight
+    override val doKill = adoKill
+    override val dr = adr
+    override val ij = aij
+  }
+
+  def create[A](ij:Cell,
+                fall:FallState,
+                up: A => (Cell, TerrainCache, PlayerInfo, Random) => (A, Cell, Seq[GlobalMessage]),
+                mv: A => (Cell, Direction, (Direction => Option[WorldTile])) => A,
+                dmg: A => Damage => A,
+                doKill: A => A,
+                deathPart:A => Cell => Particle,
+                light: A => Cell => Seq[LightSource],
+                live:A => LivingState,
+                dr:A => Cell => TileRenderer => TileRenderer,
+                self:A) = {
+    Entity(ij, fall, up, mv, dmg, doKill, deathPart, light, live, dr, self, EntityId.create)
+  }
+
 }
-case class Entity[T](ij:Cell,
-                     fall:FallState,
-                     up: T => (Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage]),
-                     mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T,
-                     dmg: T => Damage => T,
-                     doKill: T => T,
-                     deathPart:T => Cell => Particle,
-                     light: T => Cell => Seq[LightSource],
-                     live:T => LivingState,
-                     dr:T => Cell => TileRenderer => TileRenderer,
-                     self:T) {
+trait Entity {
+  type T
+  val ij:Cell
+  val fall:FallState
+  val up: T => (Cell, TerrainCache, PlayerInfo, Random) => (T, Cell, Seq[GlobalMessage])
+  val mv: T => (Cell, Direction, (Direction => Option[WorldTile])) => T
+  val dmg: T => Damage => T
+  val doKill: T => T
+  val deathPart:T => Cell => Particle
+  val light: T => Cell => Seq[LightSource]
+  val live:T => LivingState
+  val dr:T => Cell => TileRenderer => TileRenderer
+  val self:T
+  protected val id:EntityId
+
+
+  def copy(self:T=self, ij:Cell=ij, fall:FallState=fall) = {
+    Entity(ij, fall, up, mv, dmg, doKill, deathPart, light, live, dr, self, id)
+  }
+
+  def isId(id:EntityId) = this.id == id
   def pos = ij
-  def update(tc:TerrainCache, pi:PlayerInfo, r:Random): (Entity[T], Seq[GlobalMessage]) = {
+  def update(tc:TerrainCache, pi:PlayerInfo, r:Random): (Entity, Seq[GlobalMessage]) = {
     val (t, newPos, glob) = up(self)(ij, tc, pi, r)
     (copy(self=t, ij=newPos), glob)
   }
 
-  def setFall(f:FallState): Entity[T] = copy(fall=f)
+  def setFall(f:FallState): Entity = copy(fall=f)
   def getFall = fall
   def move(to:Cell, dir:Direction, newSolid:(Direction => Option[WorldTile])) = {
     copy(ij=to, self=mv(self)(to, dir, newSolid))
@@ -51,6 +119,6 @@ case class Entity[T](ij:Cell,
   def draw(tr:TileRenderer):TileRenderer = tr <+< dr(self)(pos)
   def getLight = light(self)(pos)
   def getDeathParticle = deathPart(self)(pos)
-  def toMassive:Massive[Entity[T]] = Massive(_.pos, _.move, (f:Entity[T]) => f.setFall, getFall, this)
-  def toUnloadable = Unloadable.fromPos[Entity[_]](this, _.pos)
+  def toMassive:Massive[Entity] = Massive[Entity](_.pos, _.move, (f:Entity) => f.setFall, getFall, this)
+  def toUnloadable = Unloadable.fromPos[Entity](this, _.pos)
 }

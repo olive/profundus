@@ -22,7 +22,7 @@ object EntityManager {
   }
 }
 
-case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Seq[Pickup], ropes:Seq[Rope], r:Random) {
+case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[Pickup], ropes:Seq[Rope], r:Random) {
   def update(tc:TerrainCache):(Seq[GlobalMessage], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
@@ -41,7 +41,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     def f[T]: (Seq[T], (T) => Unloadable[T]) => Seq[T] = wf.filter(recti)
     val newCaps = f[Capsule](caps, _.toUnloadable)
     val newRopes = f[Rope](ropes, _.toUnloadable)
-    val newCreatures = f[Entity[_]](cr, _.toUnloadable)
+    val newCreatures = f[Entity](cr, _.toUnloadable)
     val newPickups = f[Pickup](picks, _.toUnloadable)
     copy(caps=newCaps, cr=newCreatures, picks=newPickups, ropes=newRopes)
   }
@@ -70,7 +70,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
   }
 
 
-  def spawnEntities(cs:Seq[Entity[_]]) = {
+  def spawnEntities(cs:Seq[Entity]) = {
     copy(cr=cr++cs)
   }
 
@@ -83,6 +83,11 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     val (newCr, deadCr) = applied.partition { _.getLiving == Alive}
     val ps = deadCr.map {_.getDeathParticle}
     (copy(cr=newCr), ps)
+  }
+
+  def killEntity(id:EntityId) = {
+    val alive = cr.filter{e => ! e.isId(id)}
+    copy(cr = alive)
   }
 
   def addDrops(gs:Seq[Pickup]) = {
@@ -126,7 +131,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
 
   def updateCreatures(w:TerrainCache, pi:PlayerInfo):(EntityManager, Seq[GlobalMessage]) = {
     val (newCr, glob) = cr.map { c =>
-      val thing: ((Entity[T] forSome {type T}, Seq[GlobalMessage])) = c.update(w, pi, r)
+      val thing: ((Entity, Seq[GlobalMessage])) = c.update(w, pi, r)
       thing
     }.unzip
     (copy(cr=newCr), glob.flatten)
@@ -136,7 +141,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity[_]], picks:Se
     val newCaps = caps.map {_.toMassive.update(tr)}
     val newGems = picks.map {_.toMassive.update(tr)}
     val (onscreen, offscreen) = cr.partition { c => tr.isLoaded(c.pos) }
-    val newCr:Seq[Entity[_]] = onscreen.map { (c:Entity[_]) =>
+    val newCr:Seq[Entity] = onscreen.map { (c:Entity) =>
 
       val thing = c.toMassive
       val r = thing.update(tr)
