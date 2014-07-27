@@ -31,7 +31,9 @@ case class LightManager(cols:Int, rows:Int, lights:Seq[LightSource]) {
         val c = cell |+| cxy
         if (screenRect.contains(c)) {
           val k = Array2d.coordsToIndex(c, cols)
-          map(k) += d
+          this.synchronized { //probably not work it to lock only on k
+            map(k) += d
+          }
         }
       }
 

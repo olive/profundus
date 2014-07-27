@@ -36,10 +36,8 @@ object Segment {
 }
 
 object Tree {
-  def create(xy:Cell, r:Random) = {
+  def create(xy:Cell, barkColor:Color, leafColor:Color, r:Random) = {
     val height = 4 + r.nextInt(12)
-    val leafColor = Color.White
-    val trunkColor = Color.Brown
     val leftLeaf = CP437./.mkTile(Color.Black, leafColor)
     val midLeaf = CP437.|.mkTile(Color.Black, leafColor)
     val rightLeaf = CP437.\.mkTile(Color.Black, leafColor)
@@ -49,13 +47,13 @@ object Tree {
       ((2,0), rightLeaf)
     )
     val trunk = Vector(
-      ((1,height-1), Segment.Neither.trunk.mkTile(Color.Black, trunkColor))
+      ((1,height-1), Segment.Neither.trunk.mkTile(Color.Black, barkColor))
     )
     val segments = (1 until (height - 1)).map { k =>
       val typ = Segment.All.randomR(r)
       val left = typ.hasLeft.select(Seq(), Seq(leftLeaf))
       val right = typ.hasRight.select(Seq(), Seq(rightLeaf))
-      val mid = typ.trunk.mkTile(Color.Black, trunkColor).seq
+      val mid = typ.trunk.mkTile(Color.Black, barkColor).seq
       val segment: Vector[(Cell,Tile)] = Vector(
         left.map  { (l:Tile) => ((0, k), l)},
         mid.map   { (l:Tile) => ((1, k), l)},

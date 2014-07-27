@@ -129,20 +129,12 @@ object CaveMouth {
     val treeBuff = 12
     val pleft = new Poisson1d(0, 4, 8, cols/2 - treeBuff, r.nextLong()).get
     val pright = new Poisson1d(cols/2+treeBuff, 4, 8, cols, r.nextLong()).get
+    val dirtColor = tf.ts.dirtCs.fgMod(r)
     val trees = (pleft ++ pright).map { i =>
       val ii = i.toInt
       val j = rows/2
-      Tree.create((ii, j+y), r).toDoodad
+      Tree.create((ii, j+y), dirtColor, skyColor, r).toDoodad
     }
-
-
-
-
-    /*val trees = (0 until 20).map {case i =>
-      val i = r.nextInt(cols)
-      val j = rows/2
-      Tree.create((i, j+y), r).toDoodad
-    }*/
 
     val moon = Moon.create(cols, rows, (3*cols/4-5, y), 4, r)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
