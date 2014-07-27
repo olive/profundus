@@ -100,7 +100,7 @@ object Player {
            shovel, getLive,
            Seq(),
            ControlState(false, false, false, false, false, false, false, false),
-           Feat.adrenaline,
+           Feat.meditation,
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
            PlayerLight.create(smallLight, largeLight),
@@ -251,7 +251,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
 
   def chooseFace(dx:Int, dy:Int):Direction = {
-    if (forces.length > 0) {
+    if (forces.length > 0 || !feat.allowPlayerMove(this)) {
       face
     } else if (dx == Direction.Left.dx) {
       Direction.Left
@@ -267,7 +267,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def getMove:(Player, Option[Direction]) = {
     state match {
-      case Alive if forces.length == 0 => computeMove
+      case Alive if forces.length == 0 && feat.allowPlayerMove(this) => computeMove
       case _ => (this, None)
     }
   }
@@ -300,6 +300,11 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     npl.copy(feat=newFeat.update)
   }
 
+  def updateHealthReplenish = {
+    val newHealth = feat.healthRestore(health.restore)
+    copy(health=newHealth)
+  }
+
   def update: (Player, Seq[GlobalMessage]) = {
     import Profundus._
     val newAttr = buff.process(attr)
@@ -309,7 +314,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
                  stam=stam.update(newAttr),
                  health=health.update(newAttr),
                  light=light.update,
-                 fall=if(attr.hasWings) Floating else fall).updateFeat
+                 fall=if(attr.hasWings) Floating else fall).updateFeat.updateHealthReplenish
 
     val (jkP, ps) = if (justKilled) {
       SoundManager.dead.play(ij)

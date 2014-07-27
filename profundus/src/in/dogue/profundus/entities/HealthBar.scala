@@ -20,8 +20,12 @@ case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, last:DamageT
     copy(t=newT, amt=newAmt, vb=vb.update(newAmt, origMax))
   }
 
+  def restore(amt:Int) = {
+    setMax(max + amt)
+  }
+
   def setMax(amt:Int) = {
-    val value = amt.clamp(1, 100)
+    val value = amt.clamp(1, 200)
     copy(max=value)
   }
 
