@@ -142,7 +142,7 @@ case class Lurker private (tile:Tile, state:LurkerState) {
       case (w@Wander(t), _) => updateWander(pos, w, args.tc, args.r)
       case (a, _) => (Wander.create, pos, this, Seq())
     }
-    (newSelf.copy(state = newState), newPos, attacks.gss)
+    (newSelf.copy(state = newState), newPos, attacks.gms)
   }
 
   def draw(pos:Cell)(tr:TileRenderer):TileRenderer = {

@@ -82,7 +82,7 @@ case class Bee(a:Animation, b:Animation, drawAnim:Animation) {
         (pos, Seq())
       }
     }
-    (newSelf.copy(drawAnim=anim), newPos, kz.gss)
+    (newSelf.copy(drawAnim=anim), newPos, kz.gms)
   }
 
 

@@ -96,6 +96,6 @@ class TerrainManager {
       pl.move(newPos, face, tc.getTouching(newPos))
     }
     val plResult = updateClimb(tc, newP)
-    (tc, plResult, gs ++ drops ++ tool.gss)
+    (tc, plResult, gs ++ drops ++ tool.gms)
   }
 }

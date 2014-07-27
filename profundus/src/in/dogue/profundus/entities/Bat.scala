@@ -75,7 +75,7 @@ case class Bat(a:AnimationGroup) {
     val updated = copy(a=a.smap{_.update})
 
 
-    (updated, newPos, attack.gss)
+    (updated, newPos, attack.gms)
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

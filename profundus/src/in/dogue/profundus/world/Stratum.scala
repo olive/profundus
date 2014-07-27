@@ -130,7 +130,7 @@ trait Stratum {
 
     val pickups = pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
 
-    val doodads = dg.generate(ts, newTiles, r).gss
+    val doodads = dg.generate(ts, newTiles, r).gms
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
     (Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
   }

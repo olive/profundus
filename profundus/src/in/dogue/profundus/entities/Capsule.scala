@@ -78,9 +78,9 @@ case class Capsule private (ij:Cell, a:AnimationGroup, fall:FallState, t:Int){
 
   def getExplode:Seq[GlobalMessage] = {
     import Profundus._
-    Seq(Seq(makeDeformation).gs,
-        Seq(makeParticle).gs,
-        Seq(makeZone).gs)
+    Seq(Seq(makeDeformation).gm,
+        Seq(makeParticle).gm,
+        Seq(makeZone).gm)
   }
 
   def draw(tr:TileRenderer):TileRenderer = {

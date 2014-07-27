@@ -41,11 +41,11 @@ case class Stalactite(tile:Tile, destroy:Boolean, killT:Int) {
       SoundManager.enehit.play(pos)
     }
     val sk = if (killT > 6) {
-      args.id.gss
+      args.id.gms
     } else {
       Seq()
     }
-    copy(killT=killT+destroy.select(0,1)) @@ pos @@ (Seq(kz).gss ++ sk)
+    copy(killT=killT+destroy.select(0,1)) @@ pos @@ (Seq(kz).gms ++ sk)
   }
 
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {

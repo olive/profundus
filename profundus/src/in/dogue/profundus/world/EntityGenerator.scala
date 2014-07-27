@@ -64,7 +64,7 @@ object EntityGenerator {
       val (a, b) = ts.color.ways2(all)
       a ++ b
     }
-    s.gs
+    s.gm
   }
 
   private def lairFunc(cols:Int, rows:Int, i:Int, ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {

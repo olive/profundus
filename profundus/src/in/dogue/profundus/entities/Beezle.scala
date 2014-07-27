@@ -46,7 +46,7 @@ case class Beezle(tile:Tile, maxHealth:Int, exploded:Boolean) {
       val par = ExplosionParticle.create(pos, 8, 3).toParticle
 
       val zone = ExplosionZone.create(pos, 8, 3, DamageType.Beezle).toZone
-      val gs = Seq(`def`).gss ++ Seq(par).gss ++ Seq(zone).gss
+      val gs = Seq(`def`).gms ++ Seq(par).gms ++ Seq(zone).gms
       (gs, true)
     } else {
       (Seq(), false)

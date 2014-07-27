@@ -39,7 +39,7 @@ case class Obelisk private (tg:TileGroup, mixAmt:Double) {
       SoundManager.pop.play(pos)
       val ps = RingParticle.create(pos, 8, 3).toParticle
       val ex = ExplosionZone.create(pos, 8, 3, DamageType.Obelisk).toZone
-      Seq(ps).gss ++ Seq(ex).gss
+      Seq(ps).gms ++ Seq(ex).gms
     } else {
       Seq()
     }
@@ -49,7 +49,7 @@ case class Obelisk private (tg:TileGroup, mixAmt:Double) {
       Seq()
     }
     val mixAmt = (t % Obelisk.attackTime)/Obelisk.attackTime.toDouble
-    (copy(mixAmt = mixAmt), pos, spawns ++ pickups.gss)
+    (copy(mixAmt = mixAmt), pos, spawns ++ pickups.gms)
   }
 
   def getTg = {

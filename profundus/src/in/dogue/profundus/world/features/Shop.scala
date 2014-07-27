@@ -32,7 +32,7 @@ class Shop(x:Int, y:Int) {
     val skOffset = (6, 10)
     val toolType = ToolType.randomR(r)
     val item = ToolPickup.create((x, y) |+| skOffset -| 5 +| yy, toolType.toTool)
-    val sk = Seq(Shopkeeper.create((x, y) |+| skOffset +| yy, item, r)).gss ++ item.seq.gss
+    val sk = Seq(Shopkeeper.create((x, y) |+| skOffset +| yy, item, r)).gms ++ item.seq.gms
     (newTiles, sk)
   }
 

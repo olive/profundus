@@ -31,7 +31,7 @@ case class Midas(t:Tile) {
     }
 
     val dz = if (args.tc.isRock(pos --> Direction.Down)) {
-      Seq(MineralDeformation.create(pos --> Direction.Down).toDeformation).gss
+      Seq(MineralDeformation.create(pos --> Direction.Down).toDeformation).gms
     } else {
       Seq()
     }

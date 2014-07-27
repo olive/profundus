@@ -328,7 +328,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else {
       jkP
     }
-    (fpl, ps.gss)
+    (fpl, ps.gms)
   }
 
   def setForce(f:Force) = copy(forces=Seq(f))

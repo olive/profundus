@@ -43,7 +43,7 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
                       bought:Boolean, aggroed:Boolean, close:Boolean,
                       tt:Int) {
   private def mkBox(pos:Cell, box:MessageBox[Unit]) = {
-    GameBox(pos |+| ((-6, 3)), box).gss
+    GameBox(pos |+| ((-6, 3)), box).gms
   }
   def update(health:Int, t:Int, args:EntityArgs):(Shopkeeper, Cell, Seq[GlobalMessage]) = {
     val ppos = args.ppos
@@ -70,7 +70,7 @@ case class Shopkeeper(tile:Tile, arrow:Tile,
             p
           }
         }.getOrElse(throw new Exception("fixme"))
-        doBuy @@ (mkBox(pos, box) ++ trans(itemPos).gss)
+        doBuy @@ (mkBox(pos, box) ++ trans(itemPos).gms)
       }
 
     } else {

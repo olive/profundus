@@ -37,7 +37,7 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
     val isClose = args.distance2 < 5*5 && !aggroed
     val showMb = Controls.Up.justPressed && isClose
     val (spawn, newPtr) = if (showMb) {
-      val box = GameBox(pos |+| ((-19,10)), getBox).gss
+      val box = GameBox(pos |+| ((-19,10)), getBox).gms
       (box, (ptr+1) % boxes.length)
     } else {
       (Seq(), ptr)
@@ -67,7 +67,7 @@ case class Phoebe(a:Tile, arrow:Tile, boxes:Vector[MessageBox[Unit]], ptr:Int, c
       val dst = (x, y) |+| pos
       val boom = LaserBoom.create(pos, dst, 3)
       val hurt  = DelayedExplosion(dst, boom.timeToExplode, 30, 10, 0)
-      Seq(Seq(boom.toParticle).gs, Seq(hurt.toZone).gs)
+      Seq(Seq(boom.toParticle).gm, Seq(hurt.toZone).gm)
     } else {
       Seq()
     }

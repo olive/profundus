@@ -139,6 +139,6 @@ object CaveMouth {
     val moon = Moon.create(cols, rows, (3*cols/4-5, y), 4, r)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))
-    (tiles, Seq(moon.toDoodad, campfire.toDoodad).gss ++ trees.gss)
+    (tiles, Seq(moon.toDoodad, campfire.toDoodad).gms ++ trees.gms)
   }
 }

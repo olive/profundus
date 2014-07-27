@@ -33,61 +33,61 @@ import in.dogue.profundus.world.NewPickups
 
 object Profundus {
   class AugNewParticles(s:Seq[Particle]) {
-    def gs = NewParticles(s)
-    def gss = Seq(gs)
+    def gm = NewParticles(s)
+    def gms = Seq(gm)
   }
   implicit def particles2NewSpawn(s:Seq[Particle]) = new AugNewParticles(s)
 
   class AugNewDamageZones(s:Seq[DamageZone]) {
-    def gs = NewDamageZones(s)
-    def gss = Seq(gs)
+    def gm = NewDamageZones(s)
+    def gms = Seq(gm)
   }
   implicit def damageZones2NewSpawn(s:Seq[DamageZone]) = new AugNewDamageZones(s)
 
   class AugNewMessageBox(s:GameBox) {
-    def gs = NewMessageBox(s)
-    def gss = Seq(gs)
+    def gm = NewMessageBox(s)
+    def gms = Seq(gm)
   }
   implicit def damageZones2NewMessageBox(s:GameBox) = new AugNewMessageBox(s)
 
   class AugNewDeformations(s:Seq[Deformation]) {
-    def gs = NewDeformations(s)
-    def gss = Seq(gs)
+    def gm = NewDeformations(s)
+    def gms = Seq(gm)
   }
   implicit def deformations2NewSpawn(s:Seq[Deformation]) = new AugNewDeformations(s)
   class AugNewEmitters(s:Seq[Emitter]) {
-    def gs = NewEmitters(s)
-    def gss = Seq(gs)
+    def gm = NewEmitters(s)
+    def gms = Seq(gm)
   }
   implicit def emitters2NewEmitters(s:Seq[Emitter]) = new AugNewEmitters(s)
 
   class AugNewPickups(s:Seq[Pickup]) {
-    def gs = NewPickups(s)
-    def gss = Seq(gs)
+    def gm = NewPickups(s)
+    def gms = Seq(gm)
   }
   implicit def pickup2NewPickups(s:Seq[Pickup])  = new AugNewPickups(s)
 
   class AugNewEntitys(s:Seq[Entity]) {
-    def gs = NewEntities(s)
-    def gss = Seq(gs)
+    def gm = NewEntities(s)
+    def gms = Seq(gm)
   }
   implicit def creature2NewEntitys(s:Seq[Entity]) = new AugNewEntitys(s)
 
   class AugNewDoodads(s:Seq[Doodad]) {
-    def gs = NewDoodads(s)
-    def gss = Seq(gs)
+    def gm = NewDoodads(s)
+    def gms = Seq(gm)
   }
   implicit def doodad2NewDoodads(s:Seq[Doodad]) = new AugNewDoodads(s)
 
   class AugNewTransaction(s:Transaction) {
-    def gs = NewTransaction(s)
-    def gss = Seq(gs)
+    def gm = NewTransaction(s)
+    def gms = Seq(gm)
   }
   implicit def transaction2NewTransaction(s:Transaction) = new AugNewTransaction(s)
 
   class AugDestroyEntity(s:EntityId) {
-    def gs = DestroyEntity(s)
-    def gss = Seq(gs)
+    def gm = DestroyEntity(s)
+    def gms = Seq(gm)
   }
   implicit def transaction2DestroyEntity(s:EntityId) = new AugDestroyEntity(s)
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)

@@ -47,7 +47,7 @@ trait WorldTileFactory {
   def mkShaft:MkTile = mkSimple(ts.shaft(r), Shaft, TileClass.Invincible, 1, 0)
   def mkMineral:MkTile = {
     val (tile, color) = ts.mineral(r)
-    val spawn = (ij:Cell) => Seq(MineralPickup.create(ij, color).toPickup).gss
+    val spawn = (ij:Cell) => Seq(MineralPickup.create(ij, color).toPickup).gms
     WorldTile(tile, Mineral, TileClass.Rock1, 10, 5, 0, spawn, Seq()) @@ None
   }
   def mkSpike(ij:Cell, d:Direction) = {
@@ -68,7 +68,7 @@ case class WorldTile(tile:Tile, ttype:TileType, tclass:TileClass, hp:Int, toolDa
    * @return the modified version of 'this'
    */
   def notifyTile(tf:WorldTileFactory, ij:Cell, y:Int):(WorldTile, Seq[GlobalMessage]) = {
-    (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, copy(tile.setCode(CP437.▼)))).gss)
+    (tf.mkEmpty._1, Seq(Stalactite.create(ij +| y, copy(tile.setCode(CP437.▼)))).gms)
   }
   def hit(tf:WorldTileFactory, ij:Cell, dmg:Damage):(WorldTile, Seq[GlobalMessage], HitResult) = {
     val amt = dmg.amount
