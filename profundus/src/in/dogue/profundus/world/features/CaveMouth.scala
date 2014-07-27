@@ -2,20 +2,20 @@ package in.dogue.profundus.world.features
 
 import in.dogue.profundus.world._
 import com.deweyvm.gleany.data.Recti
-import in.dogue.antiqua.data.{Direction, CP437, Array2d}
+import in.dogue.antiqua.data.{Poisson1d, Direction, CP437, Array2d}
 import scala.util.Random
 import in.dogue.antiqua.procgen.PerlinNoise
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.geometry.{Line, Circle}
 import in.dogue.antiqua.Antiqua._
-import in.dogue.profundus.doodads.{Campfire, Moon, Doodad}
+import in.dogue.profundus.doodads.{Tree, Campfire, Moon, Doodad}
 import in.dogue.profundus.world.WorldTile
 import in.dogue.profundus.world.Empty
 import in.dogue.profundus.world.Feature
 import in.dogue.profundus.world.Scheme
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.data.Direction.Down
-import scala.collection.immutable.Stream
+import scala.collection.immutable.{IndexedSeq, Stream}
 import in.dogue.antiqua.graphics.Tile
 
 object CaveMouth {
@@ -125,10 +125,28 @@ object CaveMouth {
 
     }.unzip
     val tiles = Terrain.merge(nt, gen)
-    println(y)
-    val moon = Moon.create(cols, rows, (3*cols/4-5, -5 + y), 4, r)
+
+    val treeBuff = 12
+    val pleft = new Poisson1d(0, 4, 8, cols/2 - treeBuff, r.nextLong()).get
+    val pright = new Poisson1d(cols/2+treeBuff, 4, 8, cols, r.nextLong()).get
+    val trees = (pleft ++ pright).map { i =>
+      val ii = i.toInt
+      val j = rows/2
+      Tree.create((ii, j+y), r).toDoodad
+    }
+
+
+
+
+    /*val trees = (0 until 20).map {case i =>
+      val i = r.nextInt(cols)
+      val j = rows/2
+      Tree.create((i, j+y), r).toDoodad
+    }*/
+
+    val moon = Moon.create(cols, rows, (3*cols/4-5, y), 4, r)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))
-    (tiles, Seq(moon.toDoodad, campfire.toDoodad).gss)
+    (tiles, Seq(moon.toDoodad, campfire.toDoodad).gss ++ trees.gss)
   }
 }

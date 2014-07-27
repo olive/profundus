@@ -7,8 +7,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object Stratum {
-  def createDummy(r:Random) = {
-    val ts = TerrainScheme.generate(r)
+  def createDummy(r:Random, ts:TerrainScheme) = {
     val tg = TerrainGenerator.dummy
     val fg = FeatureGenerator.dummy
     val eg = EntityGenerator.dummy
@@ -92,20 +91,19 @@ trait Stratum {
 
   def modBiome(yIndex:Int, r:Random):Stratum = {
     val endIndex = 21
-    if (yIndex >= 0) {
-      Stratum.createSurface(r)
-    } else if (yIndex > endIndex) {
+    if (yIndex > endIndex) {
       Stratum.createAbyss(r)
     } else if (yIndex == endIndex) {
       Stratum.createLair(r)
     } else if (yIndex >= 0) {
-      Stratum.createDummy(r)
-    } else {
-      if (yIndex % strataSize == 0) {
-        copy(ts=TerrainScheme.generate(r))
+      val newTs = if (yIndex %% strataSize == 0) {
+        TerrainScheme.generate(r)
       } else {
-        this
+        this.ts
       }
+      Stratum.createDummy(r, newTs)
+    } else {
+      this
     }
   }
 
