@@ -7,7 +7,7 @@ import in.dogue.profundus.entities.pickups.{RopePickup, MineralPickup}
 
 object Inventory {
   def create(lo:Loadout):Inventory = {
-    Inventory(lo.fuel, lo.ropes, lo.bombs, lo.minerals, lo.`type`.toTool)
+    Inventory(lo.fuel, lo.ropes, lo.capsules, lo.minerals, lo.tool.toTool)
   }
 }
 

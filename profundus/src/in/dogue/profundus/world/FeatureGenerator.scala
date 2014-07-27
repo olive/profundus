@@ -1,7 +1,7 @@
 package in.dogue.profundus.world
 
 import scala.util.Random
-import in.dogue.antiqua.data.{Array2d, Direction}
+import in.dogue.antiqua.data.Direction
 import in.dogue.antiqua.Antiqua._
 import com.deweyvm.gleany.data.Recti
 import in.dogue.profundus.world.features._
@@ -10,13 +10,9 @@ import in.dogue.profundus.world.features.Mineshaft
 import in.dogue.profundus.world.features.SpikePit
 import in.dogue.profundus.world.features.Campsite
 import in.dogue.profundus.world.features.Cavern
-import in.dogue.profundus.particles.{Emitter, DropEmitter, WaterDrop}
-import in.dogue.profundus.Profundus
 import in.dogue.antiqua.geometry.Circle
 
 object FeatureGenerator {
-
-
 
   private def makePits(num:Int, cols:Int, rows:Int)(ts:TerrainScheme, r:Random) = {
     val width = 13
@@ -124,10 +120,10 @@ object FeatureGenerator {
 }
 
 case class FeatureGenerator[T](private val f:(Int, Int, Int, TerrainScheme, Random, T) => Seq[Feature]) {
-  def assemble(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, t:T) = {
+  def assemble(force:Seq[Feature], cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, t:T) = {
     val screenRect = Recti(2, 2, cols-4, rows-4)
     val feats = f(cols, rows, y, ts, r, t)
-    val result = ArrayBuffer[Feature]()
+    val result = ArrayBuffer[Feature](force:_*)
     for (feat <- feats) {
       var foundCollision = false
       for (r <- result) {

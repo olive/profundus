@@ -24,7 +24,7 @@ class Abyss {
 
     }.unzip
     val newTiles = Terrain.merge(nt, gen)
-    newTiles @@ Seq()
+    newTiles @@ Seq() @@ Seq()
   }
 
   def toFeature(cols:Int, rows:Int):Feature = {

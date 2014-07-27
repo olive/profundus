@@ -40,23 +40,22 @@ object TerrainCache {
     val r = new Random(seed)
     val (prevS, _) = getAdjacent(tc, k)
     val ns = prevS.modBiome(k, r)
-    val (terrain, spawns) = ns.generate(cols, rows, k, r)
-    (ns, terrain, spawns)
+    val (terrain, spawns, newFeats) = ns.generate(cols, rows, k, r)
+    (ns.withForced(newFeats), terrain, spawns)
   }
 
   def create(cols:Int, rows:Int, r:Random):(TerrainCache, Cell, Direction, Seq[GlobalMessage]) = {
     val copy = new Random(r.nextInt())
     val biome: Stratum = Stratum.createSurface(r)
-    val (first, gs) = biome.generate(cols, rows, 0, copy)
+    val (first, gs, forceFeats) = biome.generate(cols, rows, 0, copy)
     val tf = biome.ts.toFactory(r)
+    val added = biome.withForced(forceFeats)
     val tg = TerrainGenerator.unloaded
     val (nt, _) = Array2d.tabulate(cols, rows) { case (ij) =>
-
       tg.mkTile(biome.ts, tf, ij, 0, cols, rows, 0, r)
-
     }.unzip
     val unloaded = Terrain(0, tf, nt, (0,0), Direction.Down)
-    val cache = TerrainCache(cols, rows, Map(0->((biome, first))), Map(), unloaded, Seq(), r)
+    val cache = TerrainCache(cols, rows, Map(0->((added, first))), Map(), unloaded, Seq(), r)
     (cache, first.spawn, first.spawnFace, gs)
   }
 }

@@ -265,7 +265,7 @@ object GreatWorld {
     val (cache, spawn, spawnFace, gs1) = TerrainCache.create(worldCols, worldRows, r)
     val (tc, gs2) = cache.update(spawn)
     val loadout = if (Game.hasDrill) {
-      lo.copy(`type`=Drill)
+      lo.copy(tool=Drill)
     } else {
       lo
     }

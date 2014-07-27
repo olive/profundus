@@ -69,13 +69,13 @@ object Loadout {
     indexToFeat(v).makeDesc(Profundus.tf)
   }
 
-  def fillBombs(v:Int)(lo:Loadout) = lo.copy(bombs = v)
+  def fillBombs(v:Int)(lo:Loadout) = lo.copy(capsules = v)
   def fillRopes(v:Int)(lo:Loadout) = lo.copy(ropes = v)
   def fillGems(v:Int)(lo:Loadout) = lo.copy(minerals = v)
   def fillFuel(v:Int)(lo:Loadout) = lo.copy(fuel = v)
   def fillTool(v:Int)(lo:Loadout) = {
     val tool = indexToTool(v)
-    lo.copy(`type`=tool)
+    lo.copy(tool=tool)
   }
   def fillFeat(v:Int)(lo:Loadout) = {
     val feat = indexToFeat(v)
@@ -101,7 +101,7 @@ object Loadout {
     val x1 = x0 + 6
     val y0 = 11 + LoadoutMode.topp
     val y1 = y0 + 5
-    val (r1, cap) =  makeSimpleSlider((x0, y0), Capsule.stick, fillBombs, bombCost, 1)(lo.bombs)
+    val (r1, cap) =  makeSimpleSlider((x0, y0), Capsule.stick, fillBombs, bombCost, 1)(lo.capsules)
     val (r2, rope) = makeSimpleSlider((x1, y0), Hud.ropeIcon, fillRopes, ropeCost, 1)(lo.ropes)
     val (r3, gem) =  makeSimpleSlider((x0, y1), Hud.gemIcon, fillGems, gemCost, 5)(lo.minerals)
     val (r4, fuel) = makeSimpleSlider((x1, y1), Hud.fuelIcon, fillFuel, fuelCost, 1)(lo.fuel)
@@ -109,7 +109,7 @@ object Loadout {
   }
 
   def makeTool(rem:Int, lo:Loadout):(Int, LoadoutButton[Slider]) = {
-    val v = toolToIndex(lo.`type`)
+    val v = toolToIndex(lo.tool)
     val minus = v*toolCost
     val s = Slider.create((22, 8 + LoadoutMode.topp), Seq(), _ => Seq(), drawTool, defaultDraw, fillTool, _ => 4, 3, v, toolCost, 1).toLoadoutButton
     (rem - minus, s)
@@ -123,4 +123,4 @@ object Loadout {
   }
 }
 
-case class Loadout(fuel:Int, ropes:Int, bombs:Int, minerals:Int, `type`:ToolType, feat:FeatType, name:String)
+case class Loadout(fuel:Int, ropes:Int, capsules:Int, minerals:Int, tool:ToolType, feat:FeatType, name:String)

@@ -10,6 +10,7 @@ import scala.util.Random
 import com.deweyvm.gleany.graphics.Color._
 import in.dogue.antiqua.data.CP437
 import in.dogue.profundus.mode.loadout.LoadoutMode
+import in.dogue.profundus.procgen.LoadoutTitle
 
 object ResultMode {
   def create(cols:Int, rows:Int, pl:PlayerLog) = {
@@ -27,7 +28,7 @@ object ResultMode {
     val y0 = 2
     val draws = Seq(
       mk("Name: " + pl.lo.name) |++| ((x0,y0)),
-      mk("Loadout: Feisty") |++| ((x0,y0+2)),
+      mk("Loadout: " + LoadoutTitle.get(pl.lo).name) |++| ((x0,y0+2)),
       mk("Killed by " + pl.getKilledBy) |++| ((x0, y0+4)),
       mk("Ropes used        : " + pl.ropesUsed) |++| ((x0, y0+6)) ,
       mk("Capsules used     : " + pl.bombsUsed) |++| ((x0, y0+7)),

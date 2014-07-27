@@ -14,7 +14,7 @@ object Stratum {
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.dummy
     val sg = SpawnGenerator.dummy
-    Stratum(ts, tg, fg, eg, dg, pg, sg)
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
   }
 
   def createSurface(r:Random) = {
@@ -25,7 +25,7 @@ object Stratum {
     val eg = EntityGenerator.empty
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
-    Stratum(ts, tg, fg, eg, dg, pg, sg)
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
   }
 
   def createLair(r:Random):Stratum = {
@@ -36,7 +36,7 @@ object Stratum {
     val eg = EntityGenerator.lair
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
-    Stratum(ts, tg, fg, eg, dg, pg, sg)
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
   }
 
   def createAbyss(r:Random) = {
@@ -47,10 +47,11 @@ object Stratum {
     val eg = EntityGenerator.empty
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
-    Stratum(ts, tg, fg, eg, dg, pg, sg)
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
   }
 
-  def apply[A](tsch:TerrainScheme,
+  def apply[A](fs:Seq[Feature],
+               tsch:TerrainScheme,
                tgen:TerrainGenerator,
                fgen:FeatureGenerator[A],
                egen:EntityGenerator,
@@ -59,6 +60,7 @@ object Stratum {
                sgen:SpawnGenerator[A]) = {
     new Stratum {
       override type T = A
+      override val forced = fs
       override val ts: TerrainScheme = tsch
       override val dg: DoodadGenerator = dgen
       override val eg: EntityGenerator = egen
@@ -72,6 +74,7 @@ object Stratum {
 
 trait Stratum {
   type T
+  val forced:Seq[Feature]
   val ts:TerrainScheme
   val tg:TerrainGenerator
   val fg:FeatureGenerator[T]
@@ -81,13 +84,16 @@ trait Stratum {
   val sg:SpawnGenerator[T]
   val strataSize = 4
 
-  def copy(ts:TerrainScheme=ts,
+  def withForced(s:Seq[Feature]) = copy(forced=s)
+
+  def copy(forced:Seq[Feature]=forced,
+           ts:TerrainScheme=ts,
            tg:TerrainGenerator=tg,
            fg:FeatureGenerator[T]=fg,
            eg:EntityGenerator=eg,
            dg:DoodadGenerator=dg,
            pg:PickupGenerator=pg,
-           sg:SpawnGenerator[T]=sg) = Stratum(ts, tg, fg, eg, dg, pg, sg)
+           sg:SpawnGenerator[T]=sg) = Stratum(forced, ts, tg, fg, eg, dg, pg, sg)
 
   def modBiome(yIndex:Int, r:Random):Stratum = {
     val endIndex = 21
@@ -109,11 +115,11 @@ trait Stratum {
 
 
 
-  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Terrain, Seq[GlobalMessage]) = {
+  def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Terrain, Seq[GlobalMessage], Seq[Feature]) = {
     import Profundus._
 
     val (spawn, face, t) = sg.gen(cols, rows, r)
-    val features = fg.assemble(cols, rows, yIndex, ts, r, t)
+    val features = fg.assemble(forced, cols, rows, yIndex, ts, r, t)
     val noise = new PerlinNoise().generate(cols, rows, 0, yIndex, r.nextInt())
     val tf = ts.toFactory(r)
     val (nt, gen) = noise.map { case (ij, d) =>
@@ -123,16 +129,15 @@ trait Stratum {
     }.unzip
     val tiles = Terrain.merge(nt, gen)
 
-    val (newTiles, gs) = fold2(tiles, features) { case (ft, tiles) =>
+    val (newTiles, gs, fts) = fold3(tiles, features ++ forced/*fixme--forced features may overlap*/) { case (ft, tiles) =>
       ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
     }
-
 
     val pickups = pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
 
     val doodads = dg.generate(ts, newTiles, r).gms
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
-    (Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads)
+    (Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads, fts)
   }
 
 }

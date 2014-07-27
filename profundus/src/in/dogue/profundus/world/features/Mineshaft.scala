@@ -36,7 +36,7 @@ case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
 
     }.unzip
     val newTiles = Terrain.merge(nt, gen)
-    newTiles @@ Seq()
+    newTiles @@ Seq() @@ Seq()
   }
 
   def toFeature(cols:Int, rows:Int):Feature = {
