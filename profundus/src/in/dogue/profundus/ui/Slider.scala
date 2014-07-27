@@ -13,21 +13,27 @@ import in.dogue.profundus.audio.SoundManager
 
 object Slider {
   def create(ij:Cell,
-             icon:TileGroup, values:Int=>TileGroup,
+             icon:TileGroup,
+             desc:Int=>TileGroup,
+             values:Int=>TileGroup,
+             dr:TileGroup => TileRenderer => TileRenderer,
              fillIn:Int => Loadout => Loadout,
-             width:Int,
+             getWidth:Int=>Int,
              max:Int, value:Int, cost:Int, incr:Int) = {
     val up = CP437.▲.mkTile(Color.Black, Color.White)
     val down = CP437.▼.mkTile(Color.Black, Color.White)
-    Slider(ij, icon, values, fillIn, up, down, width, max, value, cost, incr)
+    Slider(ij, icon, desc, values, dr, fillIn, up, down, getWidth, max, value, cost, incr)
   }
 }
 
 case class Slider private (ij:Cell,
-                           icon:TileGroup, values:Int=>TileGroup,
+                           icon:TileGroup,
+                           desc:Int=>TileGroup,
+                           values:Int=>TileGroup,
+                           dr:TileGroup => TileRenderer => TileRenderer,
                            private val fillIn:Int => Loadout => Loadout,
                            up:Tile, down:Tile,
-                           width:Int,
+                           getWidth:Int=>Int,
                            max:Int, value:Int, cost:Int, incr:Int) {
   final val i = ij.x
   final val j = ij.y
@@ -56,7 +62,7 @@ case class Slider private (ij:Cell,
       val tf = TileFactory(Color.Black, Color.White)
       val i0 = i - (icon.length > 0).select(0, 1)
       (tr <| ((i0, j), tf(CP437.`[`))
-          <| ((i + width + 1, j), tf(CP437.`]`))
+          <| ((i + getWidth(value) + 1, j), tf(CP437.`]`))
         )
     }
   }
@@ -68,13 +74,20 @@ case class Slider private (ij:Cell,
     tr <|? upDraw <|? downDraw
   }
 
-  def draw(selected:Boolean, rem:Int)(tr:TileRenderer):TileRenderer = {
+  def drawDescription(tr:TileRenderer):TileRenderer = {
+    val d = desc(value)
     val spr = values(value)
-    val span = spr.getSpan
+    tr <+< dr((spr |++| ij |++ 1)) <|| (d |++| ij |++ 1)
+  }
+
+
+  def draw(selected:Boolean, rem:Int)(tr:TileRenderer):TileRenderer = {
+
+    val span = Recti(0,0,getWidth(value),1)
     val center = span.center
     (tr <|| (icon |++| ij)
         <+< drawArrows(selected, rem, center.x+1)
-        <|| (spr |++| ij |++ 1)
+        <+< drawDescription
         <+< drawSelection(selected, span)
       )
   }

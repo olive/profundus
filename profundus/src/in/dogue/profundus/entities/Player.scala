@@ -100,7 +100,7 @@ object Player {
            shovel, getLive,
            Seq(),
            ControlState(false, false, false, false, false, false, false, false),
-           Feat.meditation,
+           lo.feat.toFeat,
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
            PlayerLight.create(smallLight, largeLight),

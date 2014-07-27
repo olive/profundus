@@ -32,9 +32,10 @@ object LoadoutMode {
     val lo = initial.getOrElse(Loadout.default)
     val (rem, std) = Loadout.makeSliders(pts, lo)
     val (rem2, tool) = Loadout.makeTool(rem, lo)
+    val (rem3, feat) = Loadout.makeFeat(rem2, lo)
     val ptText = tf.create("Remaining: ")
     val story = StoryButton(cols, rows, (26, 12), tf.create("More")).toLoadoutButton
-    val sliders =  Vector(story) ++ std ++ Vector(tool)
+    val sliders =  Vector(story) ++ std ++ Vector(tool) ++ Vector(feat)
     val lines = Vector(
       "Carefully prepare for your",
       "journey. Once you descend",
@@ -51,12 +52,14 @@ object LoadoutMode {
     import LoadoutSection.{create => cr}
     val desc =  cr(cols, topp, (0, 0), lines, tf, (2,2))
     val offset = (1,1)
-    val top =   cr(   cols,              5, (      0,    0+topp), Vector(""), tf, offset)
-    val left =  cr(cols-14,             17, (      0,    5+topp), Vector("Provisions"), tf, offset)
-    val right = cr(     14,             17, (cols-14,    5+topp), Vector("Tools"), tf, offset)
-    val bott  = cr(   cols, rows-17-5-topp, (      0, 5+17+topp), Vector("Bio"), tf, offset)
-    val secs = Vector(desc, top, left, right, bott)
-    LoadoutMode(cols, rows, tf, sliders, 1, ptText, rem2, rect, new PlayerInfo(r), secs)
+    //                width,        height,      x,          y
+    val top =    cr(   cols,              5, (      0,    0+topp), Vector(""), tf, offset)
+    val left =   cr(cols-14,             17, (      0,    5+topp), Vector("Provisions"), tf, offset)
+    val right =  cr(     14,             7, (cols-14,    5+topp), Vector("Tools"), tf, offset)
+    val right2 = cr(     14,             10, (cols-14,    5+topp+7), Vector("Feat"), tf, offset)
+    val bott  =  cr(   cols, rows-17-5-topp, (      0, 5+17+topp), Vector("Bio"), tf, offset)
+    val secs = Vector(desc, top, left, right, right2, bott)
+    LoadoutMode(cols, rows, tf, sliders, 1, ptText, rem3, rect, new PlayerInfo(r), secs)
   }
 }
 

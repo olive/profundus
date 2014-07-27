@@ -2,9 +2,56 @@ package in.dogue.profundus.entities
 
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.antiqua.graphics.{TileRenderer, Tile}
+import in.dogue.antiqua.graphics.{TextFactory, TileRenderer, Tile}
 import in.dogue.antiqua.data.CP437
 import com.deweyvm.gleany.graphics.Color
+
+object FeatType {
+  case object Meditation extends FeatType {
+    def toFeat = Feat.meditation(icon)
+    def name = "Meditation"
+    val icon = CP437.O.mkTile(Color.White, Color.Black)
+  }
+  case object Fury extends FeatType {
+    def toFeat = Feat.fury(icon)
+    def name = "Fury"
+    val icon = CP437.`»`.mkTile(Color.Black, Color.Red)
+  }
+  case object Brace extends FeatType {
+    def toFeat = Feat.superbrace(icon)
+    def name = "Brace"
+    val icon = CP437.Ω.mkTile(Color.Black, Color.Pink)
+  }
+  case object Repair extends FeatType {
+    def toFeat = Feat.repair(icon)
+    def name = "Repair"
+    val icon = CP437.X.mkTile(Color.Black, Color.Green)
+  }
+  case object Adrenaline extends FeatType {
+    def toFeat = Feat.adrenaline(icon)
+    def name = "Adrenaline"
+    val icon = CP437.∞.mkTile(Color.Black, Color.Brown.dim(2))
+  }
+  case object Garlic extends FeatType {
+    def toFeat = Feat.garlic(icon)
+    def name = "Garlic"
+    val icon = CP437.♠.mkTile(Color.Black, Color.Tan)
+  }
+}
+
+sealed trait FeatType {
+  def toFeat:Feat
+  def name:String
+  val icon:Tile
+  def makeIcon(tf:TextFactory):TileGroup = {
+    Seq(((0,0), icon))
+  }
+
+  def makeDesc(tf:TextFactory):TileGroup = {
+    tf.create(name).toTileGroup |++| ((-4, -3))
+  }
+}
+
 
 object Feat {
 
@@ -61,38 +108,33 @@ object Feat {
       DefaultTakeDamage, DefaultSeekPlayer, (0,0), DefaultOnActivate, AlwaysActivate)
   }
 
-  def fury = {
-    val icon = CP437./.mkTile(Color.Black, Color.Brown)
+  def fury(icon:Tile) = {
     blank.setTime(180)
          .setTool(FuryTool)
          .setIcon(icon)
   }
 
-  def superbrace = {
-    val icon = CP437.Ω.mkTile(Color.Black, Color.Pink)
+  def superbrace(icon:Tile) = {
     blank.setTime(Int.MaxValue)
          .setFallFunc(BraceFall)
          .setMayActivate(MidairActivate)
          .setIcon(icon)
   }
 
-  def repair = {
-    val icon = CP437.X.mkTile(Color.Black, Color.Green)
+  def repair(icon:Tile) = {
     blank.setTime(1)
          .setOnActivate(ToolRepairOnActivate)
          .setIcon(icon)
   }
 
-  def adrenaline = {
-    val icon = CP437.∞.mkTile(Color.Black, Color.Brown.dim(2))
+  def adrenaline(icon:Tile) = {
     blank.setTime(180)
          .setDoDamage(AdrenalineDoDamage)
          .setTakeDamage(AdrenalineTakeDamage)
          .setIcon(icon)
   }
 
-  def meditation = {
-    val icon = CP437.O.mkTile(Color.White, Color.Black)
+  def meditation(icon:Tile) = {
     blank.setTime(180)
          .setAllowMove(NoAllowMove)
          .setSeekPlayer(NoSeekPlayer)
@@ -100,8 +142,8 @@ object Feat {
          .setIcon(icon)
   }
 
-  def garlic = {
-    val icon = CP437.♠.mkTile(Color.White, Color.Tan)
+  def garlic(icon:Tile) = {
+
     blank.setTime(600)
          .setSeekPlayer(NoSeekPlayer)
          .setIcon(icon)

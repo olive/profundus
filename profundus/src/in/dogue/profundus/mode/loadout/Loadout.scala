@@ -2,10 +2,12 @@ package in.dogue.profundus.mode.loadout
 
 import in.dogue.profundus.Profundus
 import in.dogue.profundus.entities._
-import in.dogue.antiqua.graphics.{Tile, TextFactory}
+import in.dogue.antiqua.graphics.{TileRenderer, Tile, TextFactory}
 import in.dogue.antiqua.Antiqua._
 import in.dogue.profundus.ui.{LoadoutButton, HudTool, Hud, Slider}
 import in.dogue.antiqua.data.CP437
+import in.dogue.profundus.ui.LoadoutButton
+import scala.collection.script.Index
 
 object Loadout {
   val tf = Profundus.tf
@@ -15,7 +17,8 @@ object Loadout {
   val diffCost = 10
   val gemCost = 1
   val fuelCost = 2
-  val default = Loadout(20,3,3,5,Shovel, "Debug")
+  val featCost = 0
+  val default = Loadout(20,3,3,5,Shovel, FeatType.Meditation, "Debug")
   private def indexToTool(v:Int) = v match {
     case 0 => Shovel
     case 1 => Mallet
@@ -33,11 +36,37 @@ object Loadout {
 
   }
 
+  private def indexToFeat(i:Int):FeatType = i match {
+    case 0 => FeatType.Meditation
+    case 1 => FeatType.Fury
+    case 2 => FeatType.Brace
+    case 3 => FeatType.Repair
+    case 4 => FeatType.Adrenaline
+    case _ => FeatType.Garlic
+  }
+
+  private def featToIndex(f:FeatType):Int = f match {
+    case FeatType.Meditation => 0
+    case FeatType.Fury => 1
+    case FeatType.Brace => 2
+    case FeatType.Repair  => 3
+    case FeatType.Adrenaline => 4
+    case _/*FeatType.Garlic*/ => 5
+  }
+
   def drawNumber(tf:TextFactory)(v:Int):TileGroup = {
     tf.create("%3s".format(v.toString)).filterToTileGroup(CP437.notBlank)
   }
   def drawTool(v:Int) = {
     indexToTool(v).icon
+  }
+
+  def drawFeat(v:Int) = {
+    indexToFeat(v).makeIcon(Profundus.tf)
+  }
+
+  def descFeat(v:Int) = {
+    indexToFeat(v).makeDesc(Profundus.tf)
   }
 
   def fillBombs(v:Int)(lo:Loadout) = lo.copy(bombs = v)
@@ -48,9 +77,21 @@ object Loadout {
     val tool = indexToTool(v)
     lo.copy(`type`=tool)
   }
+  def fillFeat(v:Int)(lo:Loadout) = {
+    val feat = indexToFeat(v)
+    lo.copy(feat=feat)
+  }
+
+  def defaultDraw(tg:TileGroup)(tr:TileRenderer):TileRenderer = {
+    tr <|| tg
+  }
+
+  def fullDraw(tg:TileGroup)(tr:TileRenderer):TileRenderer = {
+    tr <++ tg
+  }
 
   def makeSimpleSlider(ij:Cell, icon:Tile, fillIn:Int => Loadout => Loadout, cost:Int, incr:Int)(value:Int) = {
-    val slider = Slider.create(ij, Seq(((0,0),icon)), Loadout.drawNumber(tf), fillIn, 3, Int.MaxValue, value, cost, incr).toLoadoutButton
+    val slider = Slider.create(ij, Seq(((0,0),icon)), _ => Seq(), Loadout.drawNumber(tf), defaultDraw, fillIn, _ => 3, Int.MaxValue, value, cost, incr).toLoadoutButton
     val newRem = value*cost
     (newRem, slider)
   }
@@ -70,9 +111,16 @@ object Loadout {
   def makeTool(rem:Int, lo:Loadout):(Int, LoadoutButton[Slider]) = {
     val v = toolToIndex(lo.`type`)
     val minus = v*toolCost
-    val s = Slider.create((22, 13 + LoadoutMode.topp), Seq(), drawTool, fillTool, 4, 3, v, toolCost, 1).toLoadoutButton
+    val s = Slider.create((22, 8 + LoadoutMode.topp), Seq(), _ => Seq(), drawTool, defaultDraw, fillTool, _ => 4, 3, v, toolCost, 1).toLoadoutButton
+    (rem - minus, s)
+  }
+
+  def makeFeat(rem:Int, lo:Loadout):(Int, LoadoutButton[Slider]) = {
+    val v = featToIndex(lo.feat)
+    val minus = v * featCost
+    val s = Slider.create((23, 18 + LoadoutMode.topp), Seq(), descFeat, drawFeat, fullDraw, fillFeat, _ => 1, 5, v, featCost, 1).toLoadoutButton
     (rem - minus, s)
   }
 }
 
-case class Loadout(fuel:Int, ropes:Int, bombs:Int, minerals:Int, `type`:ToolType, name:String)
+case class Loadout(fuel:Int, ropes:Int, bombs:Int, minerals:Int, `type`:ToolType, feat:FeatType, name:String)
