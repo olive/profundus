@@ -92,7 +92,9 @@ trait Stratum {
 
   def modBiome(yIndex:Int, r:Random):Stratum = {
     val endIndex = 21
-    if (yIndex > endIndex) {
+    if (yIndex >= 0) {
+      Stratum.createSurface(r)
+    } else if (yIndex > endIndex) {
       Stratum.createAbyss(r)
     } else if (yIndex == endIndex) {
       Stratum.createLair(r)

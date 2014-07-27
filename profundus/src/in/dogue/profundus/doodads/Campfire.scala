@@ -26,7 +26,7 @@ object Campfire {
 case class Campfire(ij:Cell, a:Animation, light:LightSource, t:Int) {
   def update = copy(a=a.update, t=t+1)
 
-  def getLight:Option[LightSource] = light.copy(flicker=LightSource.flicker(11111+t)).some
+  def getLight:Seq[LightSource] = light.copy(flicker=LightSource.flicker(11111+t)).seq
   def getPos = ij
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+< a.drawFg(ij)

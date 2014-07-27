@@ -1,6 +1,9 @@
 package in.dogue.profundus.world
 
+import com.deweyvm.gleany.graphics.Color
+
 class StratumColor(hue:Double) {
+  val color = Color.fromHsb(hue)
   def ways1[T](vec:Vector[T]) = {
     val count = vec.length
     val index = (hue*count).toInt

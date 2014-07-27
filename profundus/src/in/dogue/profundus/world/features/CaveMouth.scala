@@ -22,11 +22,11 @@ object CaveMouth {
   def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
 
   def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random): (Array2d[WorldTile], Seq[GlobalMessage]) = {
-    import Profundus._
+    val skyColor = ts.color.color.dim(2)
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
 
     def skyScheme(dim:Double) = Scheme(
-      (r:Random) => Color.DarkBlue.dim(1/dim),
+      (r:Random) => skyColor.dim(1/dim),
       (r:Random) => Color.White
     )
     def makeSky(dim:Double)(r:Random) = {
@@ -68,15 +68,16 @@ object CaveMouth {
   def createMouth(face:Direction, lines:Vector[Seq[Cell]], circle:Circle)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random)
   : (Array2d[WorldTile], Seq[GlobalMessage]) = {
     import Profundus._
+    val skyColor = ts.color.color.dim(2)
     val noise = new PerlinNoise().generate(cols, rows, 0, y, r.nextInt())
     //val scheme = TerrainScheme.dummy
     val grassScheme = Scheme(
-      (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),
-      (r:Random) => Color.DarkGreen.mix(Color.Brown, r.nextDouble/6).dim(1 + r.nextDouble)
+      (r:Random) => skyColor.mix(Color.Brown, r.nextDouble/6).dim(3 + r.nextDouble),
+      (r:Random) => skyColor.mix(Color.Brown, r.nextDouble/6).dim(1 + r.nextDouble)
     )
 
     def skyScheme(dim:Double) = Scheme(
-      (r:Random) => Color.DarkBlue.dim(1/dim),
+      (r:Random) => skyColor.dim(1/dim),
       (r:Random) => Color.White
     )
     def makeSky(dim:Double)(r:Random) = {
@@ -124,7 +125,8 @@ object CaveMouth {
 
     }.unzip
     val tiles = Terrain.merge(nt, gen)
-    val moon = Moon.create(cols, rows, (3*cols/4-5, -5), 4)
+    println(y)
+    val moon = Moon.create(cols, rows, (3*cols/4-5, -5 + y), 4, r)
     val campX = if (face == Direction.Right) 2*cols/6 else 4*cols/6
     val campfire = Campfire.create((campX, rows/2))
     (tiles, Seq(moon.toDoodad, campfire.toDoodad).gss)

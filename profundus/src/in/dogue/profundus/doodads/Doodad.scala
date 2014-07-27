@@ -10,7 +10,7 @@ import in.dogue.profundus.world.Unloadable
 object Doodad {
   def apply[A](aup: A => A,
                adr: A => TileRenderer => TileRenderer,
-               alight:A => Option[LightSource],
+               alight:A => Seq[LightSource],
                apos: A => Cell,
                aself: A) = new Doodad {
     override type T = A
@@ -26,7 +26,7 @@ trait Doodad {
   type T
   val up: T => T
   val dr: T => TileRenderer => TileRenderer
-  val light:T => Option[LightSource]
+  val light:T => Seq[LightSource]
   val pos: T => Cell
   val self: T
   def update = Doodad(up, dr, light, pos, up(self))
