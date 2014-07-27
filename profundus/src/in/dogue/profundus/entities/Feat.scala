@@ -226,15 +226,17 @@ case class Feat(private val icon:Option[Tile], t:Int, tActivate:Int, isActivated
 
   def draw(xy:Cell)(tr:TileRenderer):TileRenderer = {
     if (isActivated) {
-      val bound = 5
+      val sin = math.sin(1 - t/10f).abs/2
+      val bound = (10*sin).toInt
       val x = xy.x
       val y = xy.y
-      val draws = for (i <- (x - bound) until (x + bound);
-                       j <- (y - bound) until (y + bound)) yield {
+      val draws = for (i <- (x - bound) to (x + bound);
+                       j <- (y - bound) to (y + bound)) yield {
         val ij = (i, j)
         val h = (xy |-| ij).mag
-        val f = if (h < bound) {
-          (t:Tile) => t.setFg(Color.White)
+        val f = if (h < bound && h >= bound - 2) {
+          val dim = if (t> 0) sin else 1
+          (t:Tile) => t.mapFg(_.dim(dim)).mapBg(_.dim(dim))
         } else {
           id[Tile] _
         }

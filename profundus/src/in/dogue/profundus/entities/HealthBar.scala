@@ -46,6 +46,6 @@ case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, last:DamageT
     copy(max=math.max(max.drop(i), 1))
   }
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
-    tr <+< vb.draw(ij)
+    tr <+< vb.drawEmpty((10*(max/origMax.toFloat)).toInt, ij) <+< vb.draw(ij)
   }
 }

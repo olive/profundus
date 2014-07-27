@@ -7,7 +7,6 @@ import in.dogue.antiqua.Antiqua._
 import in.dogue.profundus.ui.{LoadoutButton, HudTool, Hud, Slider}
 import in.dogue.antiqua.data.CP437
 import in.dogue.profundus.ui.LoadoutButton
-import scala.collection.script.Index
 
 object Loadout {
   val tf = Profundus.tf
@@ -18,7 +17,7 @@ object Loadout {
   val gemCost = 1
   val fuelCost = 2
   val featCost = 0
-  val default = Loadout(20,3,3,5,Shovel, FeatType.Meditation, "Debug")
+  val default = Loadout(20,3,3,0,Shovel, FeatType.Meditation, "Debug")
   private def indexToTool(v:Int) = v match {
     case 0 => Shovel
     case 1 => Mallet

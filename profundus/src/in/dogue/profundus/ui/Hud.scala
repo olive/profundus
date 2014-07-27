@@ -6,17 +6,18 @@ import in.dogue.antiqua.data.CP437
 import in.dogue.antiqua.graphics.Tile
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.entities.{Item, Capsule, Inventory}
+import in.dogue.profundus.entities._
 import in.dogue.antiqua.graphics.Text
 import in.dogue.profundus.Profundus
 import scala.util.Random
+import in.dogue.antiqua.graphics.Text
 
 
 object Hud {
   val gemIcon = CP437.♦.mkTile(Color.Black, Color.Cyan)
   val ropeIcon = CP437.⌡.mkTile(Color.Black, Color.Brown)
   val fuelIcon = CP437.f.mkTile(Color.Black, Color.Red)
-  def create(cols:Int, rows:Int, inv:Inventory, stam:ValueBar, health:ValueBar):Hud = {
+  def create(cols:Int, rows:Int, inv:Inventory, stam:StaminaBar, health:HealthBar):Hud = {
     val r = new Random(3)
     def mk(r:Random) = {
       val code = Vector(CP437.`:`, CP437.`;`).randomR(r)
@@ -36,16 +37,16 @@ object Hud {
 case class Hud private (height:Int, rect:Rect,
                         inv:Inventory,
                         tool:HudTool,
-                        stamBar:ValueBar, healthBar:ValueBar,
+                        stamBar:StaminaBar, healthBar:HealthBar,
                         buffIcon:Tile,
                         text:Text, depth:Text, depthAmt:Text,
                         items:Seq[Item],
                         feat:Option[Tile],
                         tf:TextFactory) {
   def atDepth(i:Int) = copy(depthAmt=tf.create("%4s".format(i.toString)))
-  def withStam(s:ValueBar) = copy(stamBar=s)
+  def withStam(s:StaminaBar) = copy(stamBar=s)
   def withBuff(b:Tile) = copy(buffIcon=b)
-  def withHealth(s:ValueBar) = copy(healthBar=s)
+  def withHealth(s:HealthBar) = copy(healthBar=s)
   def withItems(is:Seq[Item]) = copy(items=is)
   def withFeat(icon:Option[Tile]) = copy(feat=icon)
   def withInventory(inv:Inventory) = {

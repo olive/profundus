@@ -5,6 +5,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import scala.math._
 
 object ValueBar {
   def create(max:Int, c:Color) = {
@@ -14,6 +15,7 @@ object ValueBar {
   }
 }
 case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
+  final val maxWidth = 10
   def setColor(c:Color) = copy(tFull=tFull.setFg(c), tHalf=tHalf.setFg(c))
   def isEmpty = amt == 0
 
@@ -22,7 +24,7 @@ case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
   }
   def draw(ij:Cell)(tr:TileRenderer):TileRenderer = {
     import scala.math.ceil
-    val maxWidth = 10
+
     val numTiles = ceil((amt/max.toFloat)*2*maxWidth).toInt
     val half = ceil(numTiles/2.0).toInt
     val draws = for (p <- 0 until half) yield {
@@ -32,6 +34,16 @@ case class ValueBar private (amt:Int, max:Int, tFull:Tile, tHalf:Tile) {
         tFull
       }
       (ij |+ p, tile)
+    }
+
+    tr <++ draws
+  }
+
+  def drawEmpty(maxWidth:Int, ij:Cell)(tr:TileRenderer):TileRenderer = {
+    val numTiles = ceil((amt/max.toFloat)*maxWidth).toInt
+    val half = ceil(numTiles).toInt
+    val draws = for (p <- half until maxWidth) yield {
+      (ij |+ p, tFull.setFg(Color.Black))
     }
     tr <++ draws
   }

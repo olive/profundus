@@ -13,7 +13,6 @@ object LoadoutTitle {
     })
   }
 
-
   private def ropeMonger(lo:Loadout) = lo.ropes >= 6
   private def pyromancer(lo:Loadout) = lo.capsules >= 6 || lo.fuel > 40
   private def fencer(lo:Loadout) = lo.tool == Rapier
@@ -24,6 +23,7 @@ object LoadoutTitle {
   }
   private def miner(lo:Loadout) = lo.tool == Mattock
   private def blacksmith(lo:Loadout) = lo.capsules >= 3 && lo.tool == Mallet
+
   private val All = Vector(
     "Rope Monger" @@ ropeMonger _,
     "Pyromancer" @@ pyromancer _,
@@ -38,10 +38,6 @@ object LoadoutTitle {
     def satisfies(lo:Loadout) = f(lo)
     def name = n
   }}
-
-  /*case object RopeMonger extends LoadoutTitle {
-
-  }*/
 
 }
 

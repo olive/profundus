@@ -185,8 +185,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     val newLog = log.spendMinerals(adj)
     copy(inv=newInv, log=newLog)
   }
-  def getStamBar = stam.vb
-  def getHealthBar = health.vb
+  def getStamBar = stam
+  def getHealthBar = health
   def getBuffIcon = buff.icon
   def getItems = attr.getItems
   def pos = ij
