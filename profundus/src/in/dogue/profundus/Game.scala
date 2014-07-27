@@ -10,7 +10,7 @@ import in.dogue.profundus.utils.PerfTrack
 
 object Game {
   var t = 0
-  val debug = true
+  val debug = false
   val fixedSeed  = false && debug
   val flyMode    = false && debug
   val invMode    = false && debug

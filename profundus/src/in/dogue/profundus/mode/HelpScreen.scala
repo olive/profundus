@@ -12,7 +12,7 @@ object HelpScreen {
   def create = {
     val tf = Profundus.tf
     val x0 = 5
-    val y0 = 18
+    val y0 = 17
     val p0 = (x0, y0)
     val all = Seq(
       "Movement     ↑↓→←",
@@ -22,6 +22,7 @@ object HelpScreen {
       "Cable        Z",
       "Drop tool    V",
       "Light flare  ↑+C",
+      "Perform feat ↓+C",
       "Wall kick    LEFT_SHIFT",
       "Show help    H",
       "Show perf    TAB"
