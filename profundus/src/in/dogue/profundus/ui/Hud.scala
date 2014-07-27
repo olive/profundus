@@ -28,7 +28,7 @@ object Hud {
     val rect = Rect.createTextured(cols, rows, mk, r)
     val tf = Profundus.tf
 
-    val tool = HudTool.create(ValueBar.create(inv.tool.`type`.durability, Color.White), tf, inv)
+    val tool = HudTool.create(ValueBar.create(inv.tool.`type`.durability, Color.White.dim(2)), tf, inv)
     Hud(cols, rect, inv, tool, stam, health, blank, tf.create("Dig down"), tf.create("Depth:"), tf.create("0"), Seq(), None, tf)
   }
 }

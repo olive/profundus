@@ -5,6 +5,7 @@ import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.graphics.{TileRenderer, Tile}
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+
 object ValueBar {
   def create(max:Int, c:Color) = {
     val tFull = CP437.█.mkTile(Color.Black, c)

@@ -7,7 +7,7 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 
 object HealthBar {
-  def create(max:Int) = HealthBar(max/2, max, max/2, 0, DamageType.Unknown, ValueBar.create(max, Color.Red))
+  def create(max:Int) = HealthBar(max/2, max, max/2, 0, DamageType.Unknown, ValueBar.create(max, Color.fromHsb(0.0,1.0,0.5)))
 }
 
 case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, last:DamageType, vb:ValueBar) {

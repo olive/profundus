@@ -28,10 +28,11 @@ class Spikes(num:Int) {
     val tmap = tiles.map { case (ij, t) =>
       val isDone = done > num
       val t = terrain.get(ij)
+      val isTop = ij.x == 0
       val down = get(ij +| 1)
       val up = get(ij -| 1)
       val (next, dep, isDown) = if (!isDone && r.nextDouble > 0.9) {
-        if (down && !up && t.isWalkable) {
+        if (!isTop && down && !up && t.isWalkable) {
           done += 1
           tf.mkSpike(ij, Direction.Down) @@ true
         } else if (!isDone && up && !down && t.isWalkable) {

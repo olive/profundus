@@ -8,7 +8,7 @@ import in.dogue.profundus.entities.pickups.{Herb, Toadstool, FoodType}
 import scala.util.Random
 
 object StaminaBar {
-  def create(max:Int) = StaminaBar(max, max, 0, ValueBar.create(max, Color.Green))
+  def create(max:Int) = StaminaBar(max, max, 0, ValueBar.create(max, Color.fromHsb(0.4,1.0,0.5)))
 }
 
 case class StaminaBar private (amt:Int, max:Int, t:Int, vb:ValueBar) {
