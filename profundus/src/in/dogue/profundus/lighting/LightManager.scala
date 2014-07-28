@@ -3,7 +3,6 @@ package in.dogue.profundus.lighting
 import in.dogue.antiqua.Antiqua._
 import in.dogue.antiqua.graphics.{Tile, Filter}
 import com.deweyvm.gleany.data.Recti
-import in.dogue.antiqua.geometry.Circle
 import in.dogue.antiqua.data.Array2d
 import in.dogue.profundus.Game
 

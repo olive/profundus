@@ -274,11 +274,12 @@ object GreatWorld {
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
-    val gw = GreatWorld(worldCols, worldRows, p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
+    val gw = GreatWorld(worldCols, worldRows, screenCols, screenRows, p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
     allUpdates(gw)
   }
 }
 case class GreatWorld(cols:Int, rows:Int,
+                      screenRows:Int, screenCols:Int,
                       p:Player,
                       em:EntityManager,
                       mgr:TerrainManager,
@@ -371,7 +372,7 @@ case class GreatWorld(cols:Int, rows:Int,
   def cameraY(ppos:Cell) = {
     val res = if (ppos.y < 48) {
       val offset = (ppos.y + 48)/2
-      val result = -offset + 32
+      val result = -offset + 32//32
       result
     } else {
       -15
@@ -412,9 +413,9 @@ case class GreatWorld(cols:Int, rows:Int,
   private def drawWorld(tr:TileRenderer) = {
     (tr <+< cache.draw(p.pos)
         <+< em.draw
-        <+< p.draw
         <+< pm.draw
         <++< doodads.map {_.draw _}
+        <+< p.draw
     )
   }
 }

@@ -2,21 +2,14 @@ package in.dogue.profundus
 
 import in.dogue.antiqua.graphics.{Border, TextFactory, Tile}
 import in.dogue.profundus.particles.{Emitter, Particle}
-import in.dogue.profundus.deformations.Deformation
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.data.CP437
-import in.dogue.profundus.world._
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.entities._
-import in.dogue.antiqua.graphics.Border
-import in.dogue.profundus.world.NewParticles
-import in.dogue.profundus.world.NewDeformations
-import in.dogue.profundus.world.NewDamageZones
 import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.antiqua.algebra.Monoid
-import in.dogue.profundus.ui.MessageBox
 import in.dogue.antiqua.graphics.Border
 import in.dogue.profundus.world.Transaction
 import in.dogue.profundus.world.DestroyEntity
