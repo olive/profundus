@@ -90,7 +90,8 @@ trait Pickup   {
   def move(ij:Cell, from:Direction, newTouching:Direction => Option[WorldTile]) = {
     copy(ij=ij)
   }
-  def toMassive:Massive[Pickup] = Massive[Pickup](_.getPos, _.move, _.setState, fall, this)
+  def gMod = 0
+  def toMassive:Massive[Pickup] = Massive[Pickup](_.getPos, _.move, _.setState, _.gMod, fall, this)
   def draw(tr:TileRenderer):TileRenderer = {
     tr <+< dr(self)(ij)
   }

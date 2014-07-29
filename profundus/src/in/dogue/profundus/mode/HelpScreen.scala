@@ -24,6 +24,7 @@ object HelpScreen {
       "Light flare  ↑+C",
       "Perform feat ↓+C",
       "Wall kick    LEFT_SHIFT",
+      "Rest         K",
       "Show help    H",
       "Show perf    TAB"
 

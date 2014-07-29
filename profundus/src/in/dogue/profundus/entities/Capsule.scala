@@ -87,6 +87,8 @@ case class Capsule private (ij:Cell, a:AnimationGroup, fall:FallState, t:Int){
     tr <## (a |++| ij) <+< drawAura
   }
 
-  def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, fall, this)
+  def gMod = 0
+
+  def toMassive:Massive[Capsule] = Massive(_.pos, _.move, _.setState, _.gMod, fall, this)
   def toUnloadable = Unloadable.fromPos[Capsule](this, _.pos)
 }

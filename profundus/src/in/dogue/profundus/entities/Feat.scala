@@ -196,7 +196,7 @@ case class Feat(private val icon:Option[Tile], t:Int, tActivate:Int, isActivated
     allowMove(p, isActivated)
   }
 
-  def healthRestore(f:Int => HealthBar) = {
+  def healthRestore(f:Int => Attributes) = {
     val (amt, duration) = restoreAmount
     if (t > duration && isActivated) {
       f(amt)

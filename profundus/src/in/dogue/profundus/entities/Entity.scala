@@ -46,7 +46,7 @@ case class EntityArgs(id:EntityId, pos:Cell, tc:TerrainCache, pi:PlayerInfo, r:R
   }
 
   def moveRandom:Cell = {
-    val move = Direction.All.find { d =>
+    val move = r.shuffle(Direction.All).find { d =>
       !tc.isSolid(pos --> d)
     }
     move.map{pos --> _}.getOrElse(pos)
@@ -154,6 +154,7 @@ trait Entity {
   def draw(tr:TileRenderer):TileRenderer = tr <+< dr(self)(pos)
   def getLight = light(self)(pos)
   def getDeathParticle = deathPart(self)(pos)
-  def toMassive:Massive[Entity] = Massive[Entity](_.pos, _.move, (f:Entity) => f.setFall, getFall, this)
+  def gMod = 0
+  def toMassive:Massive[Entity] = Massive[Entity](_.pos, _.move, (f:Entity) => f.setFall, _.gMod, getFall, this)
   def toUnloadable = Unloadable.fromPos[Entity](this, _.pos)
 }

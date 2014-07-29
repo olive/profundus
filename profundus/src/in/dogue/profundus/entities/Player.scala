@@ -11,15 +11,9 @@ import in.dogue.profundus.particles.{Particle, DeathParticle}
 import in.dogue.profundus.world._
 import in.dogue.profundus.mode.loadout.Loadout
 import in.dogue.profundus.entities.pickups._
-import in.dogue.profundus.entities.pickups.Herb
-import scala.util.Random
 import in.dogue.profundus.lighting.LightSource
-import in.dogue.profundus.ui.HudTool
 import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.{Profundus, Game}
-import in.dogue.profundus.entities.pickups.Herb
-import in.dogue.profundus.entities.pickups.Toadstool
-import in.dogue.profundus.entities.pickups.Bark
 import in.dogue.profundus.world.WorldTile
 
 
@@ -92,10 +86,8 @@ object Player {
 
     val i = ij.x
     val j = ij.y
-    val smallLight = LightSource.createCircle(ij, 5, 10, 1)
-    val largeLight = LightSource.createCircle(ij, 5, 15, 1)
     Player((i, j - 1), (i, j), face,
-           Attributes.create, NoBuff,
+           Attributes.create,
            StaminaBar.create(100), HealthBar.create(200),
            shovel, getLive,
            Seq(),
@@ -103,13 +95,13 @@ object Player {
            lo.feat.toFeat,
            Inventory.create(lo), PlayerLog.create(lo),
            Grounded, Alive, false,
-           PlayerLight.create(smallLight, largeLight),
+           PlayerLight.create(i => null),
            0, new StepMachine)
   }
 }
 
 case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
-                           attr:Attributes, buff:Buff,
+                           attr:Attributes,
                            stam:StaminaBar, health:HealthBar,
                            shovel:ToolSprite, t:Direction => Tile,
                            forces:Seq[Force],
@@ -129,24 +121,10 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     SoundManager.item.play(ij)
     copy(inv=inv.collectMineral(g), log=log.getMinerals)
   }
-  def collectFood(typ:FoodType) = {
+  def collectFood(buff:Buff) = {
     SoundManager.item.play(ij)
-    val newLog = log.eatFood(typ)
-    val np = typ match {
-      case Toadstool(seed) =>
-        val regen = 1 + new Random(seed).nextInt(Attributes.default.stamRegen*2)
-        val buff = ToadstoolBuff(regen, 0)
-        copy(buff = buff)
-      case Herb(seed) =>
-        val regen = 1 + new Random(seed).nextInt(Attributes.default.healthRegen*2)
-        val buff = HerbBuff(regen, 0)
-        copy(buff = buff)
-      case Bark(seed) =>
-        val oldMax = health.max
-        val newMax = oldMax + new Random(seed).nextInt(60) - 30
-        copy(health=health.setMax(newMax))
-    }
-    np.copy(log=newLog)
+    val newLog = log.eatFood(buff.typ)
+    copy(log=newLog, attr=buff.doProcess(attr))
 
   }
 
@@ -187,7 +165,6 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   }
   def getStamBar = stam
   def getHealthBar = health
-  def getBuffIcon = buff.icon
   def getItems = attr.getItems
   def pos = ij
   def hasLongArms = attr.hasLongArms
@@ -218,7 +195,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
 
-  def getDamage = feat.multiplyDamage(inv.tool.`type`.digDamage)
+  def getDamage = attr.multiplyDamage(feat.multiplyDamage(inv.tool.`type`.digDamage))
 
   def hitTool(result:HitResult) = {
     val dmg = result.toolHurt
@@ -276,7 +253,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     val dx = Controls.AxisX.isPressed
     val dy = Controls.AxisY.isPressed
     val newT = (dx !=0 || dy != 0).select(0, moveT+1)
-    val moveSpeed = fall.moveSlow.select(4, 12)
+    val moveSpeed = fall.moveSlow.select(attr.groundMove, attr.airMove)
 
     val face = if (newT > 0 && newT % moveSpeed == 0) {
       chooseFace(dx, dy).some
@@ -300,19 +277,17 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     npl.copy(feat=newFeat.update)
   }
 
-  def updateHealthReplenish = {
-    val newHealth = feat.healthRestore(health.restore)
-    copy(health=newHealth)
+  def updateHealthReplenish: Player = {
+    val newAttr = feat.healthRestore(attr.restore)
+    copy(attr=newAttr)
   }
 
   def update: (Player, Seq[GlobalMessage]) = {
     import Profundus._
-    val newAttr = buff.process(attr)
     val p = copy(ctrl=ctrl.update(canUseTool),
                  log=log.setDepth(pos.y).incrTime,
-                 attr=newAttr,
-                 stam=stam.update(newAttr),
-                 health=health.update(newAttr),
+                 stam=stam.update(attr),
+                 health=health.update(attr),
                  light=light.update,
                  fall=if(attr.hasWings) Floating else fall).updateFeat.updateHealthReplenish
 
@@ -356,7 +331,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
 
   def damage(raw:Damage):Player = {
-    val dmg = raw.reduce(feat.reduceDamage)
+    val dmg = raw.reduce(feat.reduceDamage).reduce(attr.reduceDamage)
     if (state == Alive && dmg.amount > 0 && Game.t - Player.lastHurt > 7) {
       Player.lastHurt = Game.t
       SoundManager.hurt.play(ij)
@@ -386,7 +361,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
            face=Direction.Down,
            t=Player.getDead,
            justKilled=state!=Dead,
-           buff=DeadBuff)
+      attr=attr.kill)
     }
 
   }
@@ -404,7 +379,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   private def drawIndicator(tr:TileRenderer):TileRenderer = {
     val fall = getFall
-    tr <|? new FallIndicator(ij, fall, attr.fallDistance).render
+    tr <|? new FallIndicator(ij, fall, attr.fallDistance, state).render
   }
 
   def draw(tr:TileRenderer):TileRenderer = {
@@ -435,6 +410,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def resetFall = copy(fall=Grounded)
 
+  def gMod = attr.gMod
 
   def toMassive:Massive[Player] = {
     val f = if (forces.length > 0) {
@@ -442,7 +418,7 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
     } else {
       fall
     }
-    Massive(_.pos, _.move, (pl:Player) => pl.feat.setFallState(pl), f, this)
+    Massive(_.pos, _.move, (pl:Player) => pl.feat.setFallState(pl), _.gMod, f, this)
   }
-  def toLight:LightSource = light.toLightSource(pos)
+  def toLight:LightSource = light.toLightSource(attr, pos)
 }

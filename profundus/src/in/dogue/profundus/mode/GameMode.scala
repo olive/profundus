@@ -44,7 +44,6 @@ case class GameMode private (cols:Int, rows:Int, gw:GreatWorld, hud:Hud, help:He
                     .atDepth(pl.y)
                     .withStam(pl.getStamBar)
                     .withHealth(pl.getHealthBar)
-                    .withBuff(pl.getBuffIcon)
                     .withItems(pl.getItems)
                     .withFeat(pl.feat.getIcon)
     copy(gw=gw.resetLm.update, hud=newHud)

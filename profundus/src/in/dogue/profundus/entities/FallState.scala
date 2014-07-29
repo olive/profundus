@@ -15,9 +15,10 @@ object Falling {
   val v0 = 8
   val g = 9.8
   def sq(i:Double) = i*i
-  def t(tiles:Int) = -v0 / g + Math.sqrt(sq(v0) / sq(g) + 2*tiles / g)
-  def fallTime(tiles:Int): Int /* in frames */  = {
-    ((t(tiles+1) - t(tiles))*60).toInt.clamp(1, 999)
+  def t(v0:Double, g:Double, tiles:Int) = -v0 / g + Math.sqrt(sq(v0) / sq(g) + 2*tiles / g)
+  def fallTime(gMod:Double, tiles:Int): Int /* in frames */  = {
+    val g = gMod + this.g
+    ((t(v0, g, tiles+1) - t(v0, g, tiles))*60).toInt.clamp(1, 999)
   }
 }
 case class Falling(t:Int, override val tiles:Int) extends FallState {

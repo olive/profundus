@@ -8,6 +8,7 @@ import Antiqua._
 case class Massive[T](pos: T => Cell,
                       move: T => (Cell, Direction, Direction => Option[WorldTile]) => T,
                       setState: T => FallState => T,
+                      gMod: T => Double,
                       state: FallState,
                       self: T) {
   def update(tc:TerrainCache): T = {
@@ -19,7 +20,7 @@ case class Massive[T](pos: T => Cell,
     state match {
       case Floating => self
       case f@Falling(t, tiles) if !grounded =>
-        val newT = (t + 1) % Falling.fallTime(tiles)
+        val newT = (t + 1) % Falling.fallTime(gMod(self), tiles)
         val newTiles = tiles + (newT == 0).select(0, 1)
         val newPos = (newT == 0).select(epos, epos --> Direction.Down)
         val touching = tc.getTouching(newPos)

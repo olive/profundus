@@ -17,7 +17,7 @@ case class HealthBar private (amt:Int, origMax:Int, max:Int, t:Int, last:DamageT
     } else {
       (t+1, amt)
     }
-    copy(t=newT, amt=newAmt, vb=vb.update(newAmt, origMax))
+    copy(t=newT, amt=newAmt, max=attr.maxHp, vb=vb.update(newAmt, origMax))
   }
 
   def restore(amt:Int) = {

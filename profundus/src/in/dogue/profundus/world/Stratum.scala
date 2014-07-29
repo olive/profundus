@@ -5,6 +5,7 @@ import in.dogue.antiqua.procgen.PerlinNoise
 import in.dogue.profundus.Profundus
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.entities.pickups.FoodFactory
 
 object Stratum {
   def createDummy(r:Random, ts:TerrainScheme) = {
@@ -132,8 +133,8 @@ trait Stratum {
     val (newTiles, gs, fts) = fold3(tiles, features ++ forced/*fixme--forced features may overlap*/) { case (ft, tiles) =>
       ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
     }
-
-    val pickups = pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
+    val ff = FoodFactory.create(r)//fixme -- should have its own generator?
+    val pickups = pg.generate(ff, cols, rows, yIndex*rows, newTiles, ts, r)
 
     val doodads = dg.generate(ts, newTiles, r).gms
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
