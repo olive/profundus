@@ -64,7 +64,7 @@ class Spikes(num:Int) {
 
 
     val newTiles = Terrain.merge(nt, deps)
-    (newTiles, ems.gms, Seq())
+    (newTiles, ems.gms)
 
   }
 }

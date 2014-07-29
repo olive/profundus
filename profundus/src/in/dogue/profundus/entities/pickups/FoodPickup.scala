@@ -16,8 +16,8 @@ object FoodHueGen {
   val all = Vector(VeryBad, SlightlyBad, SlightlyGood, VeryGood)
   def create(r:Random) = {
     val hue = r.nextDouble
-    val sat = 0.25 + 0.5*r.nextInt
-    val lum = 0.25 + 0.5*r.nextInt
+    val sat = 0.55 + 0.2*r.nextInt
+    val lum = 0.55 + 0.2*r.nextInt
     val hues = r.shuffle((0 until 4).map{ i => (hue + i*0.125) % 1.0}).toVector
     def mkColor(k:Int) = Color.fromHsb(hues(k), sat, lum)
     new FoodHueGen {

@@ -15,6 +15,7 @@ import in.dogue.profundus.lighting.LightSource
 import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.{Profundus, Game}
 import in.dogue.profundus.world.WorldTile
+import in.dogue.profundus.world.features.WarpShaft
 
 
 object PlayerLog {
@@ -86,6 +87,7 @@ object Player {
 
     val i = ij.x
     val j = ij.y
+
     Player((i, j - 1), (i, j), face,
            Attributes.create,
            StaminaBar.create(100), HealthBar.create(200),

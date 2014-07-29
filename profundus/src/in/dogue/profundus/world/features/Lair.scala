@@ -28,7 +28,7 @@ class Lair {
 
     }.unzip
     val newTiles = Terrain.merge(nt, deps)
-    newTiles @@ Seq() @@ Seq()
+    newTiles @@ Seq()
   }
 
   def toFeature(cols:Int, rows:Int):Feature = {

@@ -4,7 +4,6 @@ import in.dogue.antiqua.Antiqua._
 import in.dogue.profundus.ui.ValueBar
 import in.dogue.antiqua.graphics.TileRenderer
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.profundus.entities.pickups.{Herb, Toadstool, FoodType}
 import scala.util.Random
 
 object StaminaBar {
