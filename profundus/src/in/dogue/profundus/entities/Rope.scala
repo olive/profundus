@@ -5,10 +5,11 @@ import in.dogue.antiqua.data.{Direction, CP437}
 import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.world.{Unloadable, TerrainCache}
+import in.dogue.profundus.world.{GlobalMessage, Unloadable, TerrainCache}
 import in.dogue.antiqua.algebra.Monoid
 import in.dogue.profundus.entities.pickups.{Pickup, RopePickup}
 import in.dogue.profundus.audio.SoundManager
+import in.dogue.profundus.Profundus
 
 sealed trait RopeState {
   val throwHeight = 6
@@ -53,20 +54,27 @@ object Rope {
   def create(state:RopeState) = {
     Rope(state, nub, top, mid, bot, Alive)
   }
+  /** y2 > y1 */
+  def between(ij:Cell, x:Int, y1:Int, y2:Int) = ij.x == x && ij.y >= y1 && ij.y <= y2
+
 }
 
 case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, bottomT:Tile, live:LivingState) {
 
-  /** y2 > y1 */
-  private def between(ij:Cell, x:Int, y1:Int, y2:Int) = ij.x == x && ij.y >= y1 && ij.y <= y2
 
   def ropeContains(ij:Cell) = state match {
     case FlyUp(_, _, _) => false
-    case DropDown(top, len, _) => between(ij, top.x, top.y, top.y + len)
-    case Steady(top, len) => between(ij, top.x, top.y, top.y + len)
+    case DropDown(top, len, _) => Rope.between(ij, top.x, top.y, top.y + len)
+    case Steady(top, len) => Rope.between(ij, top.x, top.y, top.y + len)
   }
 
-  def update(tc:TerrainCache):(Option[Rope], Seq[Pickup]) = {
+  def isTop(ij:Cell) = state match {
+    case FlyUp(_, _, _) => false
+    case DropDown(top, len, _) => ij == top
+    case Steady(top, len) => ij == top
+  }
+
+  def update(tc:TerrainCache):(Option[Rope], Seq[GlobalMessage]) = {
     val (rs, picks) = state match {
       case f@FlyUp(_,_,_) => updateFlyUp(f, tc)
       case d@DropDown(_,_,_) => (updateDropDown(d, tc).some, Seq())
@@ -75,7 +83,8 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     (rs.map { s => copy(state=s) }, picks)
   }
 
-  private def updateFlyUp(f:FlyUp, tc:TerrainCache):(Option[RopeState], Seq[Pickup]) = {
+  private def updateFlyUp(f:FlyUp, tc:TerrainCache):(Option[RopeState], Seq[GlobalMessage]) = {
+    import Profundus._
     val newT = f.t + 1
     if (newT % f.flySpeed == 0) {
       val top = f.top
@@ -83,7 +92,7 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
         if (tc.isBackgroundSolid(top)) {
           (DropDown.create(top).some, Seq())
         } else {
-          (None, Seq(RopePickup.create(top).toPickup))
+          (None, Seq(RopePickup.create(top).toPickup).gms)
         }
 
       } else {
@@ -116,8 +125,9 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
   def kill = copy(live=Dead)
 
   private def updateSteady(s:Steady) = {
+    import Profundus._
     if (live == Dead) {
-      (None, Seq(RopePickup.create(s.top).toPickup))
+      (None, Seq(RopePickup.create(s.top).toPickup).gms)
     } else {
       (s.some, Seq())
     }
@@ -164,5 +174,5 @@ case class Rope private (state:RopeState, nubT:Tile, topT:Tile, midT:Tile, botto
     tr <+< draw
   }
 
-  def toUnloadable = Unloadable.fromPos[Rope](this, _.getPos)
+  def toClimbable:Climbable = Climbable[Rope](_.ropeContains, _.isTop, _.isKillableAt, _.kill, _.update, _.draw, _.getPos, this)
 }

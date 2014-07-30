@@ -11,6 +11,9 @@ import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.doodads.Doodad
 import in.dogue.antiqua.algebra.Monoid
 import in.dogue.antiqua.graphics.Border
+import in.dogue.profundus.world._
+import in.dogue.profundus.entities.GameBox
+import in.dogue.antiqua.graphics.Border
 import in.dogue.profundus.world.Transaction
 import in.dogue.profundus.world.DestroyEntity
 import in.dogue.profundus.entities.GameBox
@@ -83,6 +86,14 @@ object Profundus {
     def gms = Seq(gm)
   }
   implicit def transaction2DestroyEntity(s:EntityId) = new AugDestroyEntity(s)
+
+  class AugNewClimbables(s:Seq[Climbable]) {
+    def gm = NewClimbables(s)
+    def gms = Seq(gm)
+  }
+  implicit def climbables2NewClimbables(s:Seq[Climbable]) = new AugNewClimbables(s)
+
+
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
 

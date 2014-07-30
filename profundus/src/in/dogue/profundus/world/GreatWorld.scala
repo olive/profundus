@@ -26,7 +26,7 @@ case class NewDamageZones(s:Seq[DamageZone]) extends GlobalMessage
 case class NewDeformations(s:Seq[Deformation]) extends GlobalMessage
 case class NewMessageBox(mb:GameBox) extends GlobalMessage
 case class NewDoodads(s:Seq[Doodad]) extends GlobalMessage
-
+case class NewClimbables(s:Seq[Climbable]) extends GlobalMessage
 case class NewEntities(s:Seq[Entity]) extends GlobalMessage
 case class NewPickups(s:Seq[Pickup]) extends GlobalMessage
 case class NewTransaction(s:Transaction) extends GlobalMessage
@@ -53,7 +53,7 @@ object GreatWorld {
     val em = gw.em
     val p = gw.p
     val curState = p.fall
-    val newState = if (em.isRope(p.pos) && p.state == Alive) {
+    val newState = if (em.isClimbable(p.pos) && p.state == Alive) {
       Floating
     } else {
       curState match {
@@ -87,7 +87,7 @@ object GreatWorld {
         None
       }
       state.map { r =>
-        (em.spawnRope(r), pp.spendRope)
+        (em.spawnClimbables(r.toClimbable.seq), pp.spendRope)
       }.getOrElse {
         doNothing
       }
@@ -103,7 +103,7 @@ object GreatWorld {
     val em = gw.em
     val newEm = pp.toolPos.foldLeft(em) { case (e, p) =>
       val dmg = Damage(pp.getDamage, DamageType.Player)
-      e.hitRopes(p).hitCreatures(p, dmg)
+      e.hitClimbables(p).hitCreatures(p, dmg)
     }
     gw.setEm(newEm)
   }
@@ -270,7 +270,8 @@ object GreatWorld {
       lo
     }
     val p = Player.create(spawn, spawnFace, loadout)
-    val em = EntityManager.create(r)
+    val ladder = Ladder.create((worldCols/2, worldRows/2), 50)
+    val em = EntityManager.create(r).spawnClimbables(ladder.toClimbable.seq)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
@@ -366,6 +367,7 @@ case class GreatWorld(cols:Int, rows:Int,
       case NewPickups(fs) => copy(em=em.addDrops(fs))
       case NewTransaction(ts) => addTransaction(ts)
       case DestroyEntity(id) => copy(em=em.killEntity(id))
+      case NewClimbables(cs) => copy(em=em.spawnClimbables(cs))
     }
   }
 

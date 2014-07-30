@@ -8,6 +8,8 @@ import javax.imageio.ImageIO
 import java.io.File
 import in.dogue.antiqua.Antiqua._
 import scala.Some
+import scala.collection.parallel.mutable
+import scala.collection.parallel
 
 object DungeonCell {
   def mkCell(r:Random) = {
@@ -33,11 +35,53 @@ case class DungeonCell(open:Direction=>Boolean) {
     }.toMap
     DungeonCell(map)
   }
+
+  def draw(ij:Cell, img:BufferedImage, zoom:Int) = {
+    val x = ij.x
+    val y = ij.y
+    for (i <- 0 until zoom; j <- 0 until zoom) {
+      val solid = Color.Red.toLibgdxColor.toIntBits >> 8
+      val clear = Color.White.toLibgdxColor.toIntBits
+      if (i == 0 || j == 0 || i == zoom - 1 || j == zoom - 1) {
+        img.setRGB(x + i, y + j, solid)
+      } else {
+        img.setRGB(x + i, y + j, clear)
+      }
+      val inds = -2 to 2
+      if (isBlank) {
+        img.setRGB(x + i, y + j, clear)
+      }
+      if (open(Direction.Up)) {
+        inds.foreach { i =>
+          img.setRGB(x + zoom/2 +i, y, clear)
+        }
+
+      }
+      if (open(Direction.Down)) {
+        inds.foreach { i =>
+          img.setRGB(x + zoom/2 + i, y + zoom-1, clear)
+        }
+
+      }
+      if (open(Direction.Left)) {
+        inds.foreach { i =>
+          img.setRGB(x, y + zoom/2 + i, clear)
+        }
+
+      }
+      if (open(Direction.Right)) {
+        inds.foreach { i =>
+          img.setRGB(x + zoom-1, y + zoom/2 + i, clear)
+        }
+
+      }
+    }
+
+  }
 }
 
 
 object Dungeon {
-
   private def createRaw(cols:Int, rows:Int, r:Random) = {
     val p = cols/4 + r.nextInt(cols/2)
     val q = rows/4 + r.nextInt(rows/2)
@@ -80,7 +124,7 @@ object Dungeon {
       dun = dun.flood((seed, dun.cells.get(seed)))
       ct = count(dun.cells)
     }
-    pare(dun)
+    openBottom(r)(openTop(pare(dun)))
 
   }
 
@@ -99,8 +143,33 @@ object Dungeon {
       d.cells.get(p |+| root)
     })
   }
+
+  def openTop(d:Dungeon):Dungeon = {
+    val fs = (for (i <- 0 until d.cols) yield {
+      val found = (0 until d.rows).find{ j => !d.cells.get((i, j)).isBlank }
+      found.map { f => (i,f)}
+    }).flatten
+
+    fs.foldLeft(d) { case (acc, p) =>
+      acc.modAt(p, Direction.Up, true)
+    }
+  }
+
+  def openBottom(r:Random)(d:Dungeon):Dungeon = {
+    val bot = d.rows - 1
+    val fs = r.shuffle(for (i <- 0 until d.cols) yield {
+      (i, bot).onlyIf(!d.cells.get((i, bot)).isBlank)
+    })
+    fs.flatten.headOption.map { f => d.modAt(f, Direction.Down, true)}.getOrElse{
+      throw new RuntimeException("Dungeon has no exit!")
+    }
+  }
 }
 case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
+
+  def modAt(p:Cell, d:Direction, v:Boolean) = {
+    copy(cells=cells.update(p, _.mod(d, v)))
+  }
 
   def flood(seed:(Cell, DungeonCell)) = {
     var set = Set[(Cell, DungeonCell)]() + seed
@@ -141,45 +210,10 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     cells.foreach { case (cell, dc) =>
       val x = cell.x*zoom
       val y = cell.y*zoom
-      for (i <- 0 until zoom; j <- 0 until zoom) {
-        def open(d:Direction) = dc.open(d)
-        val solid = Color.Red.toLibgdxColor.toIntBits >> 8
-        val clear = Color.White.toLibgdxColor.toIntBits
-        if (i == 0 || j == 0 || i == zoom - 1 || j == zoom - 1) {
-          img.setRGB(x + i, y + j, solid)
-        } else {
-          img.setRGB(x + i, y + j, clear)
-        }
-        val inds = -2 to 2
-        if (dc.isBlank) {
-          img.setRGB(x + i, y + j, solid)
-        }
-        if (open(Direction.Up)) {
-          inds.foreach { i =>
-            img.setRGB(x + zoom/2 +i, y, clear)
-          }
+      dc.draw((x, y), img, zoom)
 
-        }
-        if (open(Direction.Down)) {
-          inds.foreach { i =>
-            img.setRGB(x + zoom/2 + i, y + zoom-1, clear)
-          }
-
-        }
-        if (open(Direction.Left)) {
-          inds.foreach { i =>
-            img.setRGB(x, y + zoom/2 + i, clear)
-          }
-
-        }
-        if (open(Direction.Right)) {
-          inds.foreach { i =>
-            img.setRGB(x + zoom-1, y + zoom/2 + i, clear)
-          }
-
-        }
         ()
-      }
+
 
     }
     val outputfile = new File("saved.png")

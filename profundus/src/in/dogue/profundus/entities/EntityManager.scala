@@ -4,8 +4,6 @@ import in.dogue.antiqua.graphics.TileRenderer
 
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.profundus.particles.Particle
-import in.dogue.profundus.deformations.Deformation
 import in.dogue.profundus.world._
 import scala.util.Random
 import in.dogue.profundus.entities.damagezones.DamageZone
@@ -22,7 +20,7 @@ object EntityManager {
   }
 }
 
-case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[Pickup], ropes:Seq[Rope], r:Random) {
+case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[Pickup], climbs:Seq[Climbable], r:Random) {
   def update(tc:TerrainCache):(Seq[GlobalMessage], EntityManager) = {
     val upCaps = caps.map{_.update}
     val (done, notDone) = upCaps.partition{_.isDone}
@@ -30,31 +28,32 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[P
       SoundManager.boom.play(d.pos)
     }
     val explode = done.map{_.getExplode}.flatten
-    val (newRopes, pickups) = ropes.map{_.update(tc)}.unzip
+    val upped: Seq[(Option[Climbable], Seq[GlobalMessage])] = climbs.map{_.update(tc)}
+    val (newClimbs, pickups) = upped.unzip
     val newEm = copy(caps=notDone,
-                     picks=picks.map{_.update} ++ pickups.flatten,
-                     ropes=newRopes.flatten)
-    (explode, newEm)
+                     picks=picks.map{_.update},
+                     climbs=newClimbs.flatten)
+    (explode ++ pickups.flatten, newEm)
   }
 
   def filter(wf:WorldFilter, recti:Recti) = {
     def f[T]: (Seq[T], (T) => Unloadable[T]) => Seq[T] = wf.filter(recti)
     val newCaps = f[Capsule](caps, _.toUnloadable)
-    val newRopes = f[Rope](ropes, _.toUnloadable)
+    val newClimb = f[Climbable](climbs, _.toUnloadable)
     val newCreatures = f[Entity](cr, _.toUnloadable)
     val newPickups = f[Pickup](picks, _.toUnloadable)
-    copy(caps=newCaps, cr=newCreatures, picks=newPickups, ropes=newRopes)
+    copy(caps=newCaps, cr=newCreatures, picks=newPickups, climbs=newClimb)
   }
 
-  def hitRopes(pos:Cell) = {
-    val newRopes = ropes.map { r =>
+  def hitClimbables(pos:Cell) = {
+    val newClimb = climbs.map { r =>
       if (r.isKillableAt(pos)) {
         r.kill
       } else {
         r
       }
     }
-    copy(ropes=newRopes)
+    copy(climbs=newClimb)
   }
 
   def hitCreatures(pos:Cell, dmg:Damage) = {
@@ -94,8 +93,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[P
     copy(picks=picks ++ gs)
   }
 
-  def isRope(ij:Cell) = {
-    ropes.exists{_.ropeContains(ij)}
+  def isClimbable(ij:Cell) = {
+    climbs.exists{_.contains(ij)}
   }
 
   def spawnCapsule(ij:Cell) = {
@@ -104,8 +103,8 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[P
     copy(caps=caps :+ c)
   }
 
-  def spawnRope(r:Rope) = {
-    copy(ropes=ropes :+ r)
+  def spawnClimbables(rs:Seq[Climbable]) = {
+    copy(climbs=climbs ++ rs)
   }
 
   def existsSolid(ij:Cell) = {
@@ -157,7 +156,7 @@ case class EntityManager private (caps:Seq[Capsule], cr:Seq[Entity], picks:Seq[P
   def draw(tr:TileRenderer):TileRenderer = {
     (tr <++< caps.map {_.draw _}
         <++< picks.map{_.draw _}
-        <++< ropes.map{_.draw _}
+        <++< climbs.map{_.draw _}
         <++< cr.map{_.draw _}
       )
   }
