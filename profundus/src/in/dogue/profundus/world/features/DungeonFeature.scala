@@ -23,8 +23,6 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
       val tf = ts.toFactory(r)
       val (pos, rect, myTiles) = split(k)
       val (nt, gen) = tiles.map { case (p, t) =>
-        val pp = p |-| pos
-        println(p + " |-| " + pos + " = " + pp)
         myTiles.getOption(p/*probably wrong*/) match {
           case None => t @@ None
           case Some(b) => b.select(tf.mkEmpty, tf.mkDirt)

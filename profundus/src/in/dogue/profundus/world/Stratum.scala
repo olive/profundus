@@ -118,7 +118,7 @@ trait Stratum {
 
   def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Terrain, Seq[GlobalMessage], Seq[Feature]) = {
     import Profundus._
-    println("Next: " + next.length)
+    println("Next: " + next.length + " at " + yIndex)
     val (spawn, face, t) = sg.gen(cols, rows, r)
     val features = fg.assemble(next, cols, rows, yIndex, ts, r, t)
     val noise = new PerlinNoise().generate(cols, rows, 0, yIndex, r.nextInt())

@@ -69,19 +69,19 @@ object FeatureGenerator {
   }
 
   def simple(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, u:Unit) = {
-    val spikeWaves = makeSpikeWaves(1, cols, rows)(ts, r)
-    val pits = makePits(3, cols, rows)(ts, r)
-    val spikes = Seq(new Spikes(1000).toFeature(cols, rows))
-    val shafts = makeShafts(2, cols, rows)(ts, r)
-    val camps = makeCampsites(1, cols, rows)(ts, r)
-    val cavern = makeCaverns(1, cols, rows)(ts, r)
-    val shop = mkShop(cols, rows, y, ts, r, u)
-    val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
-    val (a, b, c) = ts.color.ways3(all)
-    //a ++ b ++ c ++ spikes
-    println(y)
-    if (y == 1) {
-      Seq(new DungeonFeature(0,0,cols, rows, r).toFeature(cols, rows))
+    //val spikeWaves = makeSpikeWaves(1, cols, rows)(ts, r)
+    //val pits = makePits(3, cols, rows)(ts, r)
+    //val spikes = Seq(new Spikes(1000).toFeature(cols, rows))
+    //val shafts = makeShafts(2, cols, rows)(ts, r)
+    //val camps = makeCampsites(1, cols, rows)(ts, r)
+    //val cavern = makeCaverns(1, cols, rows)(ts, r)
+    //val shop = mkShop(cols, rows, y, ts, r, u)
+    //val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
+    //val (a, b, c) = ts.color.ways3(all)
+    ////a ++ b ++ c ++ spikes
+    //println(y)
+    if (y == 1 || true) {
+      Seq(new DungeonFeature(0,y*rows,cols, rows, r).toFeature(cols, rows))
     } else {
       Seq()
     }
