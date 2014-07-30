@@ -12,7 +12,7 @@ import in.dogue.antiqua.data.CP437
 
 case class StoryButton(cols:Int, rows:Int, ij:Cell, text:Text) {
   def update(m:Mode[_], rem:Int):(LoadoutUpdate, StoryButton ,Int) = {
-    if (Controls.Action.justPressed) {
+    if (Controls.Action.justPressed || Controls.Space.justPressed) {
       def mkTransition(lo:Loadout) = {
         val story = () => StoryMode.create(cols, rows, lo).toMode
         CircleTransition.create(cols, rows, m, story, "LoadoutMode=>StoryMode").toMode

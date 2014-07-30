@@ -16,6 +16,8 @@ import in.dogue.profundus.audio.SoundManager
 import in.dogue.profundus.{Profundus, Game}
 import in.dogue.profundus.world.WorldTile
 import in.dogue.profundus.world.features.WarpShaft
+import in.dogue.profundus.world.dungeon.Dungeon
+import java.util.Random
 
 
 object PlayerLog {
@@ -87,7 +89,7 @@ object Player {
 
     val i = ij.x
     val j = ij.y
-
+    Dungeon.create(15, 15, 0.5, new Random()).saveImage(new Random())
     Player((i, j - 1), (i, j), face,
            Attributes.create,
            StaminaBar.create(100), HealthBar.create(200),
@@ -133,7 +135,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
   def useFuel = {
     val newLight = light.useFlare
     val newInv = inv.useFlare
-    copy(light=newLight, inv=newInv)
+    val newLog = log.useFuel
+    copy(light=newLight, inv=newInv, log=newLog)
   }
 
   def collectTool(t:Tool) = {

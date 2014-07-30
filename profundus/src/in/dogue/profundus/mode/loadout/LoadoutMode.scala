@@ -82,7 +82,7 @@ case class LoadoutMode private (cols:Int, rows:Int, tf:TextFactory, sliders:Inde
     }
   }
   def update = {
-    if (Controls.Space.justPressed) {
+    if (Controls.Space.justPressed && ptr != 0) {
       val seed = Game.getSeed
       val f = () => GameMode.create(cols, rows, getLoadout, seed).toMode
       CircleTransition.create(cols, rows, this.toMode, f, "GameMode, Seed: " + seed).toMode
