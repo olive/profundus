@@ -12,8 +12,8 @@ import java.util.Random
 
 object Main {
   def main(args: Array[String]) {
-    Dungeon.create(15, 15, 0.5, new Random()).saveImage(new Random())
-    System.exit(1)
+    //Dungeon.create(15, 15, 0.5, new Random()).saveImage(new Random())
+    //System.exit(1)
     val iconPath = "sprites/icon.gif"
     val settings = new Settings(ProfundusControls, new SettingDefaults() {
       val SfxVolume: Float = 0.2f

@@ -11,6 +11,7 @@ import in.dogue.profundus.world.features.SpikePit
 import in.dogue.profundus.world.features.Campsite
 import in.dogue.profundus.world.features.Cavern
 import in.dogue.antiqua.geometry.Circle
+import in.dogue.profundus.world.dungeon.Dungeon
 
 object FeatureGenerator {
 
@@ -77,7 +78,8 @@ object FeatureGenerator {
     val shop = mkShop(cols, rows, y, ts, r, u)
     val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
     val (a, b, c) = ts.color.ways3(all)
-    a ++ b ++ c ++ spikes
+    //a ++ b ++ c ++ spikes
+    Seq(Dungeon.create(10,10,0.5, r).toFeature(cols, rows))
   }
 
   val dummy = FeatureGenerator[Unit](simple)
