@@ -89,7 +89,7 @@ object Player {
 
     val i = ij.x
     val j = ij.y
-    Dungeon.create(15, 15, 0.5, new Random()).saveImage(new Random())
+
     Player((i, j - 1), (i, j), face,
            Attributes.create,
            StaminaBar.create(100), HealthBar.create(200),

@@ -270,8 +270,7 @@ object GreatWorld {
       lo
     }
     val p = Player.create(spawn, spawnFace, loadout)
-    val ladder = Ladder.create((worldCols/2, worldRows/2), 50)
-    val em = EntityManager.create(r).spawnClimbables(ladder.toClimbable.seq)
+    val em = EntityManager.create(r)
     val tm = new TerrainManager()
     val pm = ParticleManager.create
     val lm = LightManager.create(screenCols, screenRows)
