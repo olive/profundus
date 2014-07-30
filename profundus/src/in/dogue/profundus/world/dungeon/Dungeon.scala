@@ -8,13 +8,6 @@ import javax.imageio.ImageIO
 import java.io.File
 import in.dogue.antiqua.Antiqua._
 import scala.Some
-import scala.annotation.tailrec
-import in.dogue.antiqua.data
-import in.dogue.profundus.world._
-import com.deweyvm.gleany.data.Recti
-import scala.Some
-import in.dogue.profundus.world.WorldTile
-import in.dogue.profundus.world.Feature
 
 
 object Dungeon {

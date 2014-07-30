@@ -118,7 +118,6 @@ trait Stratum {
 
   def generate(cols:Int, rows:Int, yIndex:Int, r:Random):(Terrain, Seq[GlobalMessage], Seq[Feature]) = {
     import Profundus._
-    println("Next: " + next.length + " at " + yIndex)
     val (spawn, face, t) = sg.gen(cols, rows, r)
     val features = fg.assemble(next, cols, rows, yIndex, ts, r, t)
     val noise = new PerlinNoise().generate(cols, rows, 0, yIndex, r.nextInt())
@@ -128,8 +127,8 @@ trait Stratum {
     }.unzip
     val tiles = Terrain.merge(nt, gen)
 
-    val (newTiles, gs, fts) = fold3(tiles, features) { case (ft, tiles) =>
-      ft.transform(cols, rows, yIndex * rows, ts, tiles, r)
+    val (newTiles, gs, fts) = fold3(tiles, features) { case (ft, terrain) =>
+      ft.transform(cols, rows, yIndex * rows, ts, terrain, r)
     }
     val ff = FoodFactory.create(r)//fixme -- should have its own generator?
     val pickups = pg.generate(ff, cols, rows, yIndex*rows, newTiles, ts, r)

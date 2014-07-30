@@ -25,7 +25,7 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
       val (nt, gen) = tiles.map { case (p, t) =>
         myTiles.getOption(p/*probably wrong*/) match {
           case None => t @@ None
-          case Some(b) => b.select(tf.mkEmpty, tf.mkDirt)
+          case Some(b) => b.select(tf.mkEmpty, tf.mkShaft)
         }
       }.unzip
       val newTiles = Terrain.merge(nt, gen)
