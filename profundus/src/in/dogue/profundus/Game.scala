@@ -13,7 +13,7 @@ object Game {
   val debug = true
   val fixedSeed  = false && debug
   val flyMode    = false && debug
-  val invMode    = false && debug
+  val invMode    = true && debug
   val hasDrill   = false && debug
   var lightsOff  = true && debug
   val version = "Version 0.0.24b"

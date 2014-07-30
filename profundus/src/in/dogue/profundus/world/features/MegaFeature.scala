@@ -34,11 +34,9 @@ object MegaFeature {
     }
     val start = pos.y / rows
     val end = math.ceil((pos.y + tiles.rows) / rows.toFloat).toInt
-    println("Start (%d) End (%d)".format (start, end))
     val rects = (start until end) map { (i:Int) =>
-      val p = (pos.x, pos.y + rows * (start - i))
       val r = getRect(i)
-      val c = cut(r, p, tiles)
+      val c = cut(r, pos, tiles)
       c.map { case (cell, rect, array) => (i, (cell, rect, array))}
     }
     rects.flatten.toMap

@@ -79,7 +79,13 @@ object FeatureGenerator {
     val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
     val (a, b, c) = ts.color.ways3(all)
     //a ++ b ++ c ++ spikes
-    Seq(new DungeonFeature(0,0,cols, rows, r).toFeature(cols, rows))
+    println(y)
+    if (y == 1) {
+      Seq(new DungeonFeature(0,0,cols, rows, r).toFeature(cols, rows))
+    } else {
+      Seq()
+    }
+
   }
 
   val dummy = FeatureGenerator[Unit](simple)
@@ -122,10 +128,10 @@ object FeatureGenerator {
 }
 
 case class FeatureGenerator[T](private val f:(Int, Int, Int, TerrainScheme, Random, T) => Seq[Feature]) {
-  def assemble(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, t:T) = {
+  def assemble(force:Seq[Feature], cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, t:T) = {
     val screenRect = Recti(2, 2, cols-4, rows-4)
     val feats = f(cols, rows, y, ts, r, t)
-    val result = ArrayBuffer[Feature]()
+    val result = ArrayBuffer[Feature](force:_*)
     for (feat <- feats) {
       var foundCollision = false
       for (r <- result) {

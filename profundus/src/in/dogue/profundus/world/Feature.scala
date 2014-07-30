@@ -16,6 +16,6 @@ case class Feature private (rect:Recti, private val f:(Int, Int, Int, TerrainSch
   def withFuture(ft:Feature) = copy(future=future :+ ft)
   def intersects(other:Feature) = other.rect.intersects(rect)
   def transform(cols:Int,rows:Int,y:Int,ts:TerrainScheme, t:Array2d[WorldTile], r:Random) = {
-    f(cols, rows, y, ts, t, r)
+    f(cols, rows, y, ts, t, r) @@ future
   }
 }
