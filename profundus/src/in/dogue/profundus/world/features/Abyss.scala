@@ -30,6 +30,6 @@ class Abyss {
   def toFeature(cols:Int, rows:Int):Feature = {
     val rect = Recti(0, 0, cols, rows)
     val f = create _
-    Feature(rect, f)
+    Feature.create(rect, f)
   }
 }

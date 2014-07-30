@@ -39,6 +39,6 @@ class Shop(x:Int, y:Int) {
   def toFeature(cols:Int, rows:Int):Feature = {
     val rect = Recti(x, y, tiles.cols, tiles.rows)
     val f = placeSite _
-    Feature(rect, f)
+    Feature.create(rect, f)
   }
 }

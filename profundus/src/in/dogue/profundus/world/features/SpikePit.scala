@@ -32,6 +32,6 @@ case class SpikePit(x:Int, y:Int, width:Int, height:Int) {
   def toFeature(cols:Int, rows:Int):Feature = {
     val rect = Recti(x, y, width, height)
     val f = placeShaft _
-    Feature(rect, f)
+    Feature.create(rect, f)
   }
 }

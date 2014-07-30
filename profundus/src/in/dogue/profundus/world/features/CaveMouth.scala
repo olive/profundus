@@ -19,7 +19,7 @@ import scala.collection.immutable.{IndexedSeq, Stream}
 import in.dogue.antiqua.graphics.Tile
 
 object CaveMouth {
-  def skyFeature(cols:Int, rows:Int) = Feature(Recti(0,0,cols, rows), createSky)
+  def skyFeature(cols:Int, rows:Int) = Feature.create(Recti(0,0,cols, rows), createSky)
 
   def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random): (Array2d[WorldTile], Seq[GlobalMessage]) = {
     val skyColor = ts.color.color.dim(2)

@@ -10,7 +10,7 @@ import in.dogue.profundus.world.features.MegaFeature.{FeatureInput, FeatureOutpu
 
 object MegaFeature {
 
-  def cut[T](rect:Recti, p1:Cell, tiles:Array2d[T]):Option[(Cell, Recti, Array2d[T])] = {
+  private def cut[T](rect:Recti, p1:Cell, tiles:Array2d[T]):Option[(Cell, Recti, Array2d[T])] = {
     val tRect = Recti(p1.x, p1.y, tiles.cols, tiles.rows)
     val overlap = rect.getOverlap(tRect)
     overlap.map { over => cutRects(over, p1, tiles)}
@@ -33,7 +33,8 @@ object MegaFeature {
       Recti(0, rows*i, cols, rows)
     }
     val start = pos.y / rows
-    val end = (pos.y + tiles.rows) / rows
+    val end = math.ceil((pos.y + tiles.rows) / rows.toFloat).toInt
+    println("Start (%d) End (%d)".format (start, end))
     val rects = (start until end) map { (i:Int) =>
       val p = (pos.x, pos.y + rows * (start - i))
       val r = getRect(i)

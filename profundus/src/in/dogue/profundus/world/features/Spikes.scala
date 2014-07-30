@@ -15,7 +15,7 @@ class Spikes(num:Int) {
 
   def toFeature(cols:Int, rows:Int) = {
     val recti = Recti(cols/2,rows/2,0,0)
-    Feature(recti, spikes(num))
+    Feature.create(recti, spikes(num))
   }
 
   private def spikes(num:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, terrain:Array2d[WorldTile], r:Random) = {

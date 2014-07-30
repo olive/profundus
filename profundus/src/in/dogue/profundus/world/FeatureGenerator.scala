@@ -79,7 +79,7 @@ object FeatureGenerator {
     val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
     val (a, b, c) = ts.color.ways3(all)
     //a ++ b ++ c ++ spikes
-    Seq(Dungeon.create(10,10,0.5, r).toFeature(cols, rows))
+    Seq(new DungeonFeature(0,0,cols, rows, r).toFeature(cols, rows))
   }
 
   val dummy = FeatureGenerator[Unit](simple)
@@ -92,7 +92,7 @@ object FeatureGenerator {
 
   //(Vector[Seq[Cell]], Circle)
   private def mkSurface(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:(Direction, Vector[Seq[Cell]], Circle)) = {
-    Seq(Feature(Recti(0, 0, cols, rows), CaveMouth.createMouth(args._1, args._2, args._3)))
+    Seq(Feature.create(Recti(0, 0, cols, rows), CaveMouth.createMouth(args._1, args._2, args._3)))
   }
 
   val surface = FeatureGenerator(mkSurface)

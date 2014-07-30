@@ -35,7 +35,7 @@ object Dungeon {
       arr.updated(p, t.some)
     }
 
-    val filledCells = cells.map { case (p, opt) =>
+    val filledCells = cells.map { case (_, opt) =>
       opt.fold(DungeonCell.blank)(id[DungeonCell])
     }
     Dungeon(cols, rows, filledCells)
@@ -181,19 +181,4 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     }
   }
 
-  def generate(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random):(Array2d[WorldTile], Seq[GlobalMessage]) = {
-    val mask = getMask
-    val tf = ts.toFactory(r)
-    val (nt, gen) = tiles.map { case (p, t) =>
-      if (mask.get(p)) {
-        tf.mkDirt
-      } else {
-        tf.mkEmpty
-      }
-    }.unzip
-    val newTiles = Terrain.merge(nt, gen)
-    newTiles @@ Seq()
-  }
-
-  def toFeature(cols:Int, rows:Int):Feature = Feature(Recti(0,0, cols, rows), generate)
 }
