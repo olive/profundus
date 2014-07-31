@@ -16,24 +16,24 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
 
 
   def toFeature(cols:Int, rows:Int):Feature = {
-    val mask = dungeon.getMask
+    val (mask, msgs) = dungeon.getMask(rows, (x, y))
 
     val split = MegaFeature.stamp((x, y), cols, rows, mask)
     def genNth(k:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
       val tf = ts.toFactory(r)
-      val (pos, rect, myTiles) = split(k)
+      val (_, _, myTiles) = split(k)
       val (nt, gen) = tiles.map { case (p, t) =>
-        myTiles.getOption(p/*probably wrong*/) match {
+        myTiles.getOption(p) match {
           case None => t @@ None
           case Some(b) => b.select(tf.mkEmpty, tf.mkShaft)
         }
       }.unzip
       val newTiles = Terrain.merge(nt, gen)
-      newTiles @@ Seq()
+      newTiles @@ msgs(k)
     }
     val ks = split.keys.toSeq.sorted.reverse.toList
     val (first, rest) = ks match {
-      case x :: xs => (x, xs)
+      case z :: zs => (z, xs)
       case _ => throw new RuntimeException("Empty dungeon!")
     }
     def getRect(i:Int) = split(i)._2//Recti(x, y, mask.cols, mask.rows)

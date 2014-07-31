@@ -3,6 +3,9 @@ package in.dogue.profundus.world.dungeon
 import in.dogue.antiqua.data.{Array2d, Direction}
 import scala.util.Random
 import in.dogue.antiqua.Antiqua._
+import in.dogue.profundus.world.GlobalMessage
+import in.dogue.profundus.entities.Ladder
+import in.dogue.profundus.Profundus
 
 object Juncture {
   val All = Vector(High, Mid, Low)
@@ -53,16 +56,17 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     }
   }
 
-  def solidify(ij:Cell, interior:Seq[Set[Cell]]):Array2d[Boolean] = {
+  def solidify(absPos:Cell/*for messages*/, ij:Cell, interior:Seq[Set[Cell]]):(Array2d[Boolean], Seq[GlobalMessage]) = {
+    import Profundus._
     if (interior.exists { set => set.contains(ij)}) {
       return Array2d.tabulate(size, size) { case p =>
         true
-      }
+      } @@ Seq()
     }
     if (isBlank) {
       return Array2d.tabulate(size, size) { case p =>
         false
-      }
+      } @@ Seq()
     }
     val first = Array2d.tabulate(size, size) { case (i, j) =>
       i == 0 || i == size -1 || j == 0 || j == size - 1
@@ -75,9 +79,12 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
       Direction.Right -> ((p:Int, offset:Int) =>(size - 1, p + offset))
     )
 
-    pts.filter { case (d, _) => open(d) }.foldLeft(first) { case (arr, (d, f)) =>
+    val tiles = pts.filter { case (d, _) => open(d) }.foldLeft(first) { case (arr, (d, f)) =>
       stamp(d, f, arr)
     }
+    val ladderPos = absPos |+| ((size/2, 0)) |+| ((ij.x * size, ij.y*size))
+    val ladder = Ladder.create(ladderPos, size - 1).toClimbable.seq.gms
+    tiles @@ ladder
 
   }
 

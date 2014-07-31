@@ -8,6 +8,7 @@ import javax.imageio.ImageIO
 import java.io.File
 import in.dogue.antiqua.Antiqua._
 import scala.Some
+import in.dogue.profundus.world.GlobalMessage
 
 
 object Dungeon {
@@ -143,26 +144,33 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     }.map{_._1}
   }
 
-  def getMask = {
+  def getMask(worldRows:Int, xy:Cell): (Array2d[Boolean], Map[Int, Seq[GlobalMessage]]) = {
     val allIndices = Set((for (i <- 0 until cols ; j <- 0 until rows) yield (i, j)):_*)
     val all: Seq[Set[Cell]] = getInterior(Graph.floodAll(toGraph, allIndices))
-    val solid = Array2d.tabulate(cols, rows) { case p =>
-      cells.get(p).solidify(p, all)
-    }
     val size = DungeonCell.cellSize
+    val (solid, msgArray) = Array2d.tabulate(cols, rows) { case p =>
+      cells.get(p).solidify(xy, p, all)
+    }.unzip
+    val seed = Map[Int, Seq[GlobalMessage]]().withDefaultValue(Seq())
+    val msgs = msgArray.foldLeft(seed) { case (map, (p, ms)) =>
+      val y = (p.y*size + xy.y)/worldRows
+      println("y: " + y)
+      map.updated(y, map(y) ++ ms)
+    }
+    println(msgs.keys.toList.length)
     Array2d.tabulate(cols*size, rows*size) { case (x, y) =>
       val index = (x/size, y/size)
       val off = (x % size, y % size)
       solid.get(index).get(off)
 
-    }
+    } @@ msgs
   }
 
   def saveImage(r:Random) {
 
-    val zoom:Int = cells.first.map { c => c.size}.getOrElse(11)
+    val zoom:Int = cells.first.map { c => c.size }.getOrElse(11)
     val img = new BufferedImage(cells.cols*zoom, cells.rows*zoom, BufferedImage.TYPE_INT_RGB)
-    val mask = getMask
+    val mask = getMask(48, (0,0))._1
     mask.foreach { case (cell, b) =>
       val solid = Color.Red.toLibgdxColor.toIntBits >> 8
       val clear = Color.White.toLibgdxColor.toIntBits
