@@ -33,7 +33,7 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
     }
     val ks = split.keys.toSeq.sorted.reverse.toList
     val (first, rest) = ks match {
-      case z :: zs => (z, xs)
+      case z :: zs => (z, zs)
       case _ => throw new RuntimeException("Empty dungeon!")
     }
     def getRect(i:Int) = split(i)._2//Recti(x, y, mask.cols, mask.rows)
