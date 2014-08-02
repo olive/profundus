@@ -154,20 +154,18 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     val seed = Map[Int, Seq[GlobalMessage]]().withDefaultValue(Seq())
     val msgs = msgArray.foldLeft(seed) { case (map, (p, ms)) =>
       val y = (p.y*size + xy.y)/worldRows
-      println("y: " + y)
       map.updated(y, map(y) ++ ms)
     }
-    println(msgs.keys.toList.length)
-    Array2d.tabulate(cols*size, rows*size) { case (x, y) =>
+    val tiles = Array2d.tabulate(cols*size, rows*size) { case (x, y) =>
       val index = (x/size, y/size)
       val off = (x % size, y % size)
       solid.get(index).get(off)
 
-    } @@ msgs
+    }
+    tiles @@ msgs
   }
 
   def saveImage(r:Random) {
-
     val zoom:Int = cells.first.map { c => c.size }.getOrElse(11)
     val img = new BufferedImage(cells.cols*zoom, cells.rows*zoom, BufferedImage.TYPE_INT_RGB)
     val mask = getMask(48, (0,0))._1

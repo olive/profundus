@@ -80,7 +80,7 @@ object FeatureGenerator {
     //val (a, b, c) = ts.color.ways3(all)
     ////a ++ b ++ c ++ spikes
     //println(y)
-    if (y == 1 || true) {
+    if (y == 1) {
       Seq(new DungeonFeature(0,y*rows,cols, rows, r).toFeature(cols, rows))
     } else {
       Seq()

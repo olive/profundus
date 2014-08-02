@@ -36,7 +36,7 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
       case z :: zs => (z, zs)
       case _ => throw new RuntimeException("Empty dungeon!")
     }
-    def getRect(i:Int) = split(i)._2//Recti(x, y, mask.cols, mask.rows)
+    def getRect(i:Int) = split(i)._2
     def mkFeature(i:Int) = {
       Feature.create(getRect(i), genNth(i))
     }

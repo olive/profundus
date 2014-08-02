@@ -14,14 +14,18 @@ object Main {
   def main(args: Array[String]) {
     //Dungeon.create(15, 15, 0.5, new Random()).saveImage(new Random())
     //System.exit(1)
-    val iconPath = "sprites/icon.gif"
+    val iconPaths = Seq(
+      "sprites/icon16.png",
+      "sprites/icon24.png",
+      "sprites/icon32.png"
+    )
     val settings = new Settings(ProfundusControls, new SettingDefaults() {
       val SfxVolume: Float = 0.2f
       val MusicVolume: Float = 0.2f
       val WindowSize: Point2i = Point2i(512,512 + 256)
       val DisplayMode: Int = 0
     }, false)
-    val config = new GleanyConfig(settings, "profundus", iconPath.some)
+    val config = new GleanyConfig(settings, "profundus", iconPaths)
     val pathResolver = new PathResolver(
       "fonts",
       "sprites",

@@ -37,6 +37,12 @@ object DungeonCell {
 
 
 }
+sealed trait CellType
+case object Exterior extends CellType
+case object Interior extends CellType
+case object Wall extends CellType
+case object Blocked extends CellType
+case class ReifiedCell(tiles:Array2d[CellType])
 
 case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Juncture) {
   import DungeonCell._
@@ -82,9 +88,28 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     val tiles = pts.filter { case (d, _) => open(d) }.foldLeft(first) { case (arr, (d, f)) =>
       stamp(d, f, arr)
     }
-    val ladderPos = absPos |+| ((size/2, 0)) |+| ((ij.x * size, ij.y*size))
-    val ladder = Ladder.create(ladderPos, size - 1).toClimbable.seq.gms
-    tiles @@ ladder
+    val off = (ij.x * size, ij.y*size)
+    val left = if (open(Direction.Left)) {
+      val leftPos = absPos |+| ((1,1)) |+| off
+      Ladder.create(leftPos, size - 2).toClimbable.seq.gms
+    } else {
+      Seq()
+    }
+    val right = if (open(Direction.Right)) {
+      val rightPos = absPos |+| ((size - 2, 1)) |+| off
+      Ladder.create(rightPos, size - 2).toClimbable.seq.gms
+    } else {
+      Seq()
+    }
+
+    val up = if (open(Direction.Up)) {
+      val upPos = absPos |+| off |+| ((1, 1))
+      val offset = getOffset(junc(Direction.Up)) - 1
+      Ladder.create((upPos |+ offset) -| 5, size + 3).toClimbable.seq.gms
+    } else {
+      Seq()
+    }
+    tiles @@ (left ++ right ++ up)
 
   }
 
