@@ -314,6 +314,8 @@ case class GreatWorld(cols:Int, rows:Int,
   def resetLm = copy(lm = lm.reset)
   def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
+    cache.render(0, 24, "test.png")
+    System.exit(1)
     gb match {
       case Some(mb) => copy(gb = gb.map(_.update).flatten)
       case None =>
@@ -321,7 +323,6 @@ case class GreatWorld(cols:Int, rows:Int,
           w.doUpdate(t, up)
         }
     }
-
   }
 
   def +#+[T](t:T, up:GreatWorld.Update[T]) = copy(updates=updates :+ ((t, up)))

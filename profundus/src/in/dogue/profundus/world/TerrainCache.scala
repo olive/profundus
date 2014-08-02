@@ -12,6 +12,10 @@ import in.dogue.antiqua.geometry.{Circle, Line}
 import in.dogue.profundus.entities.{ToolType, Damage}
 import in.dogue.antiqua.procgen.PerlinNoise
 import scala.collection.script.Index
+import java.awt.image.BufferedImage
+import java.io.File
+import javax.imageio.ImageIO
+import com.deweyvm.gleany.graphics.Color
 
 object TerrainCache {
   def foldFutures(tc:TerrainCache) = {
@@ -63,6 +67,9 @@ object TerrainCache {
 
 case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Map[Int,Future[(Stratum,Terrain, Seq[GlobalMessage])]], dummy:Terrain, queuedSpawns:Seq[GlobalMessage], r:Random) {
 
+  def getTileType(ij:Cell):TileType = {
+    get(ij).tiles.get(toTerrainCoords(ij)).ttype
+  }
 
   def isSolid(ij:Cell):Boolean = {
     get(ij).isSolid(toTerrainCoords(ij))
@@ -189,6 +196,40 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
     val onScreen = ts.filter { ter => t.project(ter.getRect).intersects(t.screen)}
     Game.drawPerf.track("terrain") {
       onScreen.foldLeft(t) { _ <+< _.draw }
+    }
+  }
+
+  def render(start:Int, end:Int, filename:String) {
+    val span = end - start
+    val poses = (start until end) map { i => (0, i*rows)}
+    val cache = poses.foldLeft(this) { case (terr, ppos) =>
+      val (ntc, _) = terr.update(ppos)
+      ntc
+    }
+    val img = new BufferedImage(cols, rows*span, BufferedImage.TYPE_INT_RGB)
+    (start until end).foreach { i =>
+      Array2d.tabulate(cols, rows) { case p =>
+        cache.getTileType(p +| i*rows)
+      }.foreach { case (p, b) =>
+        def cl(c:Color) = com.badlogic.gdx.graphics.Color.rgb888(c.toLibgdxColor)
+        val color = b match {
+          case Empty(_) => Color.White
+          case Spike(_) => Color.Brown
+          case Dirt => Color.Brown
+          case Clay => Color.Red.mix(Color.Brown, 0.5)
+          case Rock1 => Color.Grey
+          case Rock2 => Color.DarkGrey
+          case Rock3 => Color.DarkGreen
+          case Mineral => Color.Purple
+          case Shaft => Color.Black
+        }
+        val jcolor = cl(color)
+        img.setRGB(p.x, p.y + (i - start)*rows, jcolor)
+      }
+    }
+    val out = new File(filename)
+    if (!ImageIO.write(img, "png", out)) {
+      throw new RuntimeException()
     }
   }
 }
