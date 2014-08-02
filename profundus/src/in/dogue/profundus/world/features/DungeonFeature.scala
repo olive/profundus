@@ -5,9 +5,11 @@ import in.dogue.antiqua.data.Array2d
 import scala.util.Random
 import in.dogue.profundus.world.WorldTile
 import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.world.dungeon.{DungeonCell, Dungeon}
+import in.dogue.profundus.world.dungeon._
 import in.dogue.antiqua.Antiqua
 import Antiqua._
+import in.dogue.profundus.world.WorldTile
+import scala.Some
 
 class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
   val dCols = cols/DungeonCell.cellSize
@@ -25,7 +27,13 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
       val (nt, gen) = tiles.map { case (p, t) =>
         myTiles.getOption(p) match {
           case None => t @@ None
-          case Some(b) => b.select(tf.mkEmpty, tf.mkShaft)
+          case Some(b) => b match {
+            case Wall => tf.mkShaft
+            case Exterior => t @@ None
+            case Interior => tf.mkEmpty
+            case Blocked => tf.mkShaft
+
+          }
         }
       }.unzip
       val newTiles = Terrain.merge(nt, gen)

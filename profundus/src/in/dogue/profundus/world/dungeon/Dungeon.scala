@@ -144,13 +144,16 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     }.map{_._1}
   }
 
-  def getMask(worldRows:Int, xy:Cell): (Array2d[Boolean], Map[Int, Seq[GlobalMessage]]) = {
+  def getMask(worldRows:Int, xy:Cell): (Array2d[CellType], Map[Int, Seq[GlobalMessage]]) = {
     val allIndices = Set((for (i <- 0 until cols ; j <- 0 until rows) yield (i, j)):_*)
     val all: Seq[Set[Cell]] = getInterior(Graph.floodAll(toGraph, allIndices))
     val size = DungeonCell.cellSize
-    val (solid, msgArray) = Array2d.tabulate(cols, rows) { case p =>
+    val reified = Array2d.tabulate(cols, rows) { case p =>
       cells.get(p).solidify(xy, p, all)
-    }.unzip
+    }
+    val msgArray = reified.map { case (p, r) =>
+      r.getMessages
+    }
     val seed = Map[Int, Seq[GlobalMessage]]().withDefaultValue(Seq())
     val msgs = msgArray.foldLeft(seed) { case (map, (p, ms)) =>
       val y = (p.y*size + xy.y)/worldRows
@@ -159,8 +162,7 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     val tiles = Array2d.tabulate(cols*size, rows*size) { case (x, y) =>
       val index = (x/size, y/size)
       val off = (x % size, y % size)
-      solid.get(index).get(off)
-
+      reified.get(index).get(off)
     }
     tiles @@ msgs
   }
@@ -171,8 +173,16 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     val mask = getMask(48, (0,0))._1
     mask.foreach { case (cell, b) =>
       val solid = Color.Red.toLibgdxColor.toIntBits >> 8
+      val exterior = Color.Blue.toLibgdxColor.toIntBits >> 8
+      val blocked = Color.Green.toLibgdxColor.toIntBits >> 8
       val clear = Color.White.toLibgdxColor.toIntBits
-      img.setRGB(cell.x, cell.y, b.select(clear, solid))
+      val color = b match {
+        case Wall => solid
+        case Exterior => exterior
+        case Blocked => blocked
+        case Interior => clear
+      }
+      img.setRGB(cell.x, cell.y, color)
     }
     val out = new File("saved.png")
     if (!ImageIO.write(img, "png", out)) {

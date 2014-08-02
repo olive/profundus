@@ -42,7 +42,14 @@ case object Exterior extends CellType
 case object Interior extends CellType
 case object Wall extends CellType
 case object Blocked extends CellType
-case class ReifiedCell(tiles:Array2d[CellType])
+case class LadderSpec(height:Int, pos:Cell)
+case class ReifiedCell(tiles:Array2d[CellType], open:Direction=>Boolean, junc:Direction=>Juncture, ladders:Seq[LadderSpec]) {
+  import Profundus._
+  def getMessages:Seq[GlobalMessage] = {
+    ladders.map{spec => Ladder.create(spec.pos, spec.height).toClimbable}.gms
+  }
+  def get(p:Cell) = tiles.get(p)
+}
 
 case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Juncture) {
   import DungeonCell._
@@ -62,17 +69,18 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     }
   }
 
-  def solidify(absPos:Cell/*for messages*/, ij:Cell, interior:Seq[Set[Cell]]):(Array2d[Boolean], Seq[GlobalMessage]) = {
-    import Profundus._
+  def solidify(absPos:Cell/*for messages*/, ij:Cell, interior:Seq[Set[Cell]]):(ReifiedCell) = {
     if (interior.exists { set => set.contains(ij)}) {
-      return Array2d.tabulate(size, size) { case p =>
-        true
-      } @@ Seq()
+      val tiles = Array2d.tabulate(size, size) { case p =>
+        Blocked : CellType
+      }
+      return ReifiedCell(tiles, _ => false, _ => Mid, Seq())
     }
     if (isBlank) {
-      return Array2d.tabulate(size, size) { case p =>
-        false
-      } @@ Seq()
+      val tiles = Array2d.tabulate(size, size) { case p =>
+        Exterior : CellType
+      }
+      return ReifiedCell(tiles, _ => true, _ => Mid, Seq())
     }
     val first = Array2d.tabulate(size, size) { case (i, j) =>
       i == 0 || i == size -1 || j == 0 || j == size - 1
@@ -87,29 +95,22 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
 
     val tiles = pts.filter { case (d, _) => open(d) }.foldLeft(first) { case (arr, (d, f)) =>
       stamp(d, f, arr)
+    }.map { case (_, t) =>
+      t.select(Interior, Wall) : CellType
     }
     val off = (ij.x * size, ij.y*size)
-    val left = if (open(Direction.Left)) {
-      val leftPos = absPos |+| ((1,1)) |+| off
-      Ladder.create(leftPos, size - 2).toClimbable.seq.gms
-    } else {
-      Seq()
-    }
-    val right = if (open(Direction.Right)) {
-      val rightPos = absPos |+| ((size - 2, 1)) |+| off
-      Ladder.create(rightPos, size - 2).toClimbable.seq.gms
-    } else {
-      Seq()
-    }
 
-    val up = if (open(Direction.Up)) {
-      val upPos = absPos |+| off |+| ((1, 1))
-      val offset = getOffset(junc(Direction.Up)) - 1
-      Ladder.create((upPos |+ offset) -| 5, size + 3).toClimbable.seq.gms
-    } else {
-      Seq()
-    }
-    tiles @@ (left ++ right ++ up)
+    val leftPos = absPos |+| ((1,1)) |+| off
+    val left = LadderSpec(size - 2, leftPos).onlyIfs(open(Direction.Left))
+
+    val rightPos = absPos |+| ((size - 2, 1)) |+| off
+    val right = LadderSpec(size - 2, rightPos).onlyIfs(open(Direction.Right))
+
+    val upPos = absPos |+| off |+| ((1, 1))
+    val offset = getOffset(junc(Direction.Up)) - 1
+    val up = LadderSpec(size + 3, (upPos |+ offset) -| 5).onlyIfs(open(Direction.Up))
+
+    ReifiedCell(tiles, open, junc, left ++ right ++ up)
 
   }
 
@@ -118,7 +119,6 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
   }
 
   def modDir(d:Direction, v:Boolean) = {
-
     val map:Map[Direction, Boolean] = dmap{ dd =>
       if (dd == d) {
         v
