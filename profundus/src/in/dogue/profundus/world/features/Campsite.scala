@@ -37,10 +37,10 @@ case class Campsite(center:Cell, radius:Int) {
     val siteSpot = center +| yy +| radius/2
     newTiles @@ Seq(Campfire.create(siteSpot).toDoodad).gms
   }
-  def toFeature(cols:Int, rows:Int):Feature = {
-    val rect = Recti(center.x - radius/2, center.y - radius/2, radius*2, radius*2)
+  def toFeature(yPos:Int, cols:Int, rows:Int):Feature = {
+    val rect = Recti(center.x - radius/2, center.y - radius/2 + yPos, radius*2, radius*2)
     val f = placeSite _
-    Feature.create(rect, f)
+    Feature.create(false, rect, f)
   }
 
 }

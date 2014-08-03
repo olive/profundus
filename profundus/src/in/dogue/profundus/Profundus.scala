@@ -3,7 +3,7 @@ package in.dogue.profundus
 import in.dogue.antiqua.graphics.{Border, TextFactory, Tile}
 import in.dogue.profundus.particles.{Emitter, Particle}
 import com.deweyvm.gleany.graphics.Color
-import in.dogue.antiqua.data.CP437
+import in.dogue.antiqua.data.{AugArray2d, Array2d, CP437}
 import in.dogue.profundus.entities.damagezones.DamageZone
 import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.entities._
@@ -93,7 +93,7 @@ object Profundus {
   }
   implicit def climbables2NewClimbables(s:Seq[Climbable]) = new AugNewClimbables(s)
 
-
+  implicit def array2d2AugArray2d[A](arr:Array2d[A]) = new AugArray2d(arr)
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
 

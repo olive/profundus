@@ -1,10 +1,8 @@
 package in.dogue.profundus.world
 
 import scala.util.Random
-import in.dogue.antiqua.Antiqua.Cell
 import in.dogue.antiqua.Antiqua
 import Antiqua._
-import in.dogue.antiqua.Antiqua.Cell
 
 object TerrainGenerator {
   def mkEmpty(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random):(WorldTile, Option[Cell]) = {
@@ -32,7 +30,6 @@ object TerrainGenerator {
     } else {
       tf.mkRock2
     }
-
   }
 
   def dummy = TerrainGenerator(test)

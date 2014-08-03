@@ -23,9 +23,9 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
     val split = MegaFeature.stamp((x, y), cols, rows, mask)
     def genNth(k:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
       val tf = ts.toFactory(r)
-      val (_, _, myTiles) = split(k)
+      val (pos, _, myTiles) = split(k)
       val (nt, gen) = tiles.map { case (p, t) =>
-        myTiles.getOption(p) match {
+        myTiles.getOption(p |- pos.x) match {
           case None => t @@ None
           case Some(b) => b match {
             case Wall => tf.mkShaft
@@ -46,7 +46,7 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
     }
     def getRect(i:Int) = split(i)._2
     def mkFeature(i:Int) = {
-      Feature.create(getRect(i), genNth(i))
+      Feature.create(true, getRect(i), genNth(i))
     }
     rest.foldLeft(mkFeature(first)) { case (nextFeat, k) =>
       mkFeature(k).withFuture(nextFeat)

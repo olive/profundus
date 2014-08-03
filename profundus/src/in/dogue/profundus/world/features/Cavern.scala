@@ -31,9 +31,9 @@ case class Cavern(center:Cell, radius:Int) {
     val newTiles = Terrain.merge(nt, gen)
     newTiles @@ Seq()
   }
-  def toFeature(cols:Int, rows:Int):Feature = {
-    val rect = Recti(center.x - radius/2, center.y - radius/2, radius*2, radius*2)
+  def toFeature(yPos:Int, cols:Int, rows:Int):Feature = {
+    val rect = Recti(center.x - radius/2, center.y - radius/2 + yPos, radius*2, radius*2)
     val f = placeSite _
-    Feature.create(rect, f)
+    Feature.create(false, rect, f)
   }
 }

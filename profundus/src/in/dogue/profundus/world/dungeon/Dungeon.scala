@@ -9,6 +9,8 @@ import java.io.File
 import in.dogue.antiqua.Antiqua._
 import scala.Some
 import in.dogue.profundus.world.GlobalMessage
+import in.dogue.profundus.Profundus
+import in.dogue.profundus.world.features.Cone
 
 
 object Dungeon {
@@ -55,8 +57,9 @@ object Dungeon {
       dun = dun.floodDungeon(seed)
       ct = count(dun.cells)
     }
-    openBottom(r)(openTop(pare(dun)))
-
+    val (d, bottom) = openBottom(r)(openTop(pare(dun)))
+    new Cone(bottom.x*11, (bottom.x+1)*11, 128, 48)
+    d
   }
 
   def choose(dc:DungeonCell, arr:Array2d[Option[DungeonCell]], p:Cell, r:Random) = {
@@ -90,14 +93,15 @@ object Dungeon {
     }
   }
 
-  def openBottom(r:Random)(d:Dungeon):Dungeon = {
+  def openBottom(r:Random)(d:Dungeon):(Dungeon, (Int,Int)) = {
     val bot = d.rows - 1
     val fs = r.shuffle(for (i <- 0 until d.cols) yield {
       (i, bot).onlyIf(!d.cells.get((i, bot)).isBlank)
     })
-    fs.flatten.headOption.map { f => d.modAt(f, Direction.Down, true)}.getOrElse{
+    val bottom = fs.flatten.headOption.getOrElse{
       throw new RuntimeException("Dungeon has no exit!")
     }
+    d.modAt(bottom, Direction.Down, true) @@ bottom
   }
 }
 
@@ -168,26 +172,15 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
   }
 
   def saveImage(r:Random) {
-    val zoom:Int = cells.first.map { c => c.size }.getOrElse(11)
-    val img = new BufferedImage(cells.cols*zoom, cells.rows*zoom, BufferedImage.TYPE_INT_RGB)
+    import Profundus._
     val mask = getMask(48, (0,0))._1
-    mask.foreach { case (cell, b) =>
-      val solid = Color.Red.toLibgdxColor.toIntBits >> 8
-      val exterior = Color.Blue.toLibgdxColor.toIntBits >> 8
-      val blocked = Color.Green.toLibgdxColor.toIntBits >> 8
-      val clear = Color.White.toLibgdxColor.toIntBits
-      val color = b match {
-        case Wall => solid
-        case Exterior => exterior
-        case Blocked => blocked
-        case Interior => clear
-      }
-      img.setRGB(cell.x, cell.y, color)
+    def cellTypeToColor(c:CellType) = c match {
+      case Wall => Color.Red
+      case Exterior => Color.Blue
+      case Blocked => Color.Green
+      case Interior => Color.White
     }
-    val out = new File("saved.png")
-    if (!ImageIO.write(img, "png", out)) {
-      println("hello")
-    }
+    mask.render(cellTypeToColor, "dungeon.png")
   }
 
 }

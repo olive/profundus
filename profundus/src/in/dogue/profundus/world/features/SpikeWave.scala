@@ -3,7 +3,6 @@ package in.dogue.profundus.world.features
 import in.dogue.profundus.world.{Terrain, Feature, WorldTile, TerrainScheme}
 import in.dogue.antiqua.data.{Direction, Array2d}
 import scala.util.Random
-import in.dogue.antiqua.geometry.{Line, Circle}
 import com.deweyvm.gleany.data.Recti
 import in.dogue.antiqua.Antiqua
 import Antiqua._
@@ -41,9 +40,9 @@ case class SpikeWave(xy:Cell, width:Int, height:Int, wave:Int => Int) {
 
     newTiles @@ Seq()
   }
-  def toFeature(cols:Int, rows:Int):Feature = {
-    val rect = Recti(xy.x, xy.y, width, height)
+  def toFeature(yPos:Int, cols:Int, rows:Int):Feature = {
+    val rect = Recti(xy.x, xy.y + yPos, width, height)
     val f = placeSite _
-    Feature.create(rect, f)
+    Feature.create(false, rect, f)
   }
 }

@@ -14,12 +14,10 @@ import in.dogue.profundus.world.Empty
 import in.dogue.profundus.world.Feature
 import in.dogue.profundus.world.Scheme
 import in.dogue.profundus.Profundus
-import in.dogue.antiqua.data.Direction.Down
-import scala.collection.immutable.{IndexedSeq, Stream}
 import in.dogue.antiqua.graphics.Tile
 
 object CaveMouth {
-  def skyFeature(cols:Int, rows:Int) = Feature.create(Recti(0,0,cols, rows), createSky)
+  def skyFeature(cols:Int, rows:Int) = Feature.create(true, Recti(0,0,cols, rows), createSky)
 
   def createSky(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random): (Array2d[WorldTile], Seq[GlobalMessage]) = {
     val skyColor = ts.color.color.dim(2)

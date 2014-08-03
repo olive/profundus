@@ -89,8 +89,8 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     val pts = Map(
       Direction.Up -> ((p:Int, offset:Int) => (p + offset, 0)),
       Direction.Down -> ((p:Int, offset:Int) => (p + offset, size - 1)),
-      Direction.Left -> ((p:Int, offset:Int) =>(0, p + offset)),
-      Direction.Right -> ((p:Int, offset:Int) =>(size - 1, p + offset))
+      Direction.Left -> ((p:Int, offset:Int) => (0, p + offset)),
+      Direction.Right -> ((p:Int, offset:Int) => (size - 1, p + offset))
     )
 
     val tiles = pts.filter { case (d, _) => open(d) }.foldLeft(first) { case (arr, (d, f)) =>
@@ -98,15 +98,15 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     }.map { case (_, t) =>
       t.select(Interior, Wall) : CellType
     }
-    val off = (ij.x * size, ij.y*size)
+    val off = (ij.x * size, ij.y*size) |+| absPos
 
-    val leftPos = absPos |+| ((1,1)) |+| off
+    val leftPos = (1,1) |+| off
     val left = LadderSpec(size - 2, leftPos).onlyIfs(open(Direction.Left))
 
-    val rightPos = absPos |+| ((size - 2, 1)) |+| off
+    val rightPos = (size - 2, 1) |+| off
     val right = LadderSpec(size - 2, rightPos).onlyIfs(open(Direction.Right))
 
-    val upPos = absPos |+| off |+| ((1, 1))
+    val upPos = (1, 1) |+| off
     val offset = getOffset(junc(Direction.Up)) - 1
     val up = LadderSpec(size + 3, (upPos |+ offset) -| 5).onlyIfs(open(Direction.Up))
 

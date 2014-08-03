@@ -13,8 +13,9 @@ case class SpikePit(x:Int, y:Int, width:Int, height:Int) {
     val shaftStart = yy + r.nextInt(rows/4)
     val (nt, gen) = terrain.map { case ((i, j), t) =>
       val jSpan = j >= y && j <= y + height
-      val inShaft = x > i && x < i + width && jSpan
-      if ((i == x || i  + width - 1 == x) && j + yy > shaftStart && jSpan) {
+      val inShaft = i > x && i < x + width && jSpan
+      if ((i == x || i == x  + width - 1) && j + yy > shaftStart && jSpan) {
+
         tf.mkRock2
       } else if (inShaft && j == y + height) {
         tf.mkRock1
@@ -29,9 +30,9 @@ case class SpikePit(x:Int, y:Int, width:Int, height:Int) {
     val newTiles = Terrain.merge(nt, gen)
     newTiles @@ Seq()
   }
-  def toFeature(cols:Int, rows:Int):Feature = {
-    val rect = Recti(x, y, width, height)
+  def toFeature(yPos:Int, cols:Int, rows:Int):Feature = {
+    val rect = Recti(x, y + yPos, width, height)
     val f = placeShaft _
-    Feature.create(rect, f)
+    Feature.create(false, rect, f)
   }
 }

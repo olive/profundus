@@ -39,9 +39,9 @@ case class Mineshaft(x:Int, y:Int, width:Int, height:Int) {
     newTiles @@ Seq()
   }
 
-  def toFeature(cols:Int, rows:Int):Feature = {
-    val rect = Recti(x, y, width, height)
+  def toFeature(yPos:Int, cols:Int, rows:Int):Feature = {
+    val rect = Recti(x, y + yPos, width, height)
     val f = create _
-    Feature.create(rect, f)
+    Feature.create(false, rect, f)
   }
 }

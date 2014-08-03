@@ -5,7 +5,7 @@ import in.dogue.antiqua.data._
 import scala.util.Random
 import in.dogue.antiqua.graphics.TileRenderer
 import com.deweyvm.gleany.data.Recti
-import in.dogue.profundus.Game
+import in.dogue.profundus.{Profundus, Game}
 import in.dogue.antiqua.data.FutureFinished
 import in.dogue.antiqua.data.FutureError
 import in.dogue.antiqua.geometry.{Circle, Line}
@@ -200,36 +200,27 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
   }
 
   def render(start:Int, end:Int, filename:String) {
+    import Profundus._
     val span = end - start
     val poses = (start until end) map { i => (0, i*rows)}
     val cache = poses.foldLeft(this) { case (terr, ppos) =>
       val (ntc, _) = terr.update(ppos)
       ntc
     }
-    val img = new BufferedImage(cols, rows*span, BufferedImage.TYPE_INT_RGB)
-    (start until end).foreach { i =>
-      Array2d.tabulate(cols, rows) { case p =>
-        cache.getTileType(p +| i*rows)
-      }.foreach { case (p, b) =>
-        def cl(c:Color) = com.badlogic.gdx.graphics.Color.rgb888(c.toLibgdxColor)
-        val color = b match {
-          case Empty(_) => Color.White
-          case Spike(_) => Color.Brown
-          case Dirt => Color.Brown
-          case Clay => Color.Red.mix(Color.Brown, 0.5)
-          case Rock1 => Color.Grey
-          case Rock2 => Color.DarkGrey
-          case Rock3 => Color.DarkGreen
-          case Mineral => Color.Purple
-          case Shaft => Color.Black
-        }
-        val jcolor = cl(color)
-        img.setRGB(p.x, p.y + (i - start)*rows, jcolor)
-      }
+    def ttToColor(t:TileType) = t match {
+      case Empty(_) => Color.Tan
+      case Spike(_) => Color.Brown
+      case Dirt => Color.Brown
+      case Clay => Color.Red.mix(Color.Brown, 0.5)
+      case Rock1 => Color.Grey
+      case Rock2 => Color.DarkGrey
+      case Rock3 => Color.DarkGreen
+      case Mineral => Color.Purple
+      case _ => Color.Black
     }
-    val out = new File(filename)
-    if (!ImageIO.write(img, "png", out)) {
-      throw new RuntimeException()
-    }
+    Array2d.tabulate(cols, span*rows) { case p =>
+      cache.getTileType(p +| start*rows)
+    }.render(ttToColor, filename)
+
   }
 }
