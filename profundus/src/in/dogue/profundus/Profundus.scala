@@ -93,7 +93,6 @@ object Profundus {
   }
   implicit def climbables2NewClimbables(s:Seq[Climbable]) = new AugNewClimbables(s)
 
-  implicit def array2d2AugArray2d[A](arr:Array2d[A]) = new AugArray2d(arr)
   val tf = TextFactory(Color.Black, Color.White, CP437.unicodeToCode)
   val border = Border(CP437.doubleBorder)(Color.Black, Color.White) _
 

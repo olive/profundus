@@ -20,6 +20,8 @@ object DungeonCell {
     Direction.All.map { d => d -> f(d)}.toMap
   }
   val cellSize = 11
+  val doorSize = 3
+
   private def randJunc(r:Random):Map[Direction, Juncture] = {
     dmap(d => Juncture.All.randomR(r))
   }
@@ -55,7 +57,7 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
   import DungeonCell._
   def isBlank = !Direction.All.exists(open)
 
-  private def getOffset(j:Juncture) = j match {
+  def getOffset(j:Juncture) = j match {
     case Mid => size/2
     case Low => size - 3
     case High => 2
@@ -63,7 +65,7 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
 
   private def stamp(d:Direction, f:((Int,Int) => Cell), arr:Array2d[Boolean]) = {
     val offset = getOffset(junc(d))
-    (-1 to 1).foldLeft(arr) { case (acc, p) =>
+    ((-doorSize/2) to (doorSize/2)).foldLeft(arr) { case (acc, p) =>
       val pt = f(p, offset)
       acc.updated(pt, false)
     }

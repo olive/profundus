@@ -11,6 +11,7 @@ import scala.Some
 import in.dogue.profundus.world.GlobalMessage
 import in.dogue.profundus.Profundus
 import in.dogue.profundus.world.features.Cone
+import com.badlogic.gdx.Gdx
 
 
 object Dungeon {
@@ -38,13 +39,7 @@ object Dungeon {
   }
 
   private def count(arr:Array2d[DungeonCell]) = {
-    arr.foldLeft(0) { case (acc, (pt, dc)) =>
-      acc + (if (!dc.isBlank) {
-        1
-      } else {
-        0
-      })
-    }
+    arr.countT( dc => !dc.isBlank)
   }
 
   def create(cols:Int, rows:Int, minFill:Double, r:Random) = {
@@ -57,8 +52,19 @@ object Dungeon {
       dun = dun.floodDungeon(seed)
       ct = count(dun.cells)
     }
-    val (d, bottom) = openBottom(r)(openTop(pare(dun)))
-    new Cone(bottom.x*11, (bottom.x+1)*11, 128, 48)
+    val (dTop, top) = openTop(r)(pare(dun))
+    val (d, bottom) = openBottom(r)(dTop)
+    val cs = DungeonCell.cellSize
+    val doorSize = DungeonCell.doorSize
+    val topCell = d.cells.get(top)
+    val topOff = topCell.getOffset(topCell.junc(Direction.Up))
+    val top0 = top.x*cs + topOff - 1
+    val top1 = top.x*cs + topOff + doorSize - 1
+    val bottomCell = d.cells.get(bottom)
+    val bottomOff = bottomCell.getOffset(bottomCell.junc(Direction.Down))
+    val bottom0 = bottom.x*cs + bottomOff - 1
+    val bottom1 = bottom.x*cs + bottomOff + doorSize - 1
+    new Cone(top0, top1, bottom0, bottom1, (20,0), d, 128, 48)
     d
   }
 
@@ -82,15 +88,15 @@ object Dungeon {
     })
   }
 
-  def openTop(d:Dungeon):Dungeon = {
+  def openTop(r:Random)(d:Dungeon):(Dungeon, (Int,Int)) = {
     val fs = (for (i <- 0 until d.cols) yield {
       val found = (0 until d.rows).find{ j => !d.cells.get((i, j)).isBlank }
       found.map { f => (i,f)}
     }).flatten
-
-    fs.foldLeft(d) { case (acc, p) =>
-      acc.modAt(p, Direction.Up, true)
-    }
+    val tops = r.shuffle(fs.filter(p => p.y == 0))
+    val top = tops.headOption.getOrElse(throw new RuntimeException("Dungeon has no top"))
+    val dd = d.modAt(top, Direction.Up, true)
+    (dd, top)
   }
 
   def openBottom(r:Random)(d:Dungeon):(Dungeon, (Int,Int)) = {
@@ -153,6 +159,7 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     val all: Seq[Set[Cell]] = getInterior(Graph.floodAll(toGraph, allIndices))
     val size = DungeonCell.cellSize
     val reified = Array2d.tabulate(cols, rows) { case p =>
+      //fixme -- offset by xy below with Cone, not here
       cells.get(p).solidify(xy, p, all)
     }
     val msgArray = reified.map { case (p, r) =>
