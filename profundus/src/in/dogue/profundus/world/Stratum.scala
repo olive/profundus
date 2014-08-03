@@ -15,7 +15,8 @@ object Stratum {
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.dummy
     val sg = SpawnGenerator.dummy
-    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
+    val mod = TerrainModGroup.spikes(1000)
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg, mod)
   }
 
   def createSurface(r:Random) = {
@@ -26,7 +27,8 @@ object Stratum {
     val eg = EntityGenerator.empty
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
-    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
+    val mod = TerrainModGroup.empty
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg, mod)
   }
 
   def createLair(r:Random):Stratum = {
@@ -37,7 +39,8 @@ object Stratum {
     val eg = EntityGenerator.lair
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
-    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
+    val mod = TerrainModGroup.empty
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg, mod)
   }
 
   def createAbyss(r:Random) = {
@@ -48,7 +51,8 @@ object Stratum {
     val eg = EntityGenerator.empty
     val dg = DoodadGenerator.empty
     val pg = PickupGenerator.empty
-    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg)
+    val mod = TerrainModGroup.empty
+    Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg, mod)
   }
 
   def apply[A](anext:Seq[Feature],
@@ -58,7 +62,8 @@ object Stratum {
                egen:EntityGenerator,
                dgen:DoodadGenerator,
                pgen:PickupGenerator,
-               sgen:SpawnGenerator[A]) = {
+               sgen:SpawnGenerator[A],
+               mod_ :TerrainModGroup) = {
     new Stratum {
       override type T = A
       override val next = anext
@@ -69,6 +74,7 @@ object Stratum {
       override val sg = sgen
       override val fg = fgen
       override val tg = tgen
+      override val mod = mod_
     }
   }
 }
@@ -83,6 +89,7 @@ trait Stratum {
   val dg:DoodadGenerator
   val pg:PickupGenerator
   val sg:SpawnGenerator[T]
+  val mod:TerrainModGroup
   val strataSize = 4
 
   def copy(next:Seq[Feature]=next,
@@ -92,7 +99,8 @@ trait Stratum {
            eg:EntityGenerator=eg,
            dg:DoodadGenerator=dg,
            pg:PickupGenerator=pg,
-           sg:SpawnGenerator[T]=sg) = Stratum(next, ts, tg, fg, eg, dg, pg, sg)
+           sg:SpawnGenerator[T]=sg,
+           mod:TerrainModGroup=mod) = Stratum(next, ts, tg, fg, eg, dg, pg, sg, mod)
 
   def modBiome(yIndex:Int, r:Random):Stratum = {
     val endIndex = 21
@@ -125,7 +133,7 @@ trait Stratum {
     val (nt, gen) = noise.map { case (ij, d) =>
       tg.generate(ts, tf, ij, yIndex, cols, rows, d, r)
     }.unzip
-    val (tiles, pgens) = TerrainMod.spikes(1000).mod(tf, yIndex*rows, Terrain.merge(nt, gen), r)
+    val (tiles, pgens) = mod.mod(tf, yIndex*rows, Terrain.merge(nt, gen), r)
 
     val (newTiles, gs, fts) = fold3(tiles, features) { case (ft, terrain) =>
       ft.transform(cols, rows, yIndex * rows, ts, terrain, r)

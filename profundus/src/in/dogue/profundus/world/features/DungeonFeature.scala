@@ -16,7 +16,6 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
   val dCols = 4//cols/DungeonCell.cellSize
   val dRows = 6//(rows*6)/DungeonCell.cellSize
   val (dungeon, top, bottom) = Dungeon.create(dCols, dRows, 0.5, r)
-  println("Dungeon(%d,%d)".format(dungeon.cols, dungeon.rows))
 
   def toFeature(cols:Int, rows:Int):Feature = {
     val (dmask, cone, msgs) = dungeon.getMask(rows, (x, y), top, bottom)
@@ -59,7 +58,6 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
     }
     def getRect(i:Int) = split(i)._1 + Recti(0, y, 0, 0)
     def mkFeature(i:Int) = {
-      println(getRect(i))
       Feature.create(true, getRect(i), genNth(i))
     }
     rest.foldLeft(mkFeature(first)) { case (nextFeat, k) =>

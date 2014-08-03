@@ -71,7 +71,6 @@ object FeatureGenerator {
     val yPos = y*rows
     val spikeWaves = makeSpikeWaves(1, yPos, cols, rows)(ts, r)
     val pits = makePits(3, yPos, cols, rows)(ts, r)
-    val spikes = Seq(new Spikes(1000).toFeature(cols, rows))
     val shafts = makeShafts(2, yPos, cols, rows)(ts, r)
     val camps = makeCampsites(1, yPos, cols, rows)(ts, r)
     val cavern = makeCaverns(1, yPos, cols, rows)(ts, r)
@@ -81,7 +80,7 @@ object FeatureGenerator {
     if (y == 1) {
       Seq(new DungeonFeature(35,yPos,cols, rows, r).toFeature(cols, rows))
     } else {
-      a ++ b ++ c ++ spikes
+      a ++ b ++ c
     }
 
   }
