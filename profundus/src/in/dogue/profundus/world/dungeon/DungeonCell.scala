@@ -103,7 +103,6 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     }
 
     val off = (ij.x * size, ij.y*size) |+| absPos
-    println(off)
     val leftPos = (1,1) |+| off
     val left = LadderSpec(size - 2, leftPos).onlyIfs(open(Direction.Left))
 
