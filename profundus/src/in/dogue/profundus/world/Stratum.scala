@@ -123,9 +123,9 @@ trait Stratum {
     val noise = new PerlinNoise().generate(cols, rows, 0, yIndex, r.nextInt())
     val tf = ts.toFactory(r)
     val (nt, gen) = noise.map { case (ij, d) =>
-      tg.mkTile(ts, tf, ij, yIndex, cols, rows, d, r)
+      tg.generate(ts, tf, ij, yIndex, cols, rows, d, r)
     }.unzip
-    val tiles = Terrain.merge(nt, gen)
+    val (tiles, pgens) = TerrainMod.spikes(1000).mod(tf, yIndex*rows, Terrain.merge(nt, gen), r)
 
     val (newTiles, gs, fts) = fold3(tiles, features) { case (ft, terrain) =>
       ft.transform(cols, rows, yIndex * rows, ts, terrain, r)
@@ -135,7 +135,7 @@ trait Stratum {
 
     val doodads = dg.generate(ts, newTiles, r).gms
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
-    (Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads, fts)
+    (Terrain(yIndex*rows, tf, newTiles, spawn, face), gs ++ Seq(entities) ++ pickups ++ doodads ++ pgens, fts)
   }
 
 }

@@ -37,7 +37,7 @@ object TerrainGenerator {
   def unloaded = TerrainGenerator(mkUnloaded)
   type Generate = (TerrainScheme, WorldTileFactory, Cell,Int,Int,Int,Double,Random) => (WorldTile, Option[Cell])
 }
-case class TerrainGenerator(mkTile:TerrainGenerator.Generate) {
+case class TerrainGenerator(private val mkTile:TerrainGenerator.Generate) {
   def generate(ts:TerrainScheme, tf:WorldTileFactory, ij:Cell, y:Int, cols:Int, rows:Int, d:Double, r:Random) =
     mkTile(ts, tf, ij, y, cols, rows, d, r)
 }

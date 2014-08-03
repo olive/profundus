@@ -48,7 +48,7 @@ object TerrainCache {
     val tf = newStratum.ts.toFactory(r)
     val tg = TerrainGenerator.unloaded
     val (nt, _) = Array2d.tabulate(cols, rows) { case (ij) =>
-      tg.mkTile(newStratum.ts, tf, ij, 0, cols, rows, 0, r)
+      tg.generate(newStratum.ts, tf, ij, 0, cols, rows, 0, r)
     }.unzip
     val unloaded = Terrain(0, tf, nt, (0,0), Direction.Down)
     val cache = TerrainCache(cols, rows, Map(0->((newStratum, first))), unloaded, Seq(), r)

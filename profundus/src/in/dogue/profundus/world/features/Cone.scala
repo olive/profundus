@@ -1,8 +1,6 @@
 package in.dogue.profundus.world.features
 
 import in.dogue.antiqua.data.Array2d
-import in.dogue.profundus.Profundus
-import com.deweyvm.gleany.graphics.Color
 import in.dogue.antiqua.Antiqua
 import in.dogue.profundus.world.dungeon._
 import in.dogue.antiqua.Antiqua.Cell
@@ -64,6 +62,5 @@ case class Cone(top0:Int, top1:Int, bottom0:Int, bottom1:Int, xy:Cell, top:Cell,
       }
     }
   }
-  //testMask.render(btc, "topbottom.png")
 
 }

@@ -22,8 +22,7 @@ class Spikes(num:Int) {
     var done = 0
     val tf = ts.toFactory(r)
     import Profundus._
-    def get(ij:Cell):Boolean = terrain.getOption(ij
-    ).exists{_.isWalkable}
+    def get(ij:Cell):Boolean = terrain.getOption(ij).exists{_.isWalkable}
     val tiles = r.shuffle(terrain.flatten)
     val tmap = tiles.map { case (ij, t) =>
       val isDone = done > num
