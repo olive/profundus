@@ -72,7 +72,7 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     }
   }
 
-  def solidify(absPos:Cell/*for messages*/, ij:Cell, interior:Seq[Set[Cell]]):(ReifiedCell) = {
+  def reify(absPos:Cell/*for messages*/, ij:Cell, interior:Seq[Set[Cell]]):(ReifiedCell) = {
     if (interior.exists { set => set.contains(ij)}) {
       val tiles = Array2d.tabulate(size, size) { case p =>
         Blocked : CellType
@@ -101,8 +101,9 @@ case class DungeonCell(size:Int, open:Direction=>Boolean, junc:Direction=>Junctu
     }.map { case (_, t) =>
       t.select(Interior, Wall) : CellType
     }
-    val off = (ij.x * size, ij.y*size) |+| absPos
 
+    val off = (ij.x * size, ij.y*size) |+| absPos
+    println(off)
     val leftPos = (1,1) |+| off
     val left = LadderSpec(size - 2, leftPos).onlyIfs(open(Direction.Left))
 

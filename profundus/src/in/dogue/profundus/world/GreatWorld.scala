@@ -316,7 +316,7 @@ case class GreatWorld(cols:Int, rows:Int,
   def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
     if (!rendered) {
-      cache.render(0, 64, "test.png")
+      //cache.render(0, 64, "test.png")
       rendered = true
     }
     //System.exit(1)

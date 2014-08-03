@@ -9,8 +9,9 @@ import Antiqua._
 
 object PickupGenerator {
 
-  val dummy = {
-    def gen(ff:FoodFactory, cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = {
+  def dummy(r:Random) = {
+    val ff = FoodFactory.create(r)
+    def gen(cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = {
 
       val foods = ff.All.map { ft =>
         (0 until 10).map { i =>
@@ -26,15 +27,15 @@ object PickupGenerator {
   }
 
   val empty = {
-    def gen(ff:FoodFactory, cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = Seq()
+    def gen(cols:Int, rows:Int, yRoom:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random) = Seq()
     PickupGenerator(gen)
   }
 }
 
-case class PickupGenerator(private val f:(FoodFactory, Int,Int,Int,Array2d[WorldTile], TerrainScheme, Random) => Seq[Pickup]) {
-  def generate(ff:FoodFactory, cols:Int, rows:Int, y:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random):Seq[GlobalMessage] = {
+case class PickupGenerator(private val f:(Int,Int,Int,Array2d[WorldTile], TerrainScheme, Random) => Seq[Pickup]) {
+  def generate(cols:Int, rows:Int, y:Int, cache:Array2d[WorldTile], ts:TerrainScheme, r:Random):Seq[GlobalMessage] = {
     import Profundus._
-    val picks = f(ff, cols, rows, y, cache, ts, r)
+    val picks = f(cols, rows, y, cache, ts, r)
     picks.gms
   }
 }

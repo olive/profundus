@@ -47,7 +47,7 @@ class DungeonFeature(x:Int, y:Int, dCols:Int, dRows:Int, tCols:Int, tRows:Int, r
         }
       }.unzip
       val newTiles = Terrain.merge(nt, gen)
-      newTiles @@ msgs(k)
+      newTiles @@ msgs(y/rows)
     }
     val ks = split.keys.toSeq.sorted.reverse.toList
     val (first, rest) = ks match {

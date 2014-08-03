@@ -11,6 +11,7 @@ import in.dogue.profundus.entities.pickups.Pickup
 import in.dogue.profundus.particles.Particle
 import in.dogue.profundus.audio.SoundManager
 import com.deweyvm.gleany.data.Recti
+import in.dogue.profundus.Game
 
 object EntityManager {
 

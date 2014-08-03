@@ -80,7 +80,7 @@ object FeatureGenerator {
     val (a, b, c) = ts.color.ways3(all)
     if (y % Stratum.size == 0) {
       val dCols = cols/DungeonCell.cellSize
-      val dRows = (y + Stratum.size)/Stratum.size
+      val dRows = math.max((y + Stratum.size)/Stratum.size, 2)
       Seq(new DungeonFeature(1,yPos,dCols, dRows, cols, rows, r).toFeature(cols, rows))
     } else {
       a ++ b ++ c
@@ -105,7 +105,7 @@ object FeatureGenerator {
 
 
   private def mkShop(cols:Int, rows:Int, y:Int, ts:TerrainScheme, r:Random, args:Unit) = {
-    (0 until 10).map { case i =>
+    (0 until 1).map { case i =>
       val xx = r.nextInt(cols - 16)
       val yy = r.nextInt(rows - 14)
       new Shop(xx, yy).toFeature(y*rows, cols, rows)

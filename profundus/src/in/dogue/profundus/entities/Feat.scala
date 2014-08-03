@@ -135,10 +135,10 @@ object Feat {
   }
 
   def meditation(icon:Tile) = {
-    blank.setTime(180)
+    blank.setTime(600)
          .setAllowMove(NoAllowMove)
          .setSeekPlayer(NoSeekPlayer)
-         .setRestore((1,80))
+         .setRestore((1,100))
          .setIcon(icon)
   }
 
@@ -198,7 +198,8 @@ case class Feat(private val icon:Option[Tile], t:Int, tActivate:Int, isActivated
 
   def healthRestore(f:Int => Attributes) = {
     val (amt, duration) = restoreAmount
-    if (t > duration && isActivated) {
+    if (t < duration && isActivated) {
+      println(tActivate + " " + duration)
       f(amt)
     } else {
       f(0)

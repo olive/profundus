@@ -149,14 +149,15 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     val size = DungeonCell.cellSize
     val reified = Array2d.tabulate(cols, rows) { case p =>
       //fixme -- offset by xy below with Cone, not here
-      cells.get(p).solidify(xy +| worldRows/* accounts for cone*/, p, all)
+      cells.get(p).reify(xy +| worldRows/* accounts for cone*/, p, all)
     }
     val msgArray = reified.map { case (p, r) =>
       r.getMessages
     }
     val seed = Map[Int, Seq[GlobalMessage]]().withDefaultValue(Seq())
     val msgs = msgArray.foldLeft(seed) { case (map, (p, ms)) =>
-      val y = (p.y*size + xy.y - worldRows/* accounts for cone*/)/worldRows
+      val y = (p.y*size + xy.y)/worldRows + 1
+      println(y)
       map.updated(y, map(y) ++ ms)
     }
     val tiles = Array2d.tabulate(cols*size, rows*size) { case (x, y) =>

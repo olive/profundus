@@ -13,7 +13,7 @@ object Stratum {
     val fg = FeatureGenerator.dummy
     val eg = EntityGenerator.dummy
     val dg = DoodadGenerator.empty
-    val pg = PickupGenerator.dummy
+    val pg = PickupGenerator.dummy(r)
     val sg = SpawnGenerator.dummy
     val mod = TerrainModGroup.spikes(1000)
     Stratum(Seq(), ts, tg, fg, eg, dg, pg, sg, mod)
@@ -139,8 +139,7 @@ trait Stratum {
     val (newTiles, gs, fts) = fold3(tiles, features) { case (ft, terrain) =>
       ft.transform(cols, rows, yIndex * rows, ts, terrain, r)
     }
-    val ff = FoodFactory.create(r)//fixme -- should have its own generator?
-    val pickups = pg.generate(ff, cols, rows, yIndex*rows, newTiles, ts, r)
+    val pickups = pg.generate(cols, rows, yIndex*rows, newTiles, ts, r)
 
     val doodads = dg.generate(ts, newTiles, r).gms
     val entities = eg.generate(cols, rows, yIndex, ts, newTiles, r)
