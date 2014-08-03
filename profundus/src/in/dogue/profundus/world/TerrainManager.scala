@@ -13,7 +13,7 @@ import in.dogue.profundus.Profundus
 class TerrainManager {
   private def updateShovel(tc:TerrainCache, pl:Player):(TerrainCache, Player, Seq[GlobalMessage]) = {
     pl.toolPos.foldLeft((tc, pl, Seq[GlobalMessage]())) { case ((cache, player, gs), p) =>
-      val dmg = Damage(player.getDamage/*fixme*/, DamageType.Tool)
+      val dmg = Damage(player.getDigDamage/*fixme*/, DamageType.Tool)
       val (newTc, drops, hit) = cache.hit(p, dmg, player.inv.tool.`type`)
       (newTc, player.hitTool(hit), gs ++ drops)
     }

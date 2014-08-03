@@ -200,8 +200,8 @@ case class Player private (prev:(Int,Int), ij:(Int,Int), face:Direction,
 
   def setFacing(d:Direction) = (state == Dead).select(copy(face=d), this)
 
-  def getDamage = attr.multiplyDamage(feat.multiplyDamage(inv.tool.`type`.digDamage))
-
+  def getDigDamage = attr.multiplyDamage(feat.multiplyDamage(inv.tool.`type`.digDamage))
+  def getAttackDamage = attr.multiplyDamage(feat.multiplyDamage(inv.tool.`type`.attackDamage))
   def hitTool(result:HitResult) = {
     val dmg = result.toolHurt
     val tileBroken = result.broken

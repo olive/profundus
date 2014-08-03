@@ -27,6 +27,7 @@ sealed trait ToolType {
   val healthHurt:Int = 0
   val durability:Int
   val digDamage:Int
+  val attackDamage:Int
   val stamCost:Int
   val breakable:Seq[TileClass]
   val icon:TileGroup
@@ -37,6 +38,7 @@ case object BareHands extends ToolType {
   override val healthHurt = 1
   override val durability = Int.MaxValue
   override val digDamage = 1
+  override val attackDamage = 1
   override val stamCost = 10
   override val breakable = Seq(TileClass.Dirt)
   override val icon = Tile.makeGroup(Vector(
@@ -50,6 +52,7 @@ case object BareHands extends ToolType {
 case object Drill extends ToolType {
   override val durability = 50000
   override val digDamage = 100
+  override val attackDamage = 100
   override val stamCost = 1
   override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock1, TileClass.Rock2, TileClass.Rock3)
   override val icon = Tile.makeGroup(Vector(
@@ -63,6 +66,7 @@ case object Drill extends ToolType {
 case object Gouge extends ToolType {
   override val durability = 5000
   override val digDamage = 1
+  override val attackDamage = 5
   override val stamCost = 3
   override val breakable = Seq(TileClass.Dirt)
   override val icon = Tile.makeGroup(Vector(
@@ -75,6 +79,7 @@ case object Gouge extends ToolType {
 case object Shovel extends ToolType {
   override val durability = 1000
   override val digDamage = 3
+  override val attackDamage = 3
   override val stamCost = 8
   override val breakable = Seq(TileClass.Dirt, TileClass.Clay)
   override val icon = Tile.makeGroup(Vector(
@@ -88,6 +93,7 @@ case object Shovel extends ToolType {
 case object Mallet extends ToolType {
   override val durability = 2000
   override val digDamage = 5
+  override val attackDamage = 10
   override val stamCost = 15
   override val breakable = Seq(TileClass.Dirt, TileClass.Rock1, TileClass.Rock2)
   override val icon = Tile.makeGroup(Vector(
@@ -99,6 +105,7 @@ case object Mallet extends ToolType {
 case object Mattock extends ToolType {
   override val durability = 500
   override val digDamage = 5
+  override val attackDamage = 5
   override val stamCost = 10
   override val breakable = Seq(TileClass.Dirt, TileClass.Clay, TileClass.Rock1, TileClass.Rock2, TileClass.Rock3)
   override val icon = Tile.makeGroup(Vector(
@@ -110,6 +117,7 @@ case object Mattock extends ToolType {
 case object Rapier extends ToolType {
   override val durability = 100
   override val digDamage = 1
+  override val attackDamage = 15
   override val stamCost = 5
   override val breakable = Seq(TileClass.Dirt)
   override val icon = Tile.makeGroup(Vector(

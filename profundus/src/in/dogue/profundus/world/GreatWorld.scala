@@ -102,7 +102,7 @@ object GreatWorld {
     val pp = gw.p
     val em = gw.em
     val newEm = pp.toolPos.foldLeft(em) { case (e, p) =>
-      val dmg = Damage(pp.getDamage, DamageType.Player)
+      val dmg = Damage(pp.getAttackDamage, DamageType.Player)
       e.hitClimbables(p).hitCreatures(p, dmg)
     }
     gw.setEm(newEm)
