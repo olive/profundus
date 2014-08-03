@@ -316,7 +316,7 @@ case class GreatWorld(cols:Int, rows:Int,
   def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
     if (!rendered) {
-      cache.render(0, 24, "test.png")
+      cache.render(0, 64, "test.png")
       rendered = true
     }
     //System.exit(1)
@@ -376,6 +376,7 @@ case class GreatWorld(cols:Int, rows:Int,
   }
 
   def cameraY(ppos:Cell) = {
+    //MAGIC -- DONT TOUCH UNLESS YOU WANT A HEADACHE
     val res = if (ppos.y < 48) {
       val offset = (ppos.y + 48)/2
       val result = -offset + 32//32

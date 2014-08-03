@@ -12,9 +12,7 @@ import in.dogue.profundus.world.WorldTile
 import scala.Some
 import com.deweyvm.gleany.graphics.Color
 
-class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
-  val dCols = 4//cols/DungeonCell.cellSize
-  val dRows = 6//(rows*6)/DungeonCell.cellSize
+class DungeonFeature(x:Int, y:Int, dCols:Int, dRows:Int, tCols:Int, tRows:Int, r:Random) {
   val (dungeon, top, bottom) = Dungeon.create(dCols, dRows, 0.5, r)
 
   def toFeature(cols:Int, rows:Int):Feature = {

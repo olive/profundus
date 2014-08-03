@@ -77,9 +77,11 @@ object Stratum {
       override val mod = mod_
     }
   }
+  val size = 8
 }
 
 trait Stratum {
+  import Stratum._
   type T
   val next:Seq[Feature]
   val ts:TerrainScheme
@@ -90,7 +92,6 @@ trait Stratum {
   val pg:PickupGenerator
   val sg:SpawnGenerator[T]
   val mod:TerrainModGroup
-  val strataSize = 4
 
   def copy(next:Seq[Feature]=next,
            ts:TerrainScheme=ts,
@@ -103,13 +104,13 @@ trait Stratum {
            mod:TerrainModGroup=mod) = Stratum(next, ts, tg, fg, eg, dg, pg, sg, mod)
 
   def modBiome(yIndex:Int, r:Random):Stratum = {
-    val endIndex = 21
+    val endIndex = 60
     val nn = if (yIndex > endIndex) {
       Stratum.createAbyss(r)
     } else if (yIndex == endIndex) {
       Stratum.createLair(r)
     } else if (yIndex >= 0) {
-      val newTs = if (yIndex %% strataSize == 0) {
+      val newTs = if (yIndex %% size == 0) {
         TerrainScheme.generate(r)
       } else {
         this.ts

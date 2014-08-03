@@ -11,6 +11,7 @@ import in.dogue.profundus.world.features.SpikePit
 import in.dogue.profundus.world.features.Campsite
 import in.dogue.profundus.world.features.Cavern
 import in.dogue.antiqua.geometry.Circle
+import in.dogue.profundus.world.dungeon.DungeonCell
 
 object FeatureGenerator {
 
@@ -77,8 +78,10 @@ object FeatureGenerator {
     val shop = mkShop(cols, rows, y, ts, r, u)
     val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
     val (a, b, c) = ts.color.ways3(all)
-    if (y == 1) {
-      Seq(new DungeonFeature(35,yPos,cols, rows, r).toFeature(cols, rows))
+    if (y % Stratum.size == 0) {
+      val dCols = cols/DungeonCell.cellSize
+      val dRows = (y + Stratum.size)/Stratum.size
+      Seq(new DungeonFeature(1,yPos,dCols, dRows, cols, rows, r).toFeature(cols, rows))
     } else {
       a ++ b ++ c
     }
