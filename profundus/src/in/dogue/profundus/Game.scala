@@ -21,7 +21,7 @@ object Game {
   val globPerf = new PerfTrack("Everything")
   val drawPerf = new PerfTrack("Drawing")
   def getSeed = {
-    val seed = fixedSeed.select(new Random().nextInt(), -771711754)
+    val seed = fixedSeed.select(new Random().nextInt(), 1847809037)
     println("SEED: " + seed)
     seed
   }

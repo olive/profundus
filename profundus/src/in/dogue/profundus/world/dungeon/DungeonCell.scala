@@ -44,6 +44,7 @@ case object Exterior extends CellType
 case object Interior extends CellType
 case object Wall extends CellType
 case object Blocked extends CellType
+case object ConeSpace extends CellType
 case class LadderSpec(height:Int, pos:Cell)
 case class ReifiedCell(tiles:Array2d[CellType], open:Direction=>Boolean, junc:Direction=>Juncture, ladders:Seq[LadderSpec]) {
   import Profundus._

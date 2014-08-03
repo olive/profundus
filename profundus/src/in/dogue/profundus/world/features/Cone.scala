@@ -7,12 +7,12 @@ import in.dogue.antiqua.Antiqua
 import in.dogue.profundus.world.dungeon._
 import in.dogue.antiqua.Antiqua.Cell
 
-case class Cone(top00:Int, top11:Int, bottom00:Int, bottom11:Int, xy:Cell, d:Dungeon, cols:Int, rows:Int) {
+case class Cone(top0:Int, top1:Int, bottom0:Int, bottom1:Int, xy:Cell, top:Cell, bottom:Cell, cols:Int, rows:Int) {
   import Antiqua._
-  val t0 = top00 + xy.x
-  val t1 = top11 + xy.x
-  val b0 = bottom00 + xy.x
-  val b1 = bottom11 + xy.x
+  val t0 = top0 + xy.x
+  val t1 = top1 + xy.x
+  val b0 = bottom0 + xy.x
+  val b1 = bottom1 + xy.x
   private val topLeft = Array2d.tabulate(t0, rows) { case (x, y) =>
     y > (rows/t0.sq)*x.sq
   }
@@ -33,10 +33,6 @@ case class Cone(top00:Int, top11:Int, bottom00:Int, bottom11:Int, xy:Cell, d:Dun
     yy > (rows/run.sq)*(run - x).sq
   }
 
-  private def btc(b:Boolean) = b.select(Color.White, Color.Black)
-
-
-
   val topMask = Array2d.tabulate(cols, rows) { case (x, y) =>
     if (x < t0) {
       topLeft.get((x, y))
@@ -56,24 +52,18 @@ case class Cone(top00:Int, top11:Int, bottom00:Int, bottom11:Int, xy:Cell, d:Dun
       bottomRight.get((x - b1, y))
     }
   }
-  val (mask, _) = d.getMask(48, (20,0))
-  val testMask = Array2d.tabulate(cols, rows*2 + d.rows*DungeonCell.cellSize) { case (x, y) =>
-    if (y < rows) {
-      topMask.get((x, y))
-    } else if (y >= rows + d.rows*11) {
-      bottomMask.get((x, y - (rows + d.rows*11)))
-    } else {
-      val p = mask.getOption((x,  y - rows) |-| xy)
-      p match {
-        case Some(r) => r match {
-          case Wall => true
-          case Interior => false
-          case Exterior => true
-          case Blocked => true
-        }
-        case None => true
+
+  def getMask(dcols:Int, drows:Int, dTiles:Array2d[CellType]) = {
+    Array2d.tabulate(cols, rows*2 + drows*DungeonCell.cellSize) { case (x, y) =>
+      if (y < rows) {
+        topMask.get((x, y)).select(ConeSpace,Blocked)
+      } else if (y >= rows + drows*DungeonCell.cellSize) {
+        bottomMask.get((x, y - (rows + drows*11))).select(ConeSpace,Blocked)
+      } else {
+        dTiles.getOption((x,  y - rows) |- xy.x).getOrElse(Blocked)
       }
     }
-  }.render(btc, "topbottom.png")
+  }
+  //testMask.render(btc, "topbottom.png")
 
 }

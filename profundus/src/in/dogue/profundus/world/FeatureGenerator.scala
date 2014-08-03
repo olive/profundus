@@ -78,8 +78,8 @@ object FeatureGenerator {
     val shop = mkShop(cols, rows, y, ts, r, u)
     val all = Vector(spikeWaves, cavern, pits, shafts, camps, shop)
     val (a, b, c) = ts.color.ways3(all)
-    if (y == 3) {
-      Seq(new DungeonFeature(3,yPos,cols, rows, r).toFeature(cols, rows))
+    if (y == 1) {
+      Seq(new DungeonFeature(35,yPos,cols, rows, r).toFeature(cols, rows))
     } else {
       a ++ b ++ c ++ spikes
     }

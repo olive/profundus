@@ -12,8 +12,8 @@ import java.util.Random
 
 object Main {
   def main(args: Array[String]) {
-    Dungeon.create(3, 2, 0.5, new Random()).saveImage(new Random())
-    System.exit(1)
+    //Dungeon.create(3, 2, 0.5, new Random())
+    //System.exit(1)
     val iconPaths = Seq(
       "sprites/icon16.png",
       "sprites/icon24.png",

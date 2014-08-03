@@ -6,14 +6,14 @@ import in.dogue.antiqua.data.Array2d
 
 object MegaFeature {
 
-  private def cut[T](rect:Recti, p1:Cell, tiles:Array2d[T]):Option[(Cell, Recti, Array2d[T])] = {
+  private def cut[T](rect:Recti, p1:Cell, tiles:Array2d[T]):Option[(Recti, Array2d[T])] = {
     val tRect = Recti(p1.x, p1.y, tiles.cols, tiles.rows)
     val overlap = rect.getOverlap(tRect)
     overlap.map { over => cutRects(over, p1, tiles)}
   }
 
 
-  def cutRects[T](overlap:Recti, p1:Cell, tiles:Array2d[T]):(Cell, Recti, Array2d[T]) = {
+  def cutRects[T](overlap:Recti, p1:Cell, tiles:Array2d[T]):(Recti, Array2d[T]) = {
     val p3 = overlap.x @@ overlap.y
     val w = overlap.width
     val h = overlap.height
@@ -21,10 +21,10 @@ object MegaFeature {
     val newTiles = Array2d.tabulate(w, h) { case p =>
       tiles.get(p |+| offset)
     }
-    (p3, overlap, newTiles)
+    (overlap, newTiles)
   }
 
-  def stamp[T](pos:Cell, cols:Int, rows:Int, tiles:Array2d[T]):Map[Int,(Cell, Recti, Array2d[T])] =  {
+  def stamp[T](pos:Cell, cols:Int, rows:Int, tiles:Array2d[T]):Map[Int,(Recti, Array2d[T])] =  {
     def getRect(i:Int) = {
       Recti(0, rows*i, cols, rows)
     }
@@ -33,7 +33,7 @@ object MegaFeature {
     val rects = (start until end) map { (i:Int) =>
       val r = getRect(i)
       val c = cut(r, pos, tiles)
-      c.map { case (cell, rect, array) => (i, (cell, rect, array))}
+      c.map { case (rect, array) => (i, (rect, array))}
     }
     rects.flatten.toMap
   }

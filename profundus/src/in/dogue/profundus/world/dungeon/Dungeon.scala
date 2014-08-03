@@ -54,18 +54,7 @@ object Dungeon {
     }
     val (dTop, top) = openTop(r)(pare(dun))
     val (d, bottom) = openBottom(r)(dTop)
-    val cs = DungeonCell.cellSize
-    val doorSize = DungeonCell.doorSize
-    val topCell = d.cells.get(top)
-    val topOff = topCell.getOffset(topCell.junc(Direction.Up))
-    val top0 = top.x*cs + topOff - 1
-    val top1 = top.x*cs + topOff + doorSize - 1
-    val bottomCell = d.cells.get(bottom)
-    val bottomOff = bottomCell.getOffset(bottomCell.junc(Direction.Down))
-    val bottom0 = bottom.x*cs + bottomOff - 1
-    val bottom1 = bottom.x*cs + bottomOff + doorSize - 1
-    new Cone(top0, top1, bottom0, bottom1, (20,0), d, 128, 48)
-    d
+    (d, top, bottom)
   }
 
   def choose(dc:DungeonCell, arr:Array2d[Option[DungeonCell]], p:Cell, r:Random) = {
@@ -154,20 +143,20 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
     }.map{_._1}
   }
 
-  def getMask(worldRows:Int, xy:Cell): (Array2d[CellType], Map[Int, Seq[GlobalMessage]]) = {
+  def getMask(worldRows:Int, xy:Cell, top:Cell, bottom:Cell): (Array2d[CellType], Cone, Map[Int, Seq[GlobalMessage]]) = {
     val allIndices = Set((for (i <- 0 until cols ; j <- 0 until rows) yield (i, j)):_*)
     val all: Seq[Set[Cell]] = getInterior(Graph.floodAll(toGraph, allIndices))
     val size = DungeonCell.cellSize
     val reified = Array2d.tabulate(cols, rows) { case p =>
       //fixme -- offset by xy below with Cone, not here
-      cells.get(p).solidify(xy, p, all)
+      cells.get(p).solidify(xy +| worldRows/* accounts for cone*/, p, all)
     }
     val msgArray = reified.map { case (p, r) =>
       r.getMessages
     }
     val seed = Map[Int, Seq[GlobalMessage]]().withDefaultValue(Seq())
     val msgs = msgArray.foldLeft(seed) { case (map, (p, ms)) =>
-      val y = (p.y*size + xy.y)/worldRows
+      val y = (p.y*size + xy.y - worldRows/* accounts for cone*/)/worldRows
       map.updated(y, map(y) ++ ms)
     }
     val tiles = Array2d.tabulate(cols*size, rows*size) { case (x, y) =>
@@ -175,19 +164,27 @@ case class Dungeon(cols:Int, rows:Int, cells:Array2d[DungeonCell]) {
       val off = (x % size, y % size)
       reified.get(index).get(off)
     }
-    tiles @@ msgs
+
+    tiles.render("out.png") {
+      case Exterior => Color.Black
+      case Interior => Color.White
+      case _ => Color.Black
+    }
+
+    val cs = DungeonCell.cellSize
+    val doorSize = DungeonCell.doorSize
+    val topCell = cells.get(top)
+    val topOff = topCell.getOffset(topCell.junc(Direction.Up))
+    val top0 = top.x*cs + topOff - 1
+    val top1 = top.x*cs + topOff + doorSize - 1
+    val bottomCell = cells.get(bottom)
+    val bottomOff = bottomCell.getOffset(bottomCell.junc(Direction.Down))
+    val bottom0 = bottom.x*cs + bottomOff - 1
+    val bottom1 = bottom.x*cs + bottomOff + doorSize - 1
+    val cone = new Cone(top0, top1, bottom0, bottom1, xy, top, bottom, 128, 48)
+
+    tiles @@ cone @@ msgs
   }
 
-  def saveImage(r:Random) {
-    import Profundus._
-    val mask = getMask(48, (0,0))._1
-    def cellTypeToColor(c:CellType) = c match {
-      case Wall => Color.Red
-      case Exterior => Color.Blue
-      case Blocked => Color.Green
-      case Interior => Color.White
-    }
-    mask.render(cellTypeToColor, "dungeon.png")
-  }
 
 }

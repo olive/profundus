@@ -10,29 +10,42 @@ import in.dogue.antiqua.Antiqua
 import Antiqua._
 import in.dogue.profundus.world.WorldTile
 import scala.Some
+import com.deweyvm.gleany.graphics.Color
 
 class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
-  val dCols = cols/DungeonCell.cellSize
-  val dRows = (rows*6)/DungeonCell.cellSize
-  val dungeon = Dungeon.create(dCols, dRows, 0.5, r)
-
+  val dCols = 4//cols/DungeonCell.cellSize
+  val dRows = 6//(rows*6)/DungeonCell.cellSize
+  val (dungeon, top, bottom) = Dungeon.create(dCols, dRows, 0.5, r)
+  println("Dungeon(%d,%d)".format(dungeon.cols, dungeon.rows))
 
   def toFeature(cols:Int, rows:Int):Feature = {
-    val (mask, msgs) = dungeon.getMask(rows, (x, y))
-
-    val split = MegaFeature.stamp((x, y), cols, rows, mask)
+    val (dmask, cone, msgs) = dungeon.getMask(rows, (x, y), top, bottom)
+    val mask = cone.getMask(dungeon.cols, dungeon.rows, dmask)
+    mask.render("feature.png") {
+      case Wall => Color.Black
+      case Interior => Color.White
+      case Exterior => Color.Black
+      case Blocked => Color.Black
+      case ConeSpace => Color.White
+    }
+    val split = MegaFeature.stamp((0, 0), cols, rows, mask)
     def genNth(k:Int)(cols:Int, rows:Int, y:Int, ts:TerrainScheme, tiles:Array2d[WorldTile], r:Random) = {
       val tf = ts.toFactory(r)
-      val (pos, _, myTiles) = split(k)
+      val (rect, myTiles) = split(k)
+      val pos = rect.x @@ rect.y
       val (nt, gen) = tiles.map { case (p, t) =>
-        myTiles.getOption(p |- pos.x) match {
-          case None => t @@ None
-          case Some(b) => b match {
-            case Wall => tf.mkShaft
-            case Exterior => t @@ None
-            case Interior => tf.mkEmpty
-            case Blocked => tf.mkShaft
-
+        if (p.x < 2 || p.x > cols - 3) {
+          tf.mkShaft
+        } else {
+          myTiles.getOption(p |- pos.x) match {
+            case None => t @@ None
+            case Some(b) => b match {
+              case Wall => tf.mkShaft
+              case Exterior => tf.mkShaft//t @@ None
+              case Interior => tf.mkEmpty
+              case Blocked => tf.mkShaft
+              case ConeSpace => t @@ None
+            }
           }
         }
       }.unzip
@@ -44,8 +57,9 @@ class DungeonFeature(x:Int, y:Int, cols:Int, rows:Int, r:Random) {
       case z :: zs => (z, zs)
       case _ => throw new RuntimeException("Empty dungeon!")
     }
-    def getRect(i:Int) = split(i)._2
+    def getRect(i:Int) = split(i)._1 + Recti(0, y, 0, 0)
     def mkFeature(i:Int) = {
+      println(getRect(i))
       Feature.create(true, getRect(i), genNth(i))
     }
     rest.foldLeft(mkFeature(first)) { case (nextFeat, k) =>

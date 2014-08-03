@@ -18,16 +18,7 @@ import javax.imageio.ImageIO
 import com.deweyvm.gleany.graphics.Color
 
 object TerrainCache {
-  def foldFutures(tc:TerrainCache) = {
-    val seed = (tc, Map[Int,Future[(Stratum,Terrain, Seq[GlobalMessage])]]())
-    tc.fs.foldLeft(seed) { case ((ntc, fs), (i, f)) =>
-      f.update match {
-        case FutureComputing => (ntc, fs.updated(i, f))
-        case FutureError(msg) => throw new RuntimeException("Failed to load chunk.\n" + msg)
-        case FutureFinished((s, t, ws)) => (ntc.insert(i, s, t, ws), fs)
-      }
-    }
-  }
+
 
   def getAdjacent(tc:TerrainCache, i:Int):(Stratum, Terrain) = {
     (1 until 999) map { k =>
@@ -60,12 +51,12 @@ object TerrainCache {
       tg.mkTile(newStratum.ts, tf, ij, 0, cols, rows, 0, r)
     }.unzip
     val unloaded = Terrain(0, tf, nt, (0,0), Direction.Down)
-    val cache = TerrainCache(cols, rows, Map(0->((newStratum, first))), Map(), unloaded, Seq(), r)
+    val cache = TerrainCache(cols, rows, Map(0->((newStratum, first))), unloaded, Seq(), r)
     (cache, first.spawn, first.spawnFace, gs)
   }
 }
 
-case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs:Map[Int,Future[(Stratum,Terrain, Seq[GlobalMessage])]], dummy:Terrain, queuedSpawns:Seq[GlobalMessage], r:Random) {
+case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], dummy:Terrain, queuedSpawns:Seq[GlobalMessage], r:Random) {
 
   def getTileType(ij:Cell):TileType = {
     get(ij).tiles.get(toTerrainCoords(ij)).ttype
@@ -139,10 +130,6 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
     copy(tMap=tMap.updated(i, (s, t)), queuedSpawns=queuedSpawns++ws)
   }
 
-  private def addFuture(i:Int, f:Future[(Stratum, Terrain, Seq[GlobalMessage])]) = {
-    copy(fs=fs.updated(i, f))
-  }
-
   def update(ppos:Cell):(TerrainCache, Seq[GlobalMessage]) = {
     val newI = getIndex(ppos)
     val nCache = Seq(-1, 0, 1).map {_ + newI}.foldLeft(this) { case (ntc, index) =>
@@ -153,18 +140,8 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
         insert(index, stratum, terrain, spawns)
       }
     }
-    val uCache = Seq(2).map {_ + newI}.foldLeft(nCache) { case (ntc, index) =>
-      if (ntc.tMap.contains(index) || ntc.fs.contains(index)) {
-        ntc
-      } else {
-        val f = new Future(() => TerrainCache.gen(cols, rows, ntc, index, r.nextLong()))
-        ntc.addFuture(index, f)
 
-      }
-    }
-    val (fCache, nfs) = TerrainCache.foldFutures(uCache)
-
-    fCache.copy(queuedSpawns=Seq(), fs=nfs) @@ fCache.queuedSpawns
+    nCache.copy(queuedSpawns=Seq()) @@ nCache.queuedSpawns
   }
 
 
@@ -207,6 +184,7 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
       val (ntc, _) = terr.update(ppos)
       ntc
     }
+
     def ttToColor(t:TileType) = t match {
       case Empty(_) => Color.Tan
       case Spike(_) => Color.Brown
@@ -220,7 +198,7 @@ case class TerrainCache(cols:Int, rows:Int, tMap:Map[Int,(Stratum, Terrain)], fs
     }
     Array2d.tabulate(cols, span*rows) { case p =>
       cache.getTileType(p +| start*rows)
-    }.render(ttToColor, filename)
+    }.render(filename)(ttToColor)
 
   }
 }

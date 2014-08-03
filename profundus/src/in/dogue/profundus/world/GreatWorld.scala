@@ -277,6 +277,7 @@ object GreatWorld {
     val gw = GreatWorld(worldCols, worldRows, screenCols, screenRows, p, em, tm, pm, lm, tc, Seq(), Seq(), Seq(), Seq(), Seq(), new MusicManager(0, Alive, worldRows), None).insertSpawns(gs1 ++ gs2)
     allUpdates(gw)
   }
+  var rendered = false
 }
 case class GreatWorld(cols:Int, rows:Int,
                       screenRows:Int, screenCols:Int,
@@ -314,8 +315,11 @@ case class GreatWorld(cols:Int, rows:Int,
   def resetLm = copy(lm = lm.reset)
   def addLights(ls:Seq[LightSource]) = copy(lm=lm.addLights(ls))
   def update:GreatWorld = {
-    cache.render(0, 24, "test.png")
-    System.exit(1)
+    if (!rendered) {
+      cache.render(0, 24, "test.png")
+      rendered = true
+    }
+    //System.exit(1)
     gb match {
       case Some(mb) => copy(gb = gb.map(_.update).flatten)
       case None =>
